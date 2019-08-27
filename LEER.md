@@ -4,6 +4,6 @@ Bienvenidos estimados amigos, este es el proyecto que debemos realizar, como max
 Para lo cual se le recomienda que ustedes deben cumplir con lo requerido en el tiempo establecido. 
 
 Cualquier consulta: 
-    Ing. Gino Paul Gonzales Custodio                                            Ing. Romel Diaz
-    Celular: 945388868                                                          Celular: 960154036
+    Ing. Gino Paul Gonzales Custodio         Celular: 945388868
+    Ing. Romel Diaz                          Celular: 960154036
     
