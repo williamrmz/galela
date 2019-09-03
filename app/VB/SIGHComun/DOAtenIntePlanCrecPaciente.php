@@ -1,0 +1,27 @@
+<?php
+
+namespace App\VB\SIGHComun;
+
+use Illuminate\Database\Eloquent\Model;
+
+use DB;
+
+class DOAtenIntePlanCrecPaciente extends Model
+{
+	public $timestamps = false;
+
+	public $incrementing = false;
+
+	public $fillable = [
+		'idUsuarioAuditoria', 
+		'idPlanCrecimientoPaciente', 
+		'idPlanIntegralPaciente', 
+		'idPlanAtencion', 
+		'idAtenInteItemPlan', 
+		'fechaProgramada', 
+		'fechaEjecucion', 
+		'numeroSesion', 
+		'idAtencion', 
+		'idEstablecimiento', 
+	];
+}
