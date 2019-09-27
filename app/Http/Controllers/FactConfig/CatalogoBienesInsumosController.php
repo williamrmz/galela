@@ -4,23 +4,43 @@ namespace App\Http\Controllers\FactConfig;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
+use App\VB\SIGHNegocios\ReglasComunes;
+use App\VB\SIGHNegocios\ReglasFacturacion;
+use App\VB\SIGHComun\DOCatalogoServicio;
 
 class CatalogoBienesInsumosController extends Controller
 {
 	const PATH_VIEW = 'fact-config.catalogo-bienes-insumos.';
+	private $mo_AdminComun;
 
 	public function __construct()
-	{
+	{	$this->mo_AdminComun = new ReglasComunes;
+		$this->mo_ReglasFacturacion = new ReglasFacturacion;
 		
 	}
 
 	public function index(Request $request)
 	{
-		if($request->ajax()) {
-			$items = DB::table('empleados')->select('idEmpleado as id', 'Nombres as name')->paginate(10); //test data
+
+		$tiposCatalogoData = $this->mo_ReglasFacturacion->TiposFinanciamientoSeleccionarTodos();
+	
+		/*if($request->ajax()) {
+			$oDOCatalogoServicios = new DOCatalogoServicio;
+			$oDOCatalogoServicios->codigo = Trim($request->fCodigo);
+			$oDOCatalogoServicios->nombre = Trim($request->fNombre);
+			//$items = $this->mo_AdminComun->CatalogoServiciosFiltrarDEBB($oDOCatalogoServicios, $request->fIdTipoCatalogo);
+			// dd($items);
+			return view(self::PATH_VIEW.'partials.item-list', compact('items'));
+		}*/
+
+		return view(self::PATH_VIEW.'index', compact('tiposCatalogoData'));
+
+
+		/*if($request->ajax()) {
+			$items = DB::table('empleados')->select('idEmpleado as id', 'Nombres as name')->paginate(10); 
 			return view(self::PATH_VIEW.'partials.item-list', compact('items'));
 		}
-		return view(self::PATH_VIEW.'index');
+		return view(self::PATH_VIEW.'index');*/
 	}
 
 	public function create()
