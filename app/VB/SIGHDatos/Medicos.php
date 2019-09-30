@@ -113,11 +113,28 @@ class Medicos extends Model
 
 	public function FiltrarPorDptosYEspecialidadEsActivo($idDepartamento, $idEspecialidad)
 	{
+		$lcSql = "";
+	
+		// 'yamill palomino
+		if ( $idDepartamento > 0 and $idEspecialidad > 0) {
+			$lcSql .= " where EsActivo = 1 and Especialidades.IdDepartamento = " . $idDepartamento . 
+					"     and Especialidades.IdEspecialidad = " . idEspecialidad .
+					" order by Nombre";
+		} else if( $idDepartamento > 0 and $idEspecialidad == 0 ) {
+			$lcSql .= " where EsActivo = 1 and Especialidades.IdDepartamento = " . $idDepartamento .
+					" order by Nombre";
+		} else if( $idDepartamento == 0 and $idEspecialidad > 0 ) {
+			$lcSql .= " where EsActivo = 1 and Especialidades.IdEspecialidad = " . $idEspecialidad .
+					" order by Nombre";
+		} else if( $idDepartamento == 0 and $idEspecialidad == 0 ) {
+			$lcSql .= " where EsActivo = 1  order by Nombre";
+		}
+
 		$query = "
 			EXEC MedicosPorFiltro :lcFiltro";
 
 		$params = [
-			'lcFiltro' => lcSql, 
+			'lcFiltro' => $lcSql, 
 		];
 
 		$data = \DB::select($query, $params);
@@ -125,13 +142,30 @@ class Medicos extends Model
 		return $data;
 	}
 
-	public function FiltrarPorDptosYEspecialidadEsActivoConEspecialidad($idDepartamento, $idEspecialidad)
+	public function FiltrarPorDptosYEspecialidadEsActivoConEspecialidad($IdDepartamento, $IdEspecialidad)
 	{
+		$lcSql = "";
+    
+		// 'yamill palomino
+		if ( $IdDepartamento > 0 and $IdEspecialidad > 0 ) {
+			$lcSql = $lcSql . " where EsActivo = 1 and Especialidades.IdDepartamento = " . $IdDepartamento .
+					"     and Especialidades.IdEspecialidad = " . $IdEspecialidad .
+					" order by Nombre";
+		} else if ( $IdDepartamento > 0 and $IdEspecialidad == 0) {
+			$lcSql = $lcSql . " where EsActivo = 1 and Especialidades.IdDepartamento = " . $IdDepartamento .
+					" order by Nombre";
+		} else if ( $IdDepartamento == 0 and $IdEspecialidad > 0) {
+			$lcSql = $lcSql . " where EsActivo = 1 and Especialidades.IdEspecialidad = " . $IdEspecialidad .
+					" order by Nombre";
+		} else if ( $IdDepartamento == 0 and $IdEspecialidad == 0) {
+			$lcSql = $lcSql . " where EsActivo = 1  order by Nombre";
+		}
+
 		$query = "
 			EXEC MedicosPorFiltroConEspecialidad :lcFiltro";
 
 		$params = [
-			'lcFiltro' => lcSql, 
+			'lcFiltro' => $lcSql, 
 		];
 
 		$data = \DB::select($query, $params);

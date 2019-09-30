@@ -5,21 +5,31 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
 
+use App\VB\SIGHNegocios\ReglasDeProgramacionMedica;
+
 class CitasAdmisionController extends Controller
 {
 	const PATH_VIEW = 'consulta-externa.citas-admision.';
 
+	private $mo_AdminProgramacionMedica; 
+
 	public function __construct()
 	{
-		
+		$this->mo_AdminProgramacionMedica = new ReglasDeProgramacionMedica;
 	}
 
 	public function index(Request $request)
 	{
+
+
 		if($request->ajax()) {
+
+			$this->inicializar();
+
 			$items = DB::table('empleados')->select('idEmpleado as id', 'Nombres as name')->paginate(10); //test data
 			return view(self::PATH_VIEW.'partials.item-list', compact('items'));
 		}
+
 		return view(self::PATH_VIEW.'index');
 	}
 
@@ -114,6 +124,26 @@ class CitasAdmisionController extends Controller
 			return ['success' => $success];
 		}
 	}
+
+	public function inicializar()
+	{
+		// 'mgaray20141014
+		// $cmbMedicos = $this->mo_AdminProgramacionMedica->MedicosFiltrarPorDptoYEspecialidadsql2000(0, 0);
+		// dd( $cmbMedicos );
+		// 'mgaray201503
+		$cmbMedicos = $this->mo_AdminProgramacionMedica->MedicosFiltrarPorDptoYEspecialidadConEspecialidad(0, 0);
+		// dd( $cmbMedicos );
+		$this->cargarTodosLosMedicosActivos();
+	}
+
+	private function cargarTodosLosMedicosActivos(){
+		return null;
+	}
+
+
+	
+
+	// -- Api
 
 
 	public function apiService(Request $request)
