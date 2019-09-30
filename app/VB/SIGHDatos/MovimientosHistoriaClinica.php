@@ -220,74 +220,77 @@ class MovimientosHistoriaClinica extends Model
 
 	public function MovimientosHistoriasClinicasParaDevolverPorNroHistoria()
 	{
-		$query = "
-			EXEC MovimientosHistoriaClinicaParaDevolver2 :lIdUsuario, :sFechaMovimiento, :lIdServiciodestino, :lnIdPacienteSolo, :idPaciente, :idMovimiento, :lIdUsuario, :lcFiltro, :lnIdArchivoClinico, :lcParametro231, :lIdUsuario";
+		dd( 'not found');
+		// $query = "
+		// 	EXEC MovimientosHistoriaClinicaParaDevolver2 :lIdUsuario, :sFechaMovimiento, :lIdServiciodestino, :lnIdPacienteSolo, :idPaciente, :idMovimiento, :lIdUsuario, :lcFiltro, :lnIdArchivoClinico, :lcParametro231, :lIdUsuario";
 
-		$params = [
-			'lIdUsuario' => lIdUsuario, 
-			'sFechaMovimiento' => CDate(sFechaMovimiento), 
-			'lIdServiciodestino' => lIdServiciodestino, 
-			'lnIdPacienteSolo' => lnIdPacienteSolo, 
-			'idPaciente' => rsPaciente!IdPaciente, 
-			'idMovimiento' => rsMaxMov!IdMovimiento, 
-			'lIdUsuario' => lIdUsuario, 
-			'lcFiltro' => sSql, 
-			'lnIdArchivoClinico' => lnIdArchivoClinico, 
-			'lcParametro231' => lcParametro231, 
-			'lIdUsuario' => lIdUsuario, 
-		];
+		// $params = [
+		// 	'lIdUsuario' => lIdUsuario, 
+		// 	'sFechaMovimiento' => CDate(sFechaMovimiento), 
+		// 	'lIdServiciodestino' => lIdServiciodestino, 
+		// 	'lnIdPacienteSolo' => lnIdPacienteSolo, 
+		// 	'idPaciente' => rsPaciente!IdPaciente, 
+		// 	'idMovimiento' => rsMaxMov!IdMovimiento, 
+		// 	'lIdUsuario' => lIdUsuario, 
+		// 	'lcFiltro' => sSql, 
+		// 	'lnIdArchivoClinico' => lnIdArchivoClinico, 
+		// 	'lcParametro231' => lcParametro231, 
+		// 	'lIdUsuario' => lIdUsuario, 
+		// ];
 
-		$data = \DB::select($query, $params);
+		// $data = \DB::select($query, $params);
 
-		return $data;
+		// return $data;
 	}
 
 	public function MovimientosHistoriasClinicasParaDevolverPorServicio()
 	{
-		$query = "
-			EXEC MovimientosHistoriaClinicaParaDevolver3 :lIdUsuario, :sFechaMovimiento, :lIdServiciodestino, :lnIdPacienteSolo, :idPaciente, :idMovimiento, :lIdUsuario, :lcFiltro, :lnIdArchivoClinico, :lcParametro231, :lIdUsuario";
+		dd( 'not work');
+		// $query = "
+		// 	EXEC MovimientosHistoriaClinicaParaDevolver3 :lIdUsuario, :sFechaMovimiento, :lIdServiciodestino, :lnIdPacienteSolo, :idPaciente, :idMovimiento, :lIdUsuario, :lcFiltro, :lnIdArchivoClinico, :lcParametro231, :lIdUsuario";
 
-		$params = [
-			'lIdUsuario' => lIdUsuario, 
-			'sFechaMovimiento' => CDate(sFechaMovimiento), 
-			'lIdServiciodestino' => lIdServiciodestino, 
-			'lnIdPacienteSolo' => lnIdPacienteSolo, 
-			'idPaciente' => rsPaciente!IdPaciente, 
-			'idMovimiento' => rsMaxMov!IdMovimiento, 
-			'lIdUsuario' => lIdUsuario, 
-			'lcFiltro' => sSql, 
-			'lnIdArchivoClinico' => lnIdArchivoClinico, 
-			'lcParametro231' => lcParametro231, 
-			'lIdUsuario' => lIdUsuario, 
-		];
+		// $params = [
+		// 	'lIdUsuario' => lIdUsuario, 
+		// 	'sFechaMovimiento' => CDate(sFechaMovimiento), 
+		// 	'lIdServiciodestino' => lIdServiciodestino, 
+		// 	'lnIdPacienteSolo' => lnIdPacienteSolo, 
+		// 	'idPaciente' => rsPaciente!IdPaciente, 
+		// 	'idMovimiento' => rsMaxMov!IdMovimiento, 
+		// 	'lIdUsuario' => lIdUsuario, 
+		// 	'lcFiltro' => sSql, 
+		// 	'lnIdArchivoClinico' => lnIdArchivoClinico, 
+		// 	'lcParametro231' => lcParametro231, 
+		// 	'lIdUsuario' => lIdUsuario, 
+		// ];
 
-		$data = \DB::select($query, $params);
+		// $data = \DB::select($query, $params);
 
 		return $data;
 	}
 
 	public function MovimientosHistoriasClinicasParaDevolver2()
 	{
-		$query = "
-			EXEC MovimientosHistoriaClinicaParaDevolver2 :lIdUsuario, :sFechaMovimiento, :lIdServiciodestino, :lnIdPacienteSolo, :idPaciente, :idMovimiento, :lIdUsuario, :lcFiltro, :lnIdArchivoClinico, :lcParametro231, :lIdUsuario";
+		dd( 'dont work');
+		// $query = "
+		// 	EXEC MovimientosHistoriaClinicaParaDevolver2 :lIdUsuario, :sFechaMovimiento, :lIdServiciodestino, :lnIdPacienteSolo, :idPaciente, :idMovimiento, :lIdUsuario, :lcFiltro, :lnIdArchivoClinico, :lcParametro231, :lIdUsuario";
 
-		$params = [
-			'lIdUsuario' => lIdUsuario, 
-			'sFechaMovimiento' => CDate(sFechaMovimiento), 
-			'lIdServiciodestino' => lIdServiciodestino, 
-			'lnIdPacienteSolo' => lnIdPacienteSolo, 
-			'idPaciente' => rsPaciente!IdPaciente, 
-			'idMovimiento' => rsMaxMov!IdMovimiento, 
-			'lIdUsuario' => lIdUsuario, 
-			'lcFiltro' => sSql, 
-			'lnIdArchivoClinico' => lnIdArchivoClinico, 
-			'lcParametro231' => lcParametro231, 
-			'lIdUsuario' => lIdUsuario, 
-		];
+		// $params = [
+		// 	'lIdUsuario' => lIdUsuario, 
+		// 	'sFechaMovimiento' => CDate(sFechaMovimiento), 
+		// 	'lIdServiciodestino' => lIdServiciodestino, 
+		// 	'lnIdPacienteSolo' => lnIdPacienteSolo, 
+		// 	'idPaciente' => rsPaciente!IdPaciente, 
+		// 	'idMovimiento' => rsMaxMov!IdMovimiento, 
+		// 	'lIdUsuario' => lIdUsuario, 
+		// 	'lcFiltro' => sSql, 
+		// 	'lnIdArchivoClinico' => lnIdArchivoClinico, 
+		// 	'lcParametro231' => lcParametro231, 
+		// 	'lIdUsuario' => lIdUsuario, 
+		// ];
 
-		$data = \DB::select($query, $params);
+		// $data = \DB::select($query, $params);
 
-		return $data;
+		// return $data;
 	}
 
 	public function MovimientosHistoriasClinicasParaDevolver($lIdServiciodestino, $sFechaMovimiento, $lIdUsuario)

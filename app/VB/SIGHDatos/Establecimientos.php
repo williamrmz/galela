@@ -3,6 +3,8 @@
 namespace App\VB\SIGHDatos;
 
 use Illuminate\Database\Eloquent\Model;
+use App\VB\SIGHEntidades\Enumerados;
+use App\VB\SIGHEntidades\Cadena;
 
 use DB;
 
@@ -80,13 +82,44 @@ class Establecimientos extends Model
 		return $data;
 	}
 
-	public function Filtrar($oTabla)
+	// Updated By Romel Diaz at 2019-09-04 
+	public function Filtrar($oTabla, $lDepartamento, $lProvincia)
 	{
+		$sSql = ""; $sWhere = "";
+		if ($oTabla->codigo <> "") {
+			//'mgaray201503
+			$sWhere = $sWhere . " Establecimientos.Codigo = '" . Cadena::FormatoCodigoRENAES($oTabla->codigo, Enumerados::param('GALENHOS')) . "' and ";
+		}
+		
+		if ($oTabla->nombre <> "") {
+			$sWhere = $sWhere . " Establecimientos.Nombre like '%" . $oTabla->nombre . "%' and ";
+		}
+
+		if ($oTabla->idDistrito <> 0) {
+			$sWhere = $sWhere . " Establecimientos.IdDistrito = " . $oTabla->idDistrito . " and ";
+		}
+
+		//'JVG - Adicion de Nivel maximo de Establecimiento
+		if ($oTabla->idTipo <> 0 ) {
+			$sWhere = $sWhere . " Establecimientos.IdTipo >= " . $oTabla->idTipo . " and ";
+		}
+
+		if ($lDepartamento <> 0) {
+			$sWhere = $sWhere . " Departamentos.IdDepartamento = " . $lDepartamento . " and ";
+		}
+		if ($lProvincia <> 0) {
+			$sWhere = $sWhere . " Provincias.IdProvincia = " . $lProvincia . " and ";
+		}
+
+		if ($sWhere <> "") {
+			$sSql = $sSql . " where " . substr($sWhere, 0, strlen($sWhere) - 4);
+		}
+
 		$query = "
 			EXEC EstablecimientosFiltrar :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => $sSql, 
 		];
 
 		$data = \DB::select($query, $params);

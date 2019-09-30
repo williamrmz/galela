@@ -76,7 +76,7 @@ class Provincias extends Model
 			EXEC ProvinciasSeleccionarPorDepartamento :idDepartamento";
 
 		$params = [
-			'idDepartamento' => IdDepartamento, 
+			'idDepartamento' => $idDepartamento, 
 		];
 
 		$data = \DB::select($query, $params);

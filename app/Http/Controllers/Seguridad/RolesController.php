@@ -10,7 +10,7 @@ use App\VB\SIGHComun\DORol;
 use App\VB\SIGHComun\DORolItem;
 use App\VB\SIGHComun\DORolPermiso;
 
-class RolesController extends Controller
+class RolesController extends Controller //Form
 {
 	const PATH_VIEW = 'seguridad.roles.';
 
@@ -41,7 +41,7 @@ class RolesController extends Controller
 				$items = arrlike($items, 'Nombre', $request->search);
 			}
 
-			$items = buildDataPagination($items, 10, $request);
+			$items = buildDataPagination($items, 5, $request);
 
 			return view(self::PATH_VIEW.'partials.item-list', compact('items'));
 		}
@@ -191,8 +191,7 @@ class RolesController extends Controller
 	public function apiService(Request $request)
 	{
 		switch($request->name)
-		{
-			case 'getDataCombos':
+{			case 'getDataCombos':
 				return $this->getDataCombos( $request );
 			case 'getDataRol':
 				return $this->getDataRol( $request );

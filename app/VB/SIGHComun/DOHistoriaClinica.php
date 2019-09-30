@@ -24,4 +24,5 @@ class DOHistoriaClinica extends Model
 		'nroHistoriaClinicaAnterior', 
 		'nroHistoriaClinica', 
 	];
+
 }

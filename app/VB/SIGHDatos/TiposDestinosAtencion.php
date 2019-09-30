@@ -133,6 +133,7 @@ class TiposDestinosAtencion extends Model
 
 	public function SeleccionarDestinosDeConsultoriosExternosXIdCuentaAtencion($ml_IdCuentaAtencion)
 	{
+		dd( "NO EXISTE PROC:  SeleccionarDestinosDeConsultoriosExternosXIdCuentaAtencion( @idCuentaAtencion )");
 		$query = "
 			EXEC TiposDestinoAtencionSeleccionarDestinosDeConsultorioExternoXIdcuentaAtencion :idCuentaAtencion";
 

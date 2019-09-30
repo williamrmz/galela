@@ -59,6 +59,7 @@ class SunasaPacientesHistoricos extends Model
 
 	public function Modificar($oTabla)
 	{
+		
 		$query = "
 			EXEC SunasaPacientesHistoricosModificar :idSunasaPacienteHistorico, :idPaciente, :codigoIAFA, :idPaisTitular, :idTipoDocumentoTitular, :nroDocumentoTitular, :apellidoCasada, :validacionRegIdentidad, :nroCarnetIdentidad, :estadoDelSeguro, :idAfiliacion, :productoYplan, :fechaInicioAfiliacion, :fechaFinalAfiliacion, :idRegimen, :codigoEstablecimientoIAFA, :codigoEstablecimientoRENAES, :idParentesco, :rUCempleador, :anteriorIdTipoDocumentoAsegurado, :anteriorNroDocumentoAsegurado, :dNIusarioOperacion, :idOperacion, :fechaEnvio, :sisSepelioParienteEncargado, :sisSepelioDni, :sisSepelioFnacimiento, :sisSepelioSexo, :sisNroAfiliacion, :yaNoTieneSeguro, :idUsuarioAuditoria";
 
@@ -136,7 +137,7 @@ class SunasaPacientesHistoricos extends Model
 			EXEC SunasaPacientesHistoricosSeleccionarPorIdPaciente :idPaciente ";
 
 		$params = [
-			'idPaciente ' => $oTabla->idPaciente, 
+			'idPaciente' => $oTabla->idPaciente, 
 		];
 
 		$data = \DB::select($query, $params);

@@ -11,7 +11,7 @@ $(function(){
     $('#'+model+'-btn-clear').click( function(e) {
         e.preventDefault();
         $('#'+model+'-form-search').trigger("reset");
-        showListItems();
+        $('.'+model+'-tbody').html('<tr> <td colspan="12" class="text-center"> Sin resultados </td> </tr>');
     });
 
     $('#'+model+'-btn-create').click( function (e) {
@@ -27,175 +27,82 @@ function getPathCtrl()
 
 function showListItems(page=1)
 {
-    url = getPathCtrl();
-    params  = $('#'+model+'-form-search').serialize();
-    params += "&page="+page;
+    if( validarFiltro() ){
+        url = getPathCtrl();
+        params  = $('#'+model+'-form-search').serialize();
+        params += "&page="+page;
 
-    $.ajax({
-        data: params, url: url,
-        type:  'GET', dataType: 'html',
-        success:  function (response) {
-            $('.'+model+'-table').html(response);
+        $.ajax({
+            data: params, url: url,
+            type:  'GET', dataType: 'html',
+            beforeSend: function() {
+                $('.'+model+'-tbody').html('<tr> <td colspan="12" class="text-center"> <i class="text-blue fa fa-refresh fa-spin"></i> buscando... </td> </tr>');
+            },
+            success:  function (response) {
+                $('.'+model+'-table').html(response);
 
-            $('.'+model+'-paginator .pagination a').click( function (e) {
-                e.preventDefault();
-                $('.firma-paginator li').removeClass('active');
-                $(this).parent('.firma-paginator li').addClass('active');
-                let page=$(this).attr('href').split('page=')[1];
-                showListItems(page);
-            })
+                $('.'+model+'-paginator .pagination a').click( function (e) {
+                    e.preventDefault();
+                    $('.firma-paginator li').removeClass('active');
+                    $(this).parent('.firma-paginator li').addClass('active');
+                    let page=$(this).attr('href').split('page=')[1];
+                    showListItems(page);
+                })
 
-            $('.'+model+'-btn-edit').click( function (e) {
-                e.preventDefault();
-                id = $(this).siblings('input').val();
-                editItem(id);
-            });
-        
-            $('.'+model+'-btn-delete').click( function (e) {
-                e.preventDefault();
-                id = $(this).siblings('input').val();
-                deleteItem(id);
-            });
-        }
-    });
-}
-
-function createItem()
-{
-    let url = getPathCtrl();
-
-    $.ajax({
-        data: {}, url: url+'/create',
-        type:  'GET', dataType: 'html',
-        success:  function (response) {
-            $('#myModalTitle').html('Crear '+model);
-            $('#myModalSize').addClass('modal-lg'); //options: '', 'modal-lg'
-            $('#myModalBody').html(response);
+                $('.'+model+'-btn-edit').click( function (e) {
+                    e.preventDefault();
+                    id = $(this).siblings('input').val();
+                    editItem(id);
+                });
             
-            $('#'+model+'-form').submit( function (e) {
-                e.preventDefault();
-                storeItem();
-            });
+                $('.'+model+'-btn-delete').click( function (e) {
+                    e.preventDefault();
+                    id = $(this).siblings('input').val();
+                    deleteItem(id);
+                });
 
-            $('#myModal').modal('show');
-        }
-    });
-}
+                $('.'+model+'-btn-show').click( function (e) {
+                    e.preventDefault();
+                    id = $(this).siblings('input').val();
+                    showItem(id);
+                });
 
-function editItem(id)
-{
-    let url = getPathCtrl();
-    $.ajax({
-        data: {}, url: url+'/'+id+'/edit',
-        type:  'GET', dataType: 'html',
-        success:  function (response) {
-            $('#myModalTitle').html('Editar '+model);
-            $('#myModalBody').html(response);
-            $('#myModal').modal('show');
-
-            $('#'+model+'-form').submit( function (e) {
-                e.preventDefault();
-                updateItem(id);
-            });
-
-            $('#myModal').modal('show');
-        }
-    });
-}
-
-function deleteItem(id)
-{
-    let url = getPathCtrl();
-    $.ajax({
-        data: {}, url: url+'/'+id+'/delete',
-        type:  'GET', dataType: 'html',
-        success:  function (response) {
-            $('#myModalTitle').html('Eliminar '+model);
-            $('#myModalBody').html(response);
-            $('#myModal').modal('show');
-
-            $('#'+model+'-form').submit( function (e) {
-                e.preventDefault();
-                destroyItem(id);
-            });
-
-            $('#myModal').modal('show');
-        }
-    });
-}
-
-function storeItem()
-{
-    params = $('#'+model+'-form').serialize();
-    url = getPathCtrl();
-
-    $.ajax({
-        data: params, url: url,
-        type:  'POST', dataType: 'json',
-        success:  function (response) {
-            if(response.success){
-                toastr.success(model+' creado', 'OK!');
-                $('#'+model+'-form-search').trigger("reset");
-                showListItems();
-                $('#myModal').modal('hide');
             }
-        },
-        error: function (request, status, error) {
-            showErrosValidator(request);
-        }
-    });
-}
-
-function updateItem(id)
-{
-    params = $('#'+model+'-form').serialize();
-    url = getPathCtrl();
-
-    $.ajax({
-        data: params, url: url+'/'+id,
-        type:  'POST', dataType: 'json',
-        success:  function (response) {
-            if(response.success){
-                toastr.success(model+' actualizado', 'OK!');
-                showListItems();
-                $('#myModal').modal('hide');
-            }
-        },
-        error: function (request, status, error) {
-            showErrosValidator(request);
-        }
-    });
-}
-
-function destroyItem(id)
-{
-    params = $('#'+model+'-form').serialize();
-    url = getPathCtrl();
-
-    $.ajax({
-        data: params, url: url+'/'+id,
-        type:  'POST', dataType: 'json',
-        success:  function (response) {
-            if( response.success ){
-                toastr.success(model+' eliminado', 'OK!');
-                $('#'+model+'-form-search').trigger("reset");
-                showListItems();
-                $('#myModal').modal('hide');
-            }else {
-                toastr.error(response.message, 'Error');
-            }
-        }
-    });
-}
-
-function showErrosValidator(request)
-{
-    errors = request.responseJSON.errors;
-    html = '<ul>';
-    for (var key in errors) {
-        html += "<li>" + key + ": " + errors[key] + "</li>";
+        });
     }
-    html += '</ul>';
-    toastr.error(html, 'Error')
 }
 
+
+var first_time = true;
+function validarFiltro()
+{
+    // return true;
+    dni = $.trim( $('input[name="ftxtDni"]').val() );
+    historia = $.trim( $('input[name="ftxtNroHistoria"]').val() );
+    aPaterno = $.trim( $('input[name="ftxtApellidoPaterno"]').val() );
+    aMaterno = $.trim( $('input[name="ftxtApellidoMaterno"]').val() );
+    ficha1 = $.trim( $('input[name="ftxtFichaFamiliar1"]').val() );
+    ficha2 = $.trim( $('input[name="ftxtFichaFamiliar2"]').val() );
+    ficha3 = $.trim( $('input[name="ftxtFichaFamiliar3"]').val() );
+
+    errors = [];
+    if ( (aPaterno== "" && aMaterno == ""  && historia == "" && dni == "") && (ficha1 == "" && ficha2 == "" && ficha3 == "") ){
+        errors.push("Por favor ingrese algunos de los filtros (Ap. Paterno ,Ap. Materno, DNI, Ficha Familiar o Nro Historia)");
+    }else{
+        if (historia == "" && dni == "" && (ficha1 == "" && ficha2 == "" && ficha3 == "") ) {
+            if (aPaterno == "") {
+                errors.push("Por favor ingrese Ap. Paterno");
+            }
+        }
+    }
+
+    if( errors.length > 0 && first_time==false){
+        let html = '<ul>';
+        errors.forEach(error => { html += '<li>'+error+'</li>'; });
+        html += '</ul>';
+        toastr.error(html, 'Error');
+    }
+    first_time= false;
+
+    return errors.length==0? true: false;
+}

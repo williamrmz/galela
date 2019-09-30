@@ -47,7 +47,7 @@
 						</div>
 
 						<div class="col-sm-12 periodos-tabla">
-							<div class="table-responsive {{$model}}-table">
+							<div class="{{$model}}-table">
 
 							</div>
 						</div>

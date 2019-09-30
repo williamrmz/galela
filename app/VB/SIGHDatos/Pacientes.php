@@ -8,6 +8,8 @@ use DB;
 
 class Pacientes extends Model
 {
+	public $fillable = ['conexion'];
+	
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -16,19 +18,20 @@ class Pacientes extends Model
 			EXEC PacientesAgregar :idPaisNacimiento, :apellidoMaterno, :direccionDomicilio, :observacion, :idTipoNumeracion, :idPaisProcedencia, @idPaciente OUTPUT, :apellidoPaterno, :primerNombre, :segundoNombre, :tercerNombre, :fechaNacimiento, :nroDocumento, :telefono, :autogenerado, :idTipoSexo, :idProcedencia, :idGradoInstruccion, :idEstadoCivil, :idDocIdentidad, :idTipoOcupacion, :idCentroPobladoDomicilio, :nombrePadre, :nombreMadre, :idPaisDomicilio, :nroHistoriaClinica, :idCentroPobladoNacimiento, :idCentroPobladoProcedencia, :idDistritoProcedencia, :idDistritoDomicilio, :idDistritoNacimiento, :fichaFamiliar, :idEtnia, :grupoSanguineo, :factorRh, :usoWebReniec, :idIdioma, :email, :madreDocumento, :madreApellidoPaterno, :madreApellidoMaterno, :madrePrimerNombre, :madreSegundoNombre, :nroOrdenHijo, :madreTipoDocumento, :sector, :sectorista, :idUsuarioAuditoria
 			SELECT @idPaciente AS idPaciente";
 
+		
 		$params = [
 			'idPaisNacimiento' => ($oTabla->idPaisNacimiento == 0)? Null: $oTabla->idPaisNacimiento, 
-			'apellidoMaterno' => ($oTabla->apellidomaterno == "")? Null: $oTabla->apellidomaterno, 
+			'apellidoMaterno' => ($oTabla->apellidoMaterno == "")? Null: $oTabla->apellidoMaterno, 
 			'direccionDomicilio' => ($oTabla->direccionDomicilio == "")? Null: $oTabla->direccionDomicilio, 
 			'observacion' => ($oTabla->observacion == "")? Null: $oTabla->observacion, 
 			'idTipoNumeracion' => ($oTabla->idTipoNumeracion == 0)? Null: $oTabla->idTipoNumeracion, 
 			'idPaisProcedencia' => ($oTabla->idPaisProcedencia == 0)? Null: $oTabla->idPaisProcedencia, 
 			'idPaciente' => 0, 
-			'apellidoPaterno' => ($oTabla->apellidopaterno == "")? Null: $oTabla->apellidopaterno, 
+			'apellidoPaterno' => ($oTabla->apellidoPaterno == "")? Null: $oTabla->apellidoPaterno, 
 			'primerNombre' => ($oTabla->primerNombre == "")? Null: $oTabla->primerNombre, 
 			'segundoNombre' => ($oTabla->segundoNombre == "")? Null: $oTabla->segundoNombre, 
 			'tercerNombre' => ($oTabla->tercerNombre == "")? Null: $oTabla->tercerNombre, 
-			'fechaNacimiento' => ($oTabla->fechanacimiento == 0)? Null: $oTabla->fechanacimiento, 
+			'fechaNacimiento' => ($oTabla->fechaNacimiento == 0)? Null: $oTabla->fechaNacimiento, 
 			'nroDocumento' => ($oTabla->nroDocumento == "")? Null: $oTabla->nroDocumento, 
 			'telefono' => ($oTabla->telefono == "")? Null: $oTabla->telefono, 
 			'autogenerado' => ($oTabla->autogenerado == "")? Null: $oTabla->autogenerado, 
@@ -76,22 +79,31 @@ class Pacientes extends Model
 
 	public function Modificar($oTabla, $lbVerificaPacientesRepetidosAntesDeGrabarDatos)
 	{
+
+		$errors = collect([]);
+		if ($lbVerificaPacientesRepetidosAntesDeGrabarDatos == true) {
+			$data = $this->PacientesVerificaRepetidosAntesDeGrabarDatos($oTabla);
+			if( $data->sinProblemas != '' ) {
+				throw new \Exception( $data->sinProblemas);
+			}
+		}
+
 		$query = "
 			EXEC PacientesModificar :idPaisNacimiento, :apellidoMaterno, :direccionDomicilio, :observacion, :idTipoNumeracion, :idPaisProcedencia, :idPaciente, :apellidoPaterno, :primerNombre, :segundoNombre, :tercerNombre, :fechaNacimiento, :nroDocumento, :telefono, :autogenerado, :idTipoSexo, :idProcedencia, :idGradoInstruccion, :idEstadoCivil, :idDocIdentidad, :idTipoOcupacion, :idCentroPobladoDomicilio, :nombrePadre, :nombreMadre, :idPaisDomicilio, :nroHistoriaClinica, :idCentroPobladoNacimiento, :idCentroPobladoProcedencia, :idDistritoProcedencia, :idDistritoDomicilio, :idDistritoNacimiento, :fichaFamiliar, :idEtnia, :grupoSanguineo, :factorRh, :usoWebReniec, :idIdioma, :email, :madreDocumento, :madreApellidoPaterno, :madreApellidoMaterno, :madrePrimerNombre, :madreSegundoNombre, :nroOrdenHijo, :madreTipoDocumento, :sector, :sectorista, :idUsuarioAuditoria";
 
 		$params = [
 			'idPaisNacimiento' => ($oTabla->idPaisNacimiento == 0)? Null: $oTabla->idPaisNacimiento, 
-			'apellidoMaterno' => ($oTabla->apellidomaterno == "")? Null: $oTabla->apellidomaterno, 
+			'apellidoMaterno' => ($oTabla->apellidoMaterno == "")? Null: $oTabla->apellidoMaterno, 
 			'direccionDomicilio' => ($oTabla->direccionDomicilio == "")? Null: $oTabla->direccionDomicilio, 
 			'observacion' => ($oTabla->observacion == "")? Null: $oTabla->observacion, 
 			'idTipoNumeracion' => ($oTabla->idTipoNumeracion == 0)? Null: $oTabla->idTipoNumeracion, 
 			'idPaisProcedencia' => ($oTabla->idPaisProcedencia == 0)? Null: $oTabla->idPaisProcedencia, 
 			'idPaciente' => ($oTabla->idPaciente == 0)? Null: $oTabla->idPaciente, 
-			'apellidoPaterno' => ($oTabla->apellidopaterno == "")? Null: $oTabla->apellidopaterno, 
+			'apellidoPaterno' => ($oTabla->apellidoPaterno == "")? Null: $oTabla->apellidoPaterno, 
 			'primerNombre' => ($oTabla->primerNombre == "")? Null: $oTabla->primerNombre, 
 			'segundoNombre' => ($oTabla->segundoNombre == "")? Null: $oTabla->segundoNombre, 
 			'tercerNombre' => ($oTabla->tercerNombre == "")? Null: $oTabla->tercerNombre, 
-			'fechaNacimiento' => ($oTabla->fechanacimiento == 0)? Null: $oTabla->fechanacimiento, 
+			'fechaNacimiento' => ($oTabla->fechaNacimiento == 0)? Null: $oTabla->fechaNacimiento, 
 			'nroDocumento' => ($oTabla->nroDocumento == "")? Null: $oTabla->nroDocumento, 
 			'telefono' => ($oTabla->telefono == "")? Null: $oTabla->telefono, 
 			'autogenerado' => ($oTabla->autogenerado == "")? Null: $oTabla->autogenerado, 
@@ -256,8 +268,8 @@ class Pacientes extends Model
 
 		$params = [
 			'nroHistoriaClinica' => $oTabla->nroHistoriaClinica, 
-			'apellidoPaterno' => $oTabla->apellidopaterno, 
-			'apellidoMaterno' => $oTabla->apellidomaterno, 
+			'apellidoPaterno' => $oTabla->apellidoPaterno, 
+			'apellidoMaterno' => $oTabla->apellidoMaterno, 
 			'primerNombre' => $oTabla->primerNombre, 
 			'segundoNombre' => $oTabla->segundoNombre, 
 			'idDocIdentidad' => $oTabla->idDocIdentidad, 
@@ -451,7 +463,6 @@ class Pacientes extends Model
 		];
 
 		$data = \DB::select($query, $params);
-
 		$data = reset($data);
 
 		return $data;
@@ -562,18 +573,18 @@ class Pacientes extends Model
 
 	public function PacientesSeleccionarPorDNI($lcDNI, &$oTabla)
 	{
-		$query = "
-			EXEC PacientesActualizarNroHistoriaYTipoNumeracion :nroHistoriaClinica, :idTipoNumeracion, :idPaciente";
+		// $query = "
+		// 	EXEC PacientesActualizarNroHistoriaYTipoNumeracion :nroHistoriaClinica, :idTipoNumeracion, :idPaciente";
 
-		$params = [
-			'nroHistoriaClinica' => oRsTmp1->fields!NroHistoriaClinica, 
-			'idTipoNumeracion' => oRsTmp->fields!IdTipoNumeracion, 
-			'idPaciente' => oRsTmp->fields!IdPaciente, 
-		];
+		// $params = [
+		// 	'nroHistoriaClinica' => oRsTmp1->fields!NroHistoriaClinica, 
+		// 	'idTipoNumeracion' => oRsTmp->fields!IdTipoNumeracion, 
+		// 	'idPaciente' => oRsTmp->fields!IdPaciente, 
+		// ];
 
-		$data = \DB::update($query, $params);
+		// $data = \DB::update($query, $params);
 
-		return $data;
+		// return $data;
 	}
 
 	public function HistoriasClinicasXIdPaciente($lnIdPaciente, $oConexion)
@@ -712,12 +723,9 @@ class Pacientes extends Model
 
 	public function ListarGrupoSanguineo()
 	{
-		$query = "
-			EXEC ListarGrupoSanguineo ";
-
+		$query = "EXEC ListarGrupoSanguineo ";
 		$params = [
 		];
-
 		$data = \DB::select($query, $params);
 
 		return $data;

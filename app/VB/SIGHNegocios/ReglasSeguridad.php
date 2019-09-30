@@ -97,8 +97,10 @@ class ReglasSeguridad extends Model
         return $oTabla->SeleccionarPorRol($idRol);
     }
 
+    // Romel diaz ramos 01/01/2019
     public function RolesPermisosSeleccionarPorRol( $idRol )
     {
+
         $oTabla = new RolesPermisos;
         return $oTabla->SeleccionarPorRol($idRol);
     }

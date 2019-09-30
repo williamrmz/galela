@@ -8,6 +8,7 @@ use DB;
 
 class DOAtencion extends Model
 {
+
 	public $timestamps = false;
 
 	public $incrementing = false;

@@ -77,7 +77,7 @@ class CentroPoblados extends Model
 			EXEC CentrosPobladosSeleccionarPorDistrito :idDistrito";
 
 		$params = [
-			'idDistrito' => IdDistrito, 
+			'idDistrito' => $idDistrito, 
 		];
 
 		$data = \DB::select($query, $params);

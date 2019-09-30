@@ -91,6 +91,33 @@ return [
             'prefix_indexes' => true,
         ],
 
+
+        'sigh_externa' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_SIGH_EXTERNA', 'localhost'),
+            'port' => env('DB_PORT_SIGH_EXTERNA', '1433'),
+            'database' => env('DB_DATABASE_SIGH_EXTERNA', 'forge'),
+            'username' => env('DB_USERNAME_SIGH_EXTERNA', 'forge'),
+            'password' => env('DB_PASSWORD_SIGH_EXTERNA', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
+
+        'sigh_sis' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_SIGH_SIS', 'localhost'),
+            'port' => env('DB_PORT_SIGH_SIS', '1433'),
+            'database' => env('DB_DATABASE_SIGH_SIS', 'forge'),
+            'username' => env('DB_USERNAME_SIGH_SIS', 'forge'),
+            'password' => env('DB_PASSWORD_SIGH_SIS', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
+
     ],
 
     /*

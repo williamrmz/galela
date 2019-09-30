@@ -76,7 +76,7 @@ class Distritos extends Model
 			EXEC DistritosSeleccionarPorProvincia :idProvincia";
 
 		$params = [
-			'idProvincia' => IdProvincia, 
+			'idProvincia' => $idProvincia, 
 		];
 
 		$data = \DB::select($query, $params);

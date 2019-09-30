@@ -81,6 +81,7 @@ class PacientesDatosAdd extends Model
 
 	public function DatosPersonalesAgregar($oTabla)
 	{
+		dd( 'PROCEDIMIENTO NO EXISTE EN V3');
 		$query = "
 			EXEC PacientesDatosAdicionalesPersonalesAgregar :idPaciente, :fNacimientoCalculada";
 

@@ -19,7 +19,9 @@
 
 	@include('partials.my-modal')
 
-	<div class='row'>
+	@include('consulta-externa.paciente.partials.item-create')
+
+	<div class='row' id="partial-list">
 		<div class='col-sm-12'>
 
 			<div class="box box-primary">
@@ -35,20 +37,45 @@
 
 						<div class="col-sm-12">
 							{{ Form::open(['route' => ['consulta-externa.paciente.index'], 
-								'id'=>"$model-form-search", 'method'=>'GET', 'class'=> 'form-inline pull-right']) }}
-								<div class="form-group">
-									{{ Form::text('search', null, ['class'=>"form-control input-sm $model-input-search"]) }}
+								'id'=>"$model-form-search", 'method'=>'GET']) }}
+								<div class="row" style="margin-bottom:10px;">
+									<div class="col-sm-10">
+										<div class="row">
+											<div class="col-sm-3 form-group">
+												{{ Form::label('ftxtDni', 'DNI') }}
+												{{ Form::text('ftxtDni', null, ['class'=>"form-control input-sm"]) }}
+											</div>
+											<div class="col-sm-3 form-group">
+												{{ Form::label('ftxtNroHistoria', 'Historia') }}
+												{{ Form::text('ftxtNroHistoria', null, ['class'=>"form-control input-sm"]) }}
+											</div>
+											<div class="col-sm-3 form-group">
+												{{ Form::label('ftxtApellidoPaterno', 'A.Paterno') }}
+												{{ Form::text('ftxtApellidoPaterno', null, ['class'=>"form-control input-sm"]) }}
+											</div>
+											<div class="col-sm-3 form-group">
+												{{ Form::label('ftxtApellidoMaterno', 'A.Materno') }}
+												{{ Form::text('ftxtApellidoMaterno', null, ['class'=>"form-control input-sm"]) }}
+											</div>
+										</div>
+										
+									</div>
+									<div class="col-sm-2">
+										<div style="margin:5px; padding:5px;" class="visible-md visible-lg"></div>
+										<div class="text-right">
+											<button type="submit" class="btn btn-sm btn-default" id="{{$model}}-btn-search" 
+												title="buscar"> <i class="fa fa-search"></i></button>
+											<a href="#" class="btn btn-sm btn-default" id="{{$model}}-btn-clear" 
+												title="limpiar"> <i class="fa fa-refresh"></i></a>
+										</div>
+									</div>
 								</div>
-								<button type="submit" class="btn btn-sm btn-default" id="{{$model}}-btn-search" 
-									title="buscar"> <i class="fa fa-search"></i></button>
-								<a href="#" class="btn btn-sm btn-default" id="{{$model}}-btn-clear" 
-									title="limpiar"> <i class="fa fa-refresh"></i></a>
 							{{ Form::close() }}
 						</div>
 
 						<div class="col-sm-12 periodos-tabla">
 							<div class="table-responsive {{$model}}-table">
-
+								@include('consulta-externa.paciente.partials.item-list', ['mode'=>'NO_DATA'])
 							</div>
 						</div>
 					</div>
@@ -62,5 +89,6 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ url('/js/consulta-externa/paciente.js') }}"></script>
+	<script src="{{ url('/js/consulta-externa/paciente.js') }}"></script>
+	<script src="{{ url('/js/consulta-externa/paciente.crud.js') }}"></script>
 @endsection

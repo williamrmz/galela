@@ -139,10 +139,10 @@ class Atenciones extends Model
 		$query = "
 			EXEC AtencionesSeleccionarPorIdAtencionEnAtencionesAtencionesdatosadicionalesPacientes :idCita, :idAtencion";
 
-		$params = [
-			'idCita' => DoCita->idCita, 
-			'idAtencion' => oTabla->idAtencion, 
-		];
+		// $params = [
+		// 	'idCita' => DoCita->idCita, 
+		// 	'idAtencion' => oTabla->idAtencion, 
+		// ];
 
 		$data = \DB::select($query, $params);
 
@@ -560,11 +560,52 @@ class Atenciones extends Model
 
 	public function AtencionesSeleccionarCEPorCuentaPorHistoriaPorApellidosPorServicio($lnHistoriaClinica, $lnIdCuentaAtencion, $lcApellidoPaterno, $lcFechaIngreso, $lnIdServicio, $lcDNI)
 	{
+		$sWhere = "";
+     	$sSql = "";
+     	if ($lnHistoriaClinica <> "") { //'JHIMI 13032018 de > 0  a <> ""
+			$sSql .=  " WHERE dbo.Pacientes.NroHistoriaClinica='" . $lnHistoriaClinica . "'" .
+                      "      and dbo.Atenciones.IdServicioIngreso=" . $lnIdServicio . 
+                      "      and dbo.Atenciones.idTipoServicio=1  and dbo.Atenciones.esPacienteExterno<>1" .
+                      " order by Atenciones.FechaIngreso asc, Atenciones.HoraIngreso asc, Pacientes.ApellidoPaterno, Pacientes.ApellidoMaterno, Pacientes.PrimerNombre";
+		}else if( $lnIdCuentaAtencion > 0 and $lnIdCuentaAtencion <> '') {
+			$sSql .= " WHERE dbo.Atenciones.IdCuentaAtencion=" . $lnIdCuentaAtencion .
+						"      and dbo.Atenciones.IdServicioIngreso=" . $lnIdServicio .
+						"      and dbo.Atenciones.idTipoServicio=1  and dbo.Atenciones.esPacienteExterno<>1" .
+						" order by Atenciones.FechaIngreso asc, Atenciones.HoraIngreso asc, Pacientes.ApellidoPaterno, Pacientes.ApellidoMaterno, Pacientes.PrimerNombre";
+		}else if( $lcApellidoPaterno <> "") {
+			$sSql .=  " WHERE dbo.Pacientes.ApellidoPaterno like '" . $lcApellidoPaterno . "%'" .
+						"      and dbo.Atenciones.IdServicioIngreso=" . $lnIdServicio .
+						"      and dbo.Atenciones.idTipoServicio=1  and dbo.Atenciones.esPacienteExterno<>1" .
+						" order by Atenciones.FechaIngreso asc, Atenciones.HoraIngreso asc, Pacientes.ApellidoPaterno, Pacientes.ApellidoMaterno, Pacientes.PrimerNombre";
+
+		}else if( $lcDNI <> "") {
+			$sSql .= " WHERE dbo.Pacientes.idDocIdentidad=1 and dbo.Pacientes.nroDocumento='" . $lcDNI . "'" .
+						"      and dbo.Atenciones.IdServicioIngreso=" . $lnIdServicio .
+						"      and dbo.Atenciones.idTipoServicio=1  and dbo.Atenciones.esPacienteExterno<>1" .
+						" order by Atenciones.FechaIngreso asc, Atenciones.HoraIngreso asc, Pacientes.ApellidoPaterno, Pacientes.ApellidoMaterno, Pacientes.PrimerNombre";
+						;
+		}else if( strtoupper($lcFechaIngreso) == "TODAS"){
+			$sSql .=  " WHERE dbo.Atenciones.IdServicioIngreso=" . $lnIdServicio .
+						"      and dbo.Atenciones.idTipoServicio=1  and dbo.Atenciones.esPacienteExterno<>1" .
+						" order by Atenciones.FechaIngreso asc, Atenciones.HoraIngreso asc, Pacientes.ApellidoPaterno, Pacientes.ApellidoMaterno, Pacientes.PrimerNombre";
+		}else{
+			$sSql .= " WHERE dbo.Atenciones.FechaIngreso=CONVERT(DATETIME,'" . $lcFechaIngreso . "',103)" .
+						"      and dbo.Atenciones.IdServicioIngreso=" . $lnIdServicio .
+						"      and dbo.Atenciones.idTipoServicio=1  and dbo.Atenciones.esPacienteExterno<>1" .
+						" order by Atenciones.FechaIngreso asc, Atenciones.HoraIngreso asc, Pacientes.ApellidoPaterno, Pacientes.ApellidoMaterno, Pacientes.PrimerNombre";
+		}
+		// dd($sSql);
+
+		// dd([
+		// 	'proc' => 'AtencionesSeleccionarCEPorCuentaPorHistoriaPorApellidosPorServicio',
+		// 	'filtro' => $sSql
+		// ]);
+
 		$query = "
 			EXEC AtencionesSeleccionarCEPorCuentaPorHistoriaPorApellidosPorServicio :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => $sSql, 
 		];
 
 		$data = \DB::select($query, $params);

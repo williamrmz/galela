@@ -2,6 +2,135 @@
 
 use App\Empleados as Empleado;
 
+//PARA EJECUTAR PROCEDIMIENTOS SQLSERVER
+function execute( $function, $params=[], $first=false, $conexion='sqlsrv')
+{
+    $inputs = "";
+    foreach($params as $key => $value) $inputs .= ":$key,";
+
+    $inputs = ( count($params) >0 )? substr($inputs, 0, strlen($inputs)-1): "";
+
+    $query = "EXEC $function $inputs";
+    
+    $data = !$first? \DB::connection($conexion)->select( $query, $params): \DB::connection($conexion)->update( $query, $params);
+
+    if( $first && isset($data[0]) ) $data = $data[0];
+
+    return $data;
+}
+
+// EJECUTA FUNCIONES O PROCEDIMIENTOS DE BASE DE DATOS -> PROGRAMADOS EN PHP
+function proc( $function, $params=[])
+{
+    $data =  \App\Execute\Procedure::$function( $function, json_decode( json_encode($params) ) );
+    return $data;
+}
+
+function validate_args($function, $params, $args)
+{
+    $paramsNotFound = [];
+    foreach( $params as $param){
+        $found = false;
+        foreach( $args as $key => $value){  if( $param == $key ) { $found = true; break; } }
+        if( $found == false ) array_push( $paramsNotFound, $param);
+    }
+
+    if( count($paramsNotFound) > 0) {
+        $function_params = implode( ',', $params );
+        $function_args = implode(',', $paramsNotFound);
+        throw new \Exception("La funcion '$function ($function_params)'  no encontro los argumentos: $function_args.");
+    }
+}
+
+
+//PARA EJECUTAR FUNCIONES POSTGRES
+// function execute( $function, $params=[], $first=false)
+// {
+//     $inputs = "";
+//     foreach($params as $key => $value) $inputs .= ":$key,";
+
+//     $inputs = ( count($params) >0 )? substr($inputs, 0, strlen($inputs)-1): "";
+
+//     $query = "SELECT * FROM $function ($inputs)";
+    
+//     $data = \DB::select( $query, $params);
+
+//     if( $first && isset($data[0]) ) $data = $data[0];
+
+//     return $data;
+// }
+
+
+// FUNCIONES VB
+function left($text, $len)
+{
+    return substr( $text, 0, $len);
+}
+
+function right($text, $len)
+{
+    return substr( $text, -$len);
+}
+
+function mid($text, $start, $len)
+{
+    $start = $start -1;
+    return substr( $text, $start, $len);
+}
+
+function ucase( $text )
+{
+    return strtoupper ( $text);
+}
+
+function len( $text )
+{
+    return strlen( $text );
+}
+
+function asc( $char)
+{
+    return ord( $char);
+}
+
+function cint( $text )
+{
+    return intval( $text );
+}
+
+//-- END FUNCIONES VB
+
+function replace_recursive($text, $search, $replace)
+{
+    if( strpos($text, $search) !== false){
+        $text = str_replace( $search, $replace, $text);
+        return replace_recursive( $text, $search, $replace);
+    }else{
+        return $text;
+    }
+}
+
+function getData( $array)
+{
+    // for() return $newArray;
+    return $array;
+}
+
+function jsonClass( $attr = [] )
+{
+    return json_decode( json_encode( $attr )); 
+}
+
+
+// RETORNA UN ARRAY DE PHP EN una lista HTML
+function arrayHTML( $array )
+{
+    $html = "<ul>";
+    foreach ( $array as $row) $html .= "<li>$row</li>";
+    $html .= "</ul>";
+    return $html;
+}
+
 function encryptString( $string )
 {
     $data = 'uknown';
@@ -26,6 +155,18 @@ function decryptString( $string )
     return $data;
 }
 
+function param( $key )
+{
+    return \App\VB\SIGHEntidades\Enumerados::param($key);
+}
+
+function dbParam( $idParam ){
+    $table = new \App\VB\SIGHDatos\Parametros;
+    $data = $table->SeleccionaFilaParametro( $idParam );
+    $value = ( isset($data[0]))? $data[0]->ValorTexto: '';
+    return $value;
+}
+
 function AuditoriaAgregarV ($idUsuario, $accion, $idRegistroTabla, $tabla, $idListItem, $nombrePc, $observaciones)
 {
     $sql = 'EXEC AuditoriaAgregarV :idUsuario, :accion, :idRegistroTabla, :tabla, :idListItem, :nombrePc, :observaciones';
@@ -45,6 +186,34 @@ function AuditoriaAgregarV ($idUsuario, $accion, $idRegistroTabla, $tabla, $idLi
 function fechaSistema()
 {
     return date('d-m-Y H:i:s');
+}
+
+function calcularEdad($fechaNacimiento, $fechaActual = null ){
+    $fechaNacimiento = dateFormat($fechaNacimiento, 'd-m-Y H:i');
+    $fechaActual = $fechaActual==null? date('d-m-Y H:i'): dateFormat($fechaActual, 'd-m-Y H:i');
+
+    $anoActual = date('Y',strtotime($fechaActual));
+    $mesActual = date('m',strtotime($fechaActual));
+    $diaActual = date('d',strtotime($fechaActual));
+    $horaActual = date('H',strtotime($fechaActual));
+    $minutoActual = date('i',strtotime($fechaActual));
+    
+    $anoNacimiento = date('Y',strtotime($fechaNacimiento));
+    $mesNacimiento = date('m',strtotime($fechaNacimiento));
+    $diaNacimiento = date('d',strtotime($fechaNacimiento));
+    $horaNacimiento = date('H',strtotime($fechaNacimiento));
+    $minutoNacimiento = date('i',strtotime($fechaNacimiento));
+
+    $anoDif = $anoActual - $anoNacimiento;
+    $mesDif = $mesActual - $mesNacimiento;
+    $diaDif = $diaActual - $diaNacimiento;
+    $horaDif = $horaActual - $horaNacimiento;
+    $minutoDif = $minutoActual - $minutoNacimiento;
+
+    if( $diaDif < 0 || $mesDif < 0 || $horaDif < 0 || $minutoDif < 0){
+        $anoDif--;
+    }
+    return $anoDif;
 }
 
 function arrFirst($array)
@@ -206,8 +375,6 @@ function getStringBetween($string, $start, $end){
     return substr($string,$ini,$len);
 }
 
-
-
 function labelToPath($text)
 {
     $text = normaliza($text);
@@ -236,7 +403,6 @@ function camelToUnderscore($text)
 {
     return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $text));
 }
-
 
 function buildDataPagination($items, $perPage=10, $request){
     $LapClass =  \Illuminate\Pagination\LengthAwarePaginator::class;

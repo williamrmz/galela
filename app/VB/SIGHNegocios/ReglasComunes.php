@@ -6,13 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 use DB;
 
+
+use App\VB\SIGHComun\DOEmpleado;
+use App\VB\SIGHComun\DOCatalogoServicio;
+
+
 use App\VB\SIGHDatos\TiposCondicionTrabajo;
 use App\VB\SIGHDatos\TiposDocIdentidad;
 use App\VB\SIGHDatos\TiposFinanciamiento;
 use App\VB\SIGHDatos\Empleados;
 use App\VB\SIGHDatos\UsuariosRoles;
 use App\VB\SIGHDatos\Parametros;
-
 use App\VB\SIGHDatos\CentrosCosto;
 use App\VB\SIGHDatos\PartidasPresupuestales;
 use App\VB\SIGHDatos\CatalogoServicios;
@@ -21,20 +25,444 @@ use App\VB\SIGHDatos\FactPuntosCarga;
 use App\VB\SIGHDatos\CatalogoServiciosSubGrupo;
 use App\VB\SIGHDatos\CatalogoServiciosSeccion;
 use App\VB\SIGHDatos\CatalogoServiciosSubSeccion;
-
-
-use App\VB\SIGHComun\DOEmpleado;
-use App\VB\SIGHComun\DOCatalogoServicio;
-
+use App\VB\SIGHDatos\TiposCondicionPaciente;
+use App\VB\SIGHDatos\TiposReferencia;
+use App\VB\SIGHDatos\SubclasificacionDiagnosticos;
+use App\VB\SIGHDatos\Establecimientos;
+use App\VB\SIGHDatos\Procedimientos;
+use App\VB\SIGHDatos\DiagnosticoS;
+use App\VB\SIGHDatos\TiposSexo;
+use App\VB\SIGHDatos\TiposProcedencia;
+use App\VB\SIGHDatos\TiposGradoInstruccion;
+use App\VB\SIGHDatos\TiposEstadoCivil;
+use App\VB\SIGHDatos\TiposOcupacion;
+use App\VB\SIGHDatos\TiposEdad;
+use App\VB\SIGHDatos\Pacientes;
+use App\VB\SIGHEntidades\Enumerados;
 
 class ReglasComunes extends Model
 {
+
+   
+
+    // Created by Romel Diaz at 2019-09-16
+    public function TiposCondicionPacienteCondicionAlEstablecimientoYservicio( &$lnIdCondicionEstablecimiento, &$lnIdCondicionServicio,$lnIdPaciente, $ldFechaIngreso, $lnIdAtencion,$lnIdServicio)
+    {
+        $params = [
+            'IdPaciente' => $lnIdPaciente,
+            'ldFechaIngreso' => $ldFechaIngreso,
+            'IdAtencion' => $lnIdAtencion,
+        ];
+        $oRsTmp = execute('TiposCondicionPacienteCondicionAlEstablecimientoYservicio', $params);
+
+        $sghTipoCondicion_sghTipoCondicionNuevo = Enumerados::param('sghTipoCondicion.sghTipoCondicionNuevo');
+        $sghTipoCondicion_sghTipoCondicionReingresante = Enumerados::param('sghTipoCondicion.sghTipoCondicionReingresante');
+        $sghTipoCondicion_sghTipoCondicionContinuador = Enumerados::param('sghTipoCondicion.sghTipoCondicionContinuador');
+
+        if ( count($oRsTmp) == 0 ) {
+            $lnIdCondicionEstablecimiento = $sghTipoCondicion_sghTipoCondicionNuevo;
+            $lnIdCondicionServicio = $sghTipoCondicion_sghTipoCondicionNuevo;
+        }else{ // TODO: traducir logica
+            $oRsTmpFields->idTipoCondicionAlEstab = isset($oRsTmp[0])? $oRsTmp[0]: [];
+            switch ($oRsTmpFields->idTipoCondicionAlEstab){
+                case $sghTipoCondicion_sghTipoCondicionNuevo:
+
+                    switch ($oRsTmpFields->idTipoCondicionAlServicio) {
+                        case $sghTipoCondicion_sghTipoCondicionNuevo:           //'N,N
+                            // If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         oRsTmp.MoveFirst
+                            //         If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //         Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //         End If
+                            //     End If
+                            // Else
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionReingresante
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //             lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //         Else
+                            //             lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //         End If
+                            //     End If
+                            // End If
+                            break;
+                        case $sghTipoCondicion_sghTipoCondicionReingresante:    //'N,R
+                            // If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     End If
+                            // Else
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionReingresante
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     End If
+                            // End If
+                            break;
+                        case $sghTipoCondicion_sghTipoCondicionContinuador:     //'N,C
+                            // If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         oRsTmp.MoveFirst
+                            //         If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //         Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //         End If
+                            //     End If
+                            // Else
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionReingresante
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //             lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //         Else
+                            //             lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //         End If
+                            //     End If
+                            // End If
+                            break;
+                        default: break;
+                    }
+
+                case $sghTipoCondicion_sghTipoCondicionReingresante:
+
+                    switch ($oRsTmpFields->idTipoCondicionAlServicio) {
+                        case $sghTipoCondicion_sghTipoCondicionNuevo:           //'R,N
+                            // lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionContinuador
+                            // oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            // If oRsTmp.RecordCount = 0 Then
+                            //     lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            // Else
+                            //     oRsTmp.MoveFirst
+                            //     If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //     End If
+                            // End If
+                            break;
+                        case $sghTipoCondicion_sghTipoCondicionReingresante:    //'R,R
+                            // lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionContinuador
+                            // oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            // If oRsTmp.RecordCount = 0 Then
+                            //     lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            // Else
+                            //     lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            // End If
+                            break;
+                        case $sghTipoCondicion_sghTipoCondicionContinuador:     //'R,C
+                            // lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionContinuador
+                            // oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            // If oRsTmp.RecordCount = 0 Then
+                            //     lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            // Else
+                            //     oRsTmp.MoveFirst
+                            //     If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //     End If
+                            // End If
+                            break;
+                        default: break;
+                    }
+
+                case $sghTipoCondicion_sghTipoCondicionContinuador:
+                    switch ($oRsTmpFields->idTipoCondicionAlServicio) {
+                        case $sghTipoCondicion_sghTipoCondicionNuevo:           //'C,N
+                            // If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         oRsTmp.MoveFirst
+                            //         If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //         Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //         End If
+                            //     End If
+                            // Else
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionReingresante
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         oRsTmp.MoveFirst
+                            //         If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //         Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //         End If
+                            //     End If
+                            // End If
+                            break;
+                        case $sghTipoCondicion_sghTipoCondicionReingresante:    //'C,R
+                            // If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     End If
+                            // Else
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionReingresante
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     End If
+                            // End If
+                            break;
+                        case $sghTipoCondicion_sghTipoCondicionContinuador:     //'C,C
+                            // If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionContinuador
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         oRsTmp.MoveFirst
+                            //         If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //         Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //         End If
+                            //     End If
+                            // Else
+                            //     lnIdCondicionEstablecimiento = sghTipoCondicion.sghTipoCondicionReingresante
+                            //     oRsTmp.Filter = "idServicioIngreso=" & lnIdServicio
+                            //     If oRsTmp.RecordCount = 0 Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionNuevo
+                            //     Else
+                            //         oRsTmp.MoveFirst
+                            //         If Year(oRsTmp.Fields!FechaIngreso) = Year(ldFechaIngreso) Then
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionContinuador
+                            //         Else
+                            //         lnIdCondicionServicio = sghTipoCondicion.sghTipoCondicionReingresante
+                            //         End If
+                            //     End If
+                            // End If
+                        default: break;
+                    }
+                default: break;
+            }
+        }
+    }
+
+    // Created by Romel Diaz at 2019-09-10
+    public function SunasaTiposRegimenSeleccionarTodos() 
+    {
+        $sql = "EXEC SunasaTiposRegimenSeleccionarTodos";
+        $params = [];
+        return DB::select($sql, $params);
+    }
+
+    // Created by Romel Diaz at 2019-09-10
+    public function SunasaTiposAfiliacionSeleccionarTodos() 
+    {
+        $sql = "EXEC SunasaTiposAfiliacionSeleccionarTodos";
+        $params = [];
+        return DB::select($sql, $params);
+    }
+    
+    // Created by Romel Diaz at 2019-09-10
+    public function SunasaTiposOperacionSeleccionarTodos() 
+    {
+        $sql = "EXEC SunasaTiposOperacionSeleccionarTodos";
+        $params = [];
+        return DB::select($sql, $params);
+    }
+
+    // Created by Romel Diaz at 2019-09-10
+    public function SunasaTiposParentescoSeleccionarTodos() 
+    {
+        $sql = "EXEC SunasaTiposParentescoSeleccionarTodos";
+        $params = [];
+        return DB::select($sql, $params);
+    }
+
+    // Created by Romel Diaz at 2019-09-10 (PROC. NO EXISTE)
+    public function ListarFactorRH() 
+    {
+        $oTabla = new Pacientes;
+        return $oTabla->ListarFactorRH();
+    }
+
+
+    // Created by Romel Diaz at 2019-09-10 (PROC. NO EXISTE)
+    public function ListarGrupoSanguineo()
+    {
+        $oTabla = new Pacientes;
+        return $oTabla->ListarGrupoSanguineo();
+    }
+
+    // Created by Romel Diaz at 2019-09-10 (PROC. NO EXISTE)
+    public function ReligionListarTodos()
+    {
+        $oTabla = new Pacientes;
+        return $oTabla->ListarReligiones();
+    }
+
+    // Created by Romel Diaz at 2019-09-10
+    public function TiposEdadSeleccionarTodos()
+    {
+        $oTabla = new TiposEdad;
+        return $oTabla->SeleccionarTodos();
+    }
+
+    // Created by Romel Diaz at 2019-09-10
+    public function TiposIdiomasSeleccionarTodos()
+    {
+        $sql = "EXEC TiposIdiomasSeleccionarTodos";
+        $params = [];
+        return DB::select($sql, $params);
+    }
+
+    // Created by Romel Diaz at 2019-09-10
+    public function EtniaHISseleccionarTodos()
+    {
+        $sql = "EXEC EtniaHISseleccionarTodos";
+        $params = [];
+        return DB::select($sql, $params);
+    }
+
+    // Created By Romel Diaz at 2019-09-10
+    public function TiposOcupacionTodos()
+    {
+        $oTabla = new TiposOcupacion;
+        return $oTabla->Todos();
+    }
+
+    // Created By Romel Diaz at 2019-09-10 (PROC. NO EXISTE)
+    public function TiposDocIdentidadSeleccionarTodosIncSinTipoDoc()
+    {
+        $oTabla = new TiposDocIdentidad;
+        return $oTabla->SeleccionarTodosIncSinTipoDoc();
+    }
+
+    // Created By Romel Diaz at 2019-09-10
+    public function TiposEstadoCivilTodos()
+    {
+        $oTabla = new TiposEstadoCivil;
+        return $oTabla->Todos();
+    }
+    
+    // Created By Romel Diaz at 2019-09-10
+    public function TiposGradosInstruccionTodos()
+    {
+        $oTabla = new TiposGradoInstruccion;
+        return $oTabla->Todos();
+    }
+    
+    // Created By Romel Diaz at 2019-09-10
+    public function TiposProcedenciaTodos()
+    {
+        $oTabla = new TiposProcedencia;
+        return $oTabla->Todos();
+    }
+    
+    // Created By Romel Diaz at 2019-09-10
+    public function TiposProcedenciaSeleccionarTodos()
+    {
+        $oTabla = new TiposProcedencia;
+        return $oTabla->SeleccionarTodos();
+    }
+
+    // Created By Romel Diaz at 2019-09-10
+    public function TiposSexoSeleccionarTodos()
+    {
+        $oTabla = new TiposSexo;
+        return $oTabla->SeleccionarTodos();
+    }
+
+    // Created By Romel Diaz at 2019-09-05 (Modificado)
+    public function DiagnosticosFiltrarSoloActivos( $oDODiagnostico, $lbSoloMuestraDxGalenHos, $lbUSAcodigoCIEsinPto)
+    {
+        $oTabla = new DiagnosticoS;
+        return $oTabla->FiltrarSoloActivos($oDODiagnostico, $lbSoloMuestraDxGalenHos, $lbUSAcodigoCIEsinPto);
+    }
+
+    // Created By Romel Diaz at 2019-09-04 
+    public function ProcedimientosFiltrar( $oDOProcedimiento )
+    {
+        $oTabla = new Procedimientos;
+        return $oTabla->Filtrar($oDOProcedimiento);
+    }
+
+    // Created By Romel Diaz at 2019-09-04 
+    public function EstablecimientosFiltrar( $oEstablecimiento, $lDepartamento, $lProvincia )
+    {
+        $oTabla = new Establecimientos;
+        return $oTabla->Filtrar($oEstablecimiento, $lDepartamento, $lProvincia);
+    }
+
+    // Created By Romel Diaz at 2019-09-04 
+    public function ServiciosSeleccionarXidentificador( $lnIdServicio )
+    {
+        $sql = "EXEC ServiciosSeleccionarXidentificador :IdServicio";
+        $params = ['IdServicio' => $lnIdServicio];
+        return DB::select($sql, $params);
+    }
+
+    // Created By Romel Diaz at 2019-09-04 
+    public function DevuelveHIS_SITUACIOporDescripcion()
+    {
+        return DB::select('DevuelveHIS_SITUACIOporDescripcion');
+    }
+
+    // Created By Romel Diaz at 2019-09-04 
+    public function SubclasificacionDiagnosticosSeleccionarDxConsultaExterna()
+    {
+        $oTabla = new  SubclasificacionDiagnosticos;
+        return $oTabla->SeleccionarDxConsultaExterna();
+    }
+
+    // Created By Romel Diaz at 2019-09-04 
+    public function TiposCondicionPacienteSeleccionarTodos()
+    {
+        $oTabla = new TiposCondicionPaciente;
+        return $oTabla->SeleccionarTodos();
+    }
+
+    // Created By Romel Diaz at 2019-09-04 
+    public function TiposReferenciaSeleccionarTodos()
+    {
+        $oTabla = new TiposReferencia;
+        return $oTabla->SeleccionarTodos();
+    }
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosFiltrar( $oDOEmpleado )
     {
         $oTabla = new Empleados;
         return $oTabla->Filtrar($oDOEmpleado);
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function TiposEmpleadosSeleccionarSegunFiltro( $where)
     {
         $sql = "EXEC TiposEmpleadosSeleccionarSegunFiltro :where";
@@ -42,24 +470,28 @@ class ReglasComunes extends Model
         return DB::select($sql, $params);
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function TiposCondicionTrabajoSeleccionarTodos()
     {
         $oTabla = new TiposCondicionTrabajo;
         return $oTabla->SeleccionarTodos();
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function TiposDestacadosSeleccionarTodos()
     {
         $sql = "EXEC TiposDestacadosSeleccionarTodos";
         return DB::select($sql);
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function TiposDocIdentidadSeleccionarTodos()
     {
         $oTabla = new TiposDocIdentidad;
         return $oTabla->SeleccionarTodos();
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function FactPuntosCargaSeleccionarPorFiltro( $filtro )
     {
         $query = "EXEC FactPuntosCargaSeleccionarPorFiltro :filtro";
@@ -69,12 +501,14 @@ class ReglasComunes extends Model
         return \DB::select($query, $params);
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function TiposFinanciamientoSegunFiltro( $filtro )
     {
         $oTiposFinanciamiento = new TiposFinanciamiento;
         return $oTiposFinanciamiento->TiposFinanciamientoSegunFiltro( $filtro );
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosAgregar($oDOEmpleado, $oUsuariosRoles, $oRsCargos, $oRsLaboraEn, $mo_lnIdTablaLISTBARITEMS, $mo_lcNombrePc, $lcNombreEmpleado, $lcDniEncriptado)
     {
         $empleadosAgregar = false;
@@ -165,6 +599,7 @@ class ReglasComunes extends Model
         }
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosModificar($oDOEmpleado, $oUsuariosRoles, $oRsCargos, $oRsLaboraEn, $mo_lnIdTablaLISTBARITEMS, $mo_lcNombrePc, $lcNombreEmpleado, $lcDniEncriptado)
     {
         $empleadosModificar = false;
@@ -270,6 +705,7 @@ class ReglasComunes extends Model
         }
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosEliminar($oDOEmpleado, $idListItem, $mo_lcNombrePc, $lcNombreEmpleado)
     {
         $oEmpleado = new Empleados;
@@ -306,6 +742,7 @@ class ReglasComunes extends Model
         return true;
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function ParametrosIdServicioArchivoClinico()
     {
         $oTabla = new Parametros;
@@ -314,6 +751,7 @@ class ReglasComunes extends Model
         return $id;
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function TiposEmpleadosSeleccionarSiSeProgramaPorId( $lnIdTipoEmpleado )
     {
         $sql = 'EXEC TiposEmpleadosSeleccionarSiSeProgramaPorId :idTipoEmpleado';
@@ -327,26 +765,30 @@ class ReglasComunes extends Model
         return $data[0]->EsProgramado? true: false;
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosObtenerConElMismoCodigoPlanilla( $oDOEmpleado )
     {
         $oEmpleado = new Empleados;
         return $oEmpleado->ObtenerConElMismoCodigoPlanilla($oDOEmpleado);
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosObtenerConelMismoDNI($lcDni, $lnIdTipoDocumento)
     {
         $oEmpleado = new Empleados;
         $data = $oEmpleado->ObtenerConElMismoDNI($lcDni, $lnIdTipoDocumento);
         return $data;
     }
-
+    
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosObtenerConElMismoUsuario($oDOEmpleado)
     {
         $oEmpleado = new Empleados;
         $data = $oEmpleado->ObtenerConElMismoUsuario($oDOEmpleado);
         return $data;
     }
-
+    
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosSeleccionarPorId( $idEmpleado )
     {
         $oEmpleado = new Empleados;
@@ -360,7 +802,8 @@ class ReglasComunes extends Model
 			return $data[0];
 		}
     }
-
+    
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosCargosSeleccionarPorFiltro( $lcFiltro )
     {
         $sql = "EXEC EmpleadosCargosSeleccionarPorFiltro :filtro";
@@ -369,7 +812,8 @@ class ReglasComunes extends Model
         ];
         return DB::select($sql, $params);
     }
-
+    
+    // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosLugarDeTrabajoSeleccionarPorFiltro( $lcFiltro )
     {
         $sql = "EXEC EmpleadosLugarDeTrabajoSeleccionarPorFiltro :filtro";
@@ -378,8 +822,8 @@ class ReglasComunes extends Model
         ];
         return DB::select($sql, $params);
     }
-
-    //NEW
+    
+    // Created By Romel Diaz at 2019-09-04 (NEW)
     public function AreasTrabajo(){
         $table = [
             [ 'id'=> 0, 'key'=>'sghOtroLugar', 'nombre'=> 'Otro lugar'],
@@ -395,7 +839,8 @@ class ReglasComunes extends Model
         ];
         return json_decode(json_encode($table));
     }
-    //NEW
+
+    // Created By Romel Diaz at 2019-09-04 (NEW)
     public function SubAreaTrabajoSeleccionarXKeyArea($keyArea)
     {
         // App\VB\SIGHNegocios\ReglasFarmacia
@@ -490,49 +935,57 @@ class ReglasComunes extends Model
         }
         return $data;
     }
-
+    
+    // Created By Romel Diaz at 2019-09-04 
     public function CentrosCostoSeleccionarTodos()
     {
         $oTabla = new CentrosCosto;
         return $oTabla->SeleccionarTodos();
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function PartidasPresupuestalesSeleccionarTodos()
     {
         $oTabla = new PartidasPresupuestales;
         return $oTabla->SeleccionarTodos();
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosGrupoSeleccionarTodos()
     {
         $oTabla = new CatalogoServiciosGrupo;
         return $oTabla->SeleccionarTodos();
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function SeleccionarPuntosDeCarga()
     {
         $oTabla = new FactPuntosCarga;
         return $oTabla->SeleccionarTodos();
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosSubGrupoSeleccionarPorGrupo( $lIdGrupo )
     {
         $oTabla = new CatalogoServiciosSubGrupo;
         return $oTabla->SeleccionarPorGrupo( $lIdGrupo );
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosSeccionSeleccionarPorSubGrupo( $lIdSubGrupo )
     {
         $oTabla = new CatalogoServiciosSeccion;
         return $oTabla->SeleccionarPorSubGrupo( $lIdSubGrupo );
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosSubSeccionSeleccionarPorSeccion( $lIdServicioSeccion )
     {
         $oTabla = new CatalogoServiciosSubSeccion;
         return $oTabla->SeleccionarPorSeccion( $lIdServicioSeccion );
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosSeleccionarPorCodigo( $lcCodigo, $oConexion=null){
         //No existe el procedimiento almacendo SISGALEN v3
         // $oTabla = new CatalogoServicios;
@@ -540,6 +993,7 @@ class ReglasComunes extends Model
         return DB::table('FactCatalogoServicios')->where('codigo', $lcCodigo)->get();
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosAgregar( &$oDOCatalogoServicio, $oRsPuntoCarga, $idListBar, $mo_lcNombrePc, $lcNombreServicio)
     {
         $oCatalogoServicios = new CatalogoServicios;
@@ -562,6 +1016,7 @@ class ReglasComunes extends Model
         return true;
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosModificar( $oDOCatalogoServicio, $oRsPuntoCarga, $idListBar, $mo_lcNombrePc, $lcNombreServicio)
     {
         $oCatalogoServicios = new CatalogoServicios;
@@ -592,6 +1047,7 @@ class ReglasComunes extends Model
         return true;
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosEliminar( $oDOCatalogoServicio, $idListBar, $mo_lcNombrePc, $lcNombreServicio)
     {
         $oCatalogoServicios = new CatalogoServicios;
@@ -607,6 +1063,7 @@ class ReglasComunes extends Model
         return true;
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosFiltrarDEBB($oDOCatalogoServicio, $ml_TipoCatalogo)
     {
         $oTabla = new CatalogoServicios;
@@ -646,6 +1103,7 @@ class ReglasComunes extends Model
 
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function CatalogoServiciosSeleccionarPorId($idProducto)
     {
         $oProducto = new CatalogoServicios;
@@ -655,6 +1113,7 @@ class ReglasComunes extends Model
         return isset($data[0])? $data[0]: null;
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function FactCatalogoServiciosPtosSeleccionarXidProducto( $lnIdProducto ){
         $sql = 'EXEC FactCatalogoServiciosPtosSeleccionarXidProducto :idProducto';
         $params = [
@@ -663,6 +1122,7 @@ class ReglasComunes extends Model
         return DB::select($sql, $params);
     }
 
+    // Created By Romel Diaz at 2019-09-04 
     public function FactPuntosCargaSeleccionarPorId( $lnIdPuntoCarga )
     {
         $sql = 'EXEC FactPuntosCargaSeleccionarPorId :idPuntoCarga';

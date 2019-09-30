@@ -39,7 +39,9 @@ class DoAtencionDatosAdicionales extends Model
 		'nroExpediente', 
 		'idServicioDestino', 
 		'ups', 
-		'nroDocumentoAcompañante', 
-		'domicilioAcompañante', 
+		'nroDocumentoAcompanante', 
+		'domicilioAcompanante', 
+
 	];
+
 }

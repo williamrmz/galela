@@ -140,17 +140,58 @@ class Diagnosticos extends Model
 
 	public function FiltrarSoloActivos($oDoDiagnostico, $lbSoloMuestraDxGalenHos, $lbUSAcodigoCIEsinPto)
 	{
+		$sWhere = $this->getStringWhereForFilter( $oDoDiagnostico, $lbSoloMuestraDxGalenHos, $lbUSAcodigoCIEsinPto, true);
 		$query = "
 			EXEC DiagnosticosFiltrar :lcFiltro, :lbUSAcodigoCIEsinPto";
 
 		$params = [
-			'lcFiltro' => sWhere, 
+			'lcFiltro' => $sWhere, 
 			'lbUSAcodigoCIEsinPto' => $lbUSAcodigoCIEsinPto, 
 		];
 
 		$data = \DB::select($query, $params);
 
 		return $data;
+	}
+
+	// Created By Romel Diaz at 2019-09-05
+	private function getStringWhereForFilter($oDoDiagnostico, $lbSoloMuestraDxGalenHos, $lbUSAcodigoCIEsinPto, $MostrarSoloActivos)
+	{
+		$sSql = ""; $sOrder = ""; $sWhere = "";    
+
+       	if( $lbUSAcodigoCIEsinPto = true) {
+        	if( $oDoDiagnostico->codigoCIEsinPto <> "") {
+               $sWhere = $sWhere . " codigoCIEsinPto like '" . $oDoDiagnostico->codigoCIEsinPto . "%' and ";
+		   }
+		}else{
+        	if( $oDoDiagnostico->codigoCIE2004 <> "") {
+              $sWhere = $sWhere . " CodigoCIE2004 like '" . $oDoDiagnostico->codigoCIE2004 . "%' and ";
+			}
+		}
+
+		
+       	if( $oDoDiagnostico->descripcion <> "" && $oDoDiagnostico->descripcion <> "%%") {
+            if( substr($oDoDiagnostico->descripcion, 0, 1) <> "%") {
+               	$oDoDiagnostico->descripcion = "%" . trim($oDoDiagnostico->descripcion) . "%";
+			}
+            $sWhere = $sWhere . " Descripcion like '" . $oDoDiagnostico->descripcion . "' and ";
+            //'sWhere = sWhere + " dbo.cleanSpecialChar(Descripcion) like dbo.cleanSpecialChar('" + oDoDiagnostico.Descripcion + "') and " 'Actualizado Yamill Palomino 16/10/2014
+		}
+       	if( $lbSoloMuestraDxGalenHos = true) {
+           	$sWhere = $sWhere . " not (descripcionMINSA is null) and ";
+		}
+       
+       	// if( $MostrarSoloActivos = true) {
+        //    	$sWhere = $sWhere . " EsActivo = 1 and ";
+		// }
+       
+       	if( $sWhere <> "") {
+            $sWhere = " Where " . substr($sWhere, 0, strlen($sWhere) - 4);
+		}
+
+		   $sWhere = $sWhere . " order by  Descripcion,CodigoCIE2004 ";
+		   
+       	return $sWhere;
 	}
 
 	public function SeleccionarPorCodigoCIE2004($oTabla, $lbSoloMuestraDxGalenHos)

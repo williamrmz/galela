@@ -39,7 +39,14 @@ class DOEmpleado extends Model
 		'apellidoMaterno', 
 		'apellidoPaterno', 
 		'idEmpleado', 
+
+		'ubigeo'
 		// 'esActivo', 
 		// 'sexo', 
 	];
+
+
+	
+
+
 }

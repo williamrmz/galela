@@ -3,6 +3,7 @@
 namespace App\VB\SIGHDatos;
 
 use Illuminate\Database\Eloquent\Model;
+use App\VB\SIGHEntidades\Enumerados;
 
 use DB;
 
@@ -59,7 +60,8 @@ class HistoriasClinicas extends Model
 		$query = "
 			EXEC HistoriasClinicasEliminar :nroHistoriaClinica, :idUsuarioAuditoria";
 
-		$params = [
+		$params = 
+		[
 			'nroHistoriaClinica' => ($oTabla->nroHistoriaClinica == "")? Null: $oTabla->nroHistoriaClinica, 
 			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria, 
 		];
@@ -85,24 +87,33 @@ class HistoriasClinicas extends Model
 
 	public function GenerarNroHistoria($lTipoNumeracion)
 	{
-		$query = "
-			DECLARE @idHistoriaClinica AS Int = :idHistoriaClinica
-			SET NOCOUNT ON 
-			EXEC generadorNroHistoriaClinicaActualizaNroHistoria :idTipoNumeracion, @idHistoriaClinica OUTPUT, :nroHistoriaClinica, :nroHistoriaClinica
-			SELECT @idHistoriaClinica AS idHistoriaClinica";
+		$lnNroHistoriaClinica = '';
 
 		$params = [
-			'idTipoNumeracion' => $lTipoNumeracion, 
-			'idHistoriaClinica' => 0, 
-			'nroHistoriaClinica' => lnNroHistoriaClinica, 
-			'nroHistoriaClinica' => lnNroHistoriaClinica, 
+			'idTipoNumeracion' => $lTipoNumeracion,
+			'nroHistoriaClinica' => 0,
 		];
 
-		$data = \DB::select($query, $params);
+		$dataTmp = proc( 'HistoriasClinicasGenerarNroHistoria', $params );
+		$lnNroHistoriaClinica = $dataTmp->nroHistoriaClinica;
+		$GenerarNroHistoria = $lnNroHistoriaClinica;
 
-		$data = reset($data);
+		if( Enumerados::param('sghHistoriaDefinitivaAutomatica') == $lTipoNumeracion) {
+			$oRsTmp1 = execute('HistoriasClinicasSeleccionarPorId', ['nroHistoriaClinica'=>$lnNroHistoriaClinica]);
 
-		return $data;
+			if( count( $oRsTmp1 ) > 0 ){
+				$oRsTmp1 = execute('HistoriasClinicasUltimoGenerado');
+
+				$lnNroHistoriaClinica = $oRsTmp1[0]->nroHistoriaClinica + 1;
+
+				$update = execute('generadorNroHistoriaClinicaActualizaNroHistoria', ['nroHistoriaClinica'=>$lnNroHistoriaClinica], true );
+				
+				$GenerarNroHistoria = $lnNroHistoriaClinica;
+			}
+		}
+
+		return $GenerarNroHistoria;
+
 	}
 
 	public function Filtrar($oTabla, $lcSinApellido)

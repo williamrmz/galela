@@ -24,4 +24,8 @@ class DOAtencionDiagnostico extends Model
 		'subGrupoHIS', 
 		'idordenDx', 
 	];
+
+
+	
+
 }

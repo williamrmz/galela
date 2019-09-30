@@ -1,7 +1,7 @@
 {{-- MY MODAL --}}
 @php
     $idModal = isset($id)? $id: "myModal";
-
+    $content = isset($content)? $content: 'write a specific content';
 @endphp
 
 <div class="modal fade" id="{{$idModal}}" style="display: none;">
@@ -13,7 +13,7 @@
                 <h4 class="modal-title" id="{{$idModal}}Title">Title</h4>
             </div>
             <div class="modal-body" id="{{$idModal}}Body">
-                body…
+                {!! $content !!};
             </div>
         </div>
     </div>
