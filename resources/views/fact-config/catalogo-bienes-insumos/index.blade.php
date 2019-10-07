@@ -59,16 +59,16 @@
 
 							    	</div>
 
-							    		<div class="col-sm-2">
-							    			<input type="button" " class="btn btn-default" name="btnLimpiar" id="btnLimpiar" value="Limpiar (F7)">
-							    		</div>
-							    	<div class="form-group col-sm-1">
-							    		<input type="button" " class="btn btn-info" name="btnImprimir" id="btnImprimir" value="Imprimir">
-							    	</div>
-							    	<div class="form-group col-sm-11">
-							    		<div class="col-sm-2">
-							    			<input type="button" class="btn btn-success" name="btnBuscar" id="btnBuscar" value="Buscar (F6)">
-							    		</div>
+							    	<div class="col-sm-1 form-group">
+									<button type="submit" class="btn btn-sm btn-block btn-default" id="{{$model}}-btn-search" title="buscar"> 
+											<i class="fa fa-search"></i>
+									</button>
+									<a href="#" class="btn btn-sm btn-block btn-default" id="{{$model}}-btn-clear" title="limpiar"> <i class="fa fa-eraser"></i></a>	
+								</div>
+							    	<div class="col-sm-2">
+							    		<a href="#" class="btn btn-sm btn-block btn-default" id="{{$model}}-btn-print" title="Imprimir">
+							    			<i class="fa fa-print"></i>
+							    		</a>
 							    	</div>	
 							    </div>
 							</div>
@@ -101,5 +101,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ url('/js/fact-config/catalogo-bienes-insumos.js') }}"></script>
+    <script src="{{ url('/js/fact-config/catalogo-bienes-insumos.js?v=3') }}"></script>
 @endsection
