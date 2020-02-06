@@ -8,6 +8,15 @@ use DB;
 
 class TiposProgramacion extends Model
 {
+    protected $table = "TiposProgramacion";
+    protected $primaryKey = "IdTipoProgramacion";
+    public $timestamps = false;
+    protected $fillable =
+        [
+            "IdTipoProgramacion",
+            "Descripcion"
+        ];
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -74,7 +83,7 @@ class TiposProgramacion extends Model
 		return $data;
 	}
 
-	public function SeleccionarTodos()
+	public static function SeleccionarTodos()
 	{
 		$query = "
 			EXEC TiposProgramacionSeleccionarTodos ";

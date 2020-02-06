@@ -82,4 +82,11 @@ class Paises extends Model
 		return $data;
 	}
 
+	public static function buscarPaisPorNombre($nombrePais)
+    {
+        $objPais = new Paises();
+        $data = $objPais->whereRaw("upper(Nombre) = ?", strtoupper($nombrePais))->first();
+        return $data;
+    }
+
 }

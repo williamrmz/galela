@@ -179,7 +179,21 @@ function AuditoriaAgregarV ($idUsuario, $accion, $idRegistroTabla, $tabla, $idLi
         'nombrePc' => $nombrePc,
         'observaciones' => $observaciones,
     ];
-    // dd($params);
+    return \DB::update($sql, $params);
+}
+
+function AuditoriaAgregarVGood ($accion, $idRegistroTabla, $tabla, $idListItem, $observaciones, $nombrePc = "")
+{
+    $sql = 'EXEC AuditoriaAgregarV :idUsuario, :accion, :idRegistroTabla, :tabla, :idListItem, :nombrePc, :observaciones';
+    $params = [
+        'idUsuario' => Auth::user()->id,
+        'accion' => $accion,
+        'idRegistroTabla' => $idRegistroTabla,
+        'tabla' => $tabla,
+        'idListItem' => $idListItem,
+        'nombrePc' => $nombrePc,
+        'observaciones' => $observaciones,
+    ];
     return \DB::update($sql, $params);
 }
 
@@ -432,4 +446,25 @@ function arrlike($items, $key=null, $value)
         }
     }
     return $data;
+}
+
+// Reemplaza cadena todas las coincidencias con la cadena
+function reemplazarFrase($frase, $search = 'SIN DATOS')
+{
+    return str_replace($search, '', $frase);
+}
+
+// Funcion:: Para imprimir datos de JSON
+function imprimeJSON($estado, $mensaje = '', $datos = null)
+{
+//    header('Content-Type: application/json');
+//    header('Access-Control-Allow-Origin: *');
+//    header('Access-Control-Allow-Methods: GET, POST');
+//    header("Access-Control-Allow-Headers: X-Requested-With");
+
+    $response["estado"]	= $estado;
+    $response["mensaje"]	= $mensaje;
+    $response["datos"]	= $datos;
+
+    echo json_encode($response);
 }

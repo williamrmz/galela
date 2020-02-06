@@ -8,6 +8,19 @@ use DB;
 
 class Turno extends Model
 {
+    protected $table = "Turnos";
+    protected $primaryKey = "IdTurno";
+    protected $fillable = [
+            "IdTurno",
+            "Codigo",
+            "Descripcion",
+            "HoraInicio",
+            "HoraFin",
+            "IdTipoServicio",
+            "IdEspecialidad"
+        ];
+    public $timestamps = false;
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -113,6 +126,20 @@ class Turno extends Model
 		return $data;
 	}
 
+    public static function SeleccionarPorIdTipoServicio($idTipoServicio)
+    {
+        $query = "
+			EXEC TurnosSeleccionarPorIdTipoServicio :IdTipoServicio";
+
+        $params = [
+            'IdTipoServicio' => $idTipoServicio,
+        ];
+
+        $data = \DB::select($query, $params);
+
+        return $data;
+    }
+
 	public function SeleccionarPorCodigo($oTabla)
 	{
 		$query = "
@@ -126,5 +153,50 @@ class Turno extends Model
 
 		return $data;
 	}
+
+	// :: 28/01/2020 LA
+    public static function filtrar($textoFiltrar)
+    {
+        $page = request()->page;
+        $size = 10;
+        $rowStart = ($page-1) * $size;
+
+        $params = [ 'size' => $size, 'rowStart' => $rowStart,];
+
+        $queryPag = "ORDER BY Turnos.Codigo, Turnos.Descripcion OFFSET :rowStart ROWS FETCH NEXT :size ROWS ONLY";
+
+        $querySelect = "Select Turnos.IdTurno, Turnos.Codigo, Turnos.Descripcion, Turnos.HoraInicio, Turnos.HoraFin,
+                        TiposServicio.Descripcion as TipoServicio, Especialidades.Nombre as Especialidad";
+
+        $queryFrom = " from ((Turnos left join TiposServicio on Turnos.IdTipoServicio = TiposServicio.IdTipoServicio) 
+                        left join Especialidades on Turnos.IdEspecialidad = Especialidades.IdEspecialidad)";
+
+        $queryWhere = " WHERE UPPER(Turnos.Descripcion) like '%$textoFiltrar%' ";
+
+        $query = $querySelect . $queryFrom . $queryWhere .$queryPag;
+
+        $queryCount = "SELECT count(*) total" . $queryFrom . $queryWhere;
+
+        $items = DB::select( $query, $params );
+
+        $count = DB::select( $queryCount );
+        $total = reset( $count )->total; // first element of array
+
+        $pag = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect ( $items )->forPage(1, $size),
+            $total,
+            $size,
+            $page
+        );
+
+        return $pag;
+    }
+
+    // :: 29/01/2020 LA
+    public static function guardar($oTurno)
+    {
+        $oTurno->save();
+        return $oTurno;
+    }
 
 }

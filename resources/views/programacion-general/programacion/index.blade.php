@@ -15,16 +15,14 @@
 
 @section('content')
 
-	{{ Form::hidden($model.'-path-ctrl', route('programacion-general.programacion.index')) }}
+	@include('programacion-general.programacion.partials.item-form')
 
-	@include('partials.my-modal')
-
-	<div class='row'>
+	<div class='row' id="listado-programacion">
 		<div class='col-sm-12'>
 
 			<div class="box box-primary">
 				<div class="box-header with-border">
-					<h3 class="box-title"><i class="fa fa-calendar text-yellow"></i> Programacion</h3>
+					<h3 class="box-title"><i class="fa fa-calendar text-yellow"></i> Programación general</h3>
 					<div class="box-tools pull-right">
 						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-create"> <i class="fa fa-plus"></i> Crear</a>
 					</div>
@@ -32,22 +30,48 @@
 				<!-- /.box-header -->
 				<div class="box-body">
 					<div class="row">
+						<div class="col-sm-3">
+							<h5>Buscar por médico</h5>
 
-						<div class="col-sm-12">
-							{{ Form::open(['route' => ['programacion-general.programacion.index'], 
-								'id'=>"$model-form-search", 'method'=>'GET', 'class'=> 'form-inline pull-right']) }}
-								<div class="form-group">
-									{{ Form::text('search', null, ['class'=>"form-control input-sm $model-input-search"]) }}
+							<div class="row">
+
+								{{-- Departamento --}}
+								<div class="col-sm-12 form-group">
+									<div class="input-group" style="width:100%">
+										<span class="input-group-addon" style="width:120px">Departamento</span>
+										{{ Form::select('fcmbIdDepartamento', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
+									</div>
 								</div>
-								<button type="submit" class="btn btn-sm btn-default" id="{{$model}}-btn-search" 
-									title="buscar"> <i class="fa fa-search"></i></button>
-								<a href="#" class="btn btn-sm btn-default" id="{{$model}}-btn-clear" 
-									title="limpiar"> <i class="fa fa-refresh"></i></a>
-							{{ Form::close() }}
+
+								{{-- Especialidad --}}
+								<div class="col-sm-12 form-group">
+									<div class="input-group" style="width:100%">
+										<span class="input-group-addon" style="width:120px">Especialidad</span>
+										{{ Form::select('fcmbIdEspecialidad', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
+									</div>
+								</div>
+
+								{{-- Médico --}}
+								<div class="col-sm-12 form-group">
+									<div class="input-group" style="width:100%">
+										<span class="input-group-addon" style="width:120px">Médico</span>
+										{{ Form::select('fcmbIdMedico', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
+									</div>
+								</div>
+							</div>
+
+
+						</div>
+						<div class="col-sm-3">
+							<h5>Listado por día</h5>
+							<div class="listado-dia-programacion">
+								@include('programacion-general.programacion.partials.item-list')
+							</div>
 						</div>
 
-						<div class="col-sm-12 periodos-tabla">
-							<div class="table-responsive {{$model}}-table">
+						<div class="col-sm-3">
+							<h5>Programación mensual</h5>
+							<div class="listado-mes-programacion">
 
 							</div>
 						</div>
@@ -61,6 +85,15 @@
 
 @endsection
 
-@section('scripts')
-    <script src="{{ url('/js/programacion-general/programacion.js') }}"></script>
-@endsection
+@push('scripts')
+
+	<script>
+		var model = '{{ $model }}';
+		var url = '{{ route("programacion-general.programacion.index") }}';
+		var opcionBlanco  = { id: '', text: '...' };
+		console.log(url);
+	</script>
+
+
+	<script src="{{ asset('js/programacion-general/programacion.js') }}"></script>
+@endpush

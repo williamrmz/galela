@@ -15,7 +15,7 @@ use DB;
 
 class InsumoAsignacionController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.insumos.asignaciones.';
+    const PATH_VIEW = 'lab.insumos.asignaciones.';
 
     public function index(Request $request)
     {
@@ -455,7 +455,7 @@ class InsumoAsignacionController extends Controller
             }
 
             $data = [];
-            if(count($codigos) && $desde && $hasta){
+            if(isset($codigos[0]) && $desde && $hasta){
                 $data = DB::table('FactCatalogoBienesInsumos as bi')
                 ->leftJoin('LabInsumosCpt as i', 'i.IdProductoInsumo', 'bi.IdProducto')
                 ->leftJoin('WLabConsumoInsumos as c', 'i.IdInsumo', 'c.IdInsumo')

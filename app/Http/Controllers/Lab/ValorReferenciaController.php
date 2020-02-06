@@ -9,7 +9,7 @@ use App\Model\ValoresReferencia as ValorRef;
 
 class ValorReferenciaController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.patologia-clinica.items.';
+    const PATH_VIEW = 'lab.patologia-clinica.items.';
 
     public function index(Request $request)
     {

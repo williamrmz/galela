@@ -81,6 +81,6 @@
 
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="{{ url('/js/seguridad/empleados.js') }}"></script>
-@endsection
+@endpush

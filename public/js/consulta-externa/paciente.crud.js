@@ -1,48 +1,93 @@
 var model="paciente";
-
 var urlBase = '';
-
 var dataCmbPais = [];
-
 var dateHTML = '';
-
-var action = '';
-
 var paciente = {};
 
-$(function(){
-
+$(document).ready(function()
+{
     urlBase = $('meta[name="base-path"]').attr('content');
+
     optionNull = { id: '', text: '...' };
 
-    $('#'+model+'-btn-store').click( function (e) {
+    testing();
+
+    // Si el usuario hace clic sobre el boton paciente-btn-store (Guardar / Actualizar)
+    $('#'+model+'-btn-store').click( function (e)
+    {
         e.preventDefault();
         createItem();
     });
 
-    $("#imagenPaciente").change(function() {
+    // Cuando el usuario carga una imagen
+    $("#imagenPaciente").change(function()
+    {
         readURL(this);
     });
 
-    $("#imagenPacienteClear").click(function(e) {
+    // Limpiar foto
+    $("#imagenPacienteClear").click(function(e)
+    {
         e.preventDefault();
         $('#imagenPaciente').val('');
+        $("#foto_base64").val('');
         readURL(this);
     });
 
-    if(  $(".current_action").val() == 'CREATE' ){
-        enableFormSenasa( false );
+    if($("#accion").val() == 'CREATE' )
+    {
+        habilitarFormSunasa( false );
     }
-    
-    
 
-
-    setData();
+    inicializar();
 
     // trigger events
     eventManager();
 
+    $("#chkNN").change(function()
+    {
+        soloLecturaNN();
+    });
+
+    // Cuando el usuario escribe el DNI realizar búsqueda a nivel de WS
+    $("input[name='txtNroDocumento']").focusout(function ()
+    {
+        var tipoDoc = $('select[name="cmbIdDocIndentidad"]').val();
+        if (tipoDoc=="1")
+        {
+            var dni = $('input[name="txtNroDocumento"]').val();
+            buscarPacientexDNI(dni);
+        }
+    });
+
 });
+
+function testing()
+{
+    $("#ftxtDni").val("71068282");
+    $('#paciente-form-search').trigger('submit');
+}
+
+// Funcion: Cambia el estado de combos cuando se marca checkbox: No identificado
+function soloLecturaNN()
+{
+    var nnEstado = $("#chkNN").prop("checked");
+    $('input[name="txtApellidoPaterno"]').prop('readonly', nnEstado);
+    $('input[name="txtApellidoMaterno"]').prop('readonly', nnEstado);
+    $('input[name="txtPrimerNombre"]').prop('readonly', nnEstado);
+    $('input[name="txtSegundoNombre"]').prop('readonly', nnEstado);
+    $('input[name="txtTercerNombre"]').prop('readonly', nnEstado);
+    $('select[name="cmbEtnia"]').prop('disabled', nnEstado);
+    $('select[name="cmbIdIdioma"]').prop('disabled', nnEstado);
+    $('input[name="txtMadreDocumento"]').prop('readonly', nnEstado);
+    $('input[name="txtMadreApellidoP"]').prop('readonly', nnEstado);
+    $('input[name="txtMadreApellidoM"]').prop('readonly', nnEstado);
+    $('input[name="txtMadreNombre"]').prop('readonly', nnEstado);
+    $('input[name="txtMadreSnombre"]').prop('readonly', nnEstado);
+
+    // Falta implementar
+
+}
 
 function getPathCtrl()
 {
@@ -51,10 +96,12 @@ function getPathCtrl()
 
 function eventManager()
 {
-    $('input[name="chkIgualQueDomicilio"]').change( function(){
+    $('input[name="chkIgualQueDomicilio"]').change( function()
+    {
         if( $(this).prop('checked') ){
             setCombosIgualDomicilio( 'Procedencia' );
-        }else{
+        }else
+        {
             initGruposCombos ( dataCmbPais, 'Procedencia');
         }
     });
@@ -76,9 +123,8 @@ function eventManager()
     });
 
     $('input[name="txtFechaNacimiento"]').change( function(e) {
-        console.log( $(this).val() );
+        // console.log( $(this).val() );
         getEdad( $(this).val()  );
-
         $('input[name="txtFnacimiento"]').val( $(this).val() );
     });
 
@@ -90,28 +136,38 @@ function eventManager()
 
 
     // SUNASA
-    $('input[name="chkNuevoSeguro"]').change( function(e) {
-        enableFormSenasa( $(this).prop('checked') );
-    });
-
-    $('input[name="chkNoTieneSeguro"]').change( function(e) {
-        enableFormSenasa( !$(this).prop('checked') );
+    $('input[type=radio][name=rbTieneSeguro]').change( function(e)
+    {
+        var valor = this.value;
+        if (valor=="SI")
+        {
+            habilitarFormSunasa(true);
+        }
+        else
+        {
+            habilitarFormSunasa(false);
+        }
     });
     
 
-    $(".btn-save").click( function(e){
-        e.preventDefault(); saveItem();
+    // Guardar / Actualizar registro de paciente
+    $(".btn-save").click( function(e)
+    {
+        e.preventDefault();
+        saveItem();
     });
 
     $(".btn-cancel").click( function(e){
         e.preventDefault(); cancelItem();
-    });        
+    });
 }
 
-function enableFormSenasa( state )
+function habilitarFormSunasa(state)
 {
-    $('input[name="chkNuevoSeguro"]').prop('checked', state);
-    $('input[name="chkNoTieneSeguro"]').prop('checked', !state);
+    if(state) { $("#forms-sunasa").show(); } else { $("#forms-sunasa").hide() }
+
+    $("#id_rbTieneSeguro").attr("checked", state);
+    $("#id_rbNoTieneSeguro").attr("checked", !state);
 
     $('#forms-sunasa').find(':input').each(function( index, element ) {
         if( !(element.name == 'txtFnacimiento' || element.name == 'txtUbigeo' || element.name == 'txtNroAfiliacion1'
@@ -145,13 +201,14 @@ function writeFullname(){
     $('input[name="txtPaciente"]').val( fullname.trim() );
 }
 
-function setData()
+// Carga información inicial de combos, etc
+function inicializar()
 {
     $.ajax({
         data: {}, url: getPathCtrl()+'/api/service?name=getData',
         type:  'GET', dataType: 'json',
-        success:  function (data) {
-            console.log( data );
+        success:  function (data)
+        {
 
             var form = data.forms;
             var item = data.item;
@@ -199,13 +256,15 @@ function setData()
             $('select[name="cmbTipoOperacion"]').select2({data: form.cmbTipoOperacion});
 
             dataCmbPais = form.cmbPais;
-            setCombosEventos ( dataCmbPais, 'Domicilio');
-            setCombosEventos ( dataCmbPais, 'Procedencia');
-            setCombosEventos ( dataCmbPais, 'Nacimiento');
+            eventosComboUbigeo ( dataCmbPais, 'Domicilio');
+            eventosComboUbigeo ( dataCmbPais, 'Procedencia');
+            eventosComboUbigeo ( dataCmbPais, 'Nacimiento');
             
             // trigger events
             $('input[name="txtDocumento"]').val( $('select[name="cmbIdDocIndentidad"]').select2('data')[0].Descripcion );
-            $('select[name="cmbIdDocIndentidad"]').on('select2:select', function (e) {
+
+            $('select[name="cmbIdDocIndentidad"]').on('select2:select', function (e)
+            {
                 $('input[name="txtDocumento"]').val( e.params.data.Descripcion );
             });
 
@@ -235,9 +294,9 @@ function resetForm()
     $('input[name="yaNoTieneSeguroUltimoRegistroGrabado"]').val('');
     // PACIENTE
     //-- Datos de la Historia Clinica
-    $('select[name="cmbIdDocIndentidad"').val(1).trigger('change');
+    $('select[name="cmbIdDocIndentidad"]').val(1).trigger('change');
     $('input[name="txtNroDocumento"]').val('');
-    $('select[name="cmbIdTipoGenHistoriaClinica"').val(1).trigger('change');
+    $('select[name="cmbIdTipoGenHistoriaClinica"]').val(1).trigger('change');
     $('input[name="tipoNumeracionAnterior"]').val('');
     $('input[name="txtIdNroHistoria"]').val('');
     //-- Datos del paciente
@@ -331,19 +390,19 @@ function resetForm()
 
 function disableHistoriaAndFecha( state )
 {
-    $('input[name="txtNumeroHistoria"]').val('');
-    $('input[name="txtNumeroHistoria"]').prop('readonly', state);
+    $('input[name="txtIdNroHistoria"]').val('');
+    $('input[name="txtIdNroHistoria"]').prop('readonly', state);
     $('input[name="txtFechaCreacion"]').val(dateHTML);
     $('input[name="txtFechaCreacion"]').prop('readonly', state);
 }
 
 function setCombosIgualDomicilio( context )
 {
-    dataPais = $('select[name="cmbIdPaisDomicilio').find(':selected')[0];
-    dataDepartamento = $('select[name="cmbIdDepartamentoDomicilio').find(':selected')[0];
-    dataProvincia = $('select[name="cmbIdProvinciaDomicilio').find(':selected')[0];
-    dataDistrito = $('select[name="cmbIdDistritoDomicilio').find(':selected')[0];
-    dataCentroPoblado = $('select[name="cmbIdCentroPobladoDomicilio').find(':selected')[0];
+    dataPais = $('select[name="cmbIdPais'+context).find(':selected')[0];
+    dataDepartamento = $('select[name="cmbIdDepartamento'+context).find(':selected')[0];
+    dataProvincia = $('select[name="cmbIdProvincia'+context).find(':selected')[0];
+    dataDistrito = $('select[name="cmbIdDistrito'+context).find(':selected')[0];
+    dataCentroPoblado = $('select[name="cmbIdCentroPoblado'+context).find(':selected')[0];
 
     optionPais = [ {id: dataPais.value, 'text': dataPais.innerHTML } ];
     optionDepartamento = [ {id: dataDepartamento.value, 'text': dataDepartamento.innerHTML } ];
@@ -365,10 +424,11 @@ function resetCombo( classSelector )
     $('select[name="'+classSelector+'"]').html ('').select2({ data: cmbData });
 }
 
-function setCombosEventos( paisesData, context )
+function eventosComboUbigeo(paisesData, context )
 {
     $('select[name="cmbIdPais'+context+'"]').html('').select2( {'data': paisesData });
-    $('select[name="cmbIdPais'+context+'"]').change( function () {
+    $('select[name="cmbIdPais'+context+'"]').change( function ()
+    {
         cargarComboDepartamentos( $(this).val() , context);
     });
 
@@ -385,11 +445,188 @@ function setCombosEventos( paisesData, context )
     });
 }
 
+function buscarPacientexDNI(dni)
+{
+    if(dni.length==8)
+    {
+        $.ajax({
+            data: {'nro_documento': dni }, url: getPathCtrl()+'/api/service?name=get_by_nro_documento',
+            type:  'GET', dataType: 'json',
+            success:  function (response)
+            {
+                if(response.IdPaciente!=null || response.IdPaciente!=undefined)
+                {
+                    nombreCompleto = $.trim(response.ApellidoPaterno)+" "+$.trim(response.ApellidoMaterno)+" "+$.trim(response.PrimerNombre);
+                    toastr.error( response.message, 'El nro. documento ya se encuentra registrado para el paciente '+nombreCompleto);
+                    $("input[name='txtNroDocumento']").val("");
+                    limpiarCampos();
+                    return;
+                }
+
+
+                $('input[name="txtDocumento"]').val( $('select[name="cmbIdDocIndentidad"]').select2('data')[0].Descripcion );
+                $("input[name='txtApellidoPaterno']").val( response.ApellidoPaterno);
+                $("input[name='txtApellidoMaterno']").val( response.ApellidoMaterno);
+                $("input[name='txtPrimerNombre']").val( response.PrimerNombre);
+                $("input[name='txtSegundoNombre']").val( response.SegundoNombre);
+                $("input[name='txtTercerNombre']").val( response.TercerNombre);
+                $("input[name='txtDireccionDomicilio']").val( response.DireccionDomicilio);
+                $("input[name='txtNombrePadre']").val( response.NombrePadre);
+                $("input[name='txtMadreNombre']").val( response.NombreMadre);
+                $("input[name='txtFechaNacimiento']").val( response.FechaNacimiento);
+                $('input[name="txtFechaNacimiento"]').trigger('change');
+                $("select[name='cmbIdTipoSexo']").val( response.IdTipoSexo);
+                $("select[name='cmbIdTipoSexo']").select2();
+                $('input[name="txtSexo"]').val( $('select[name="cmbIdTipoSexo"]').select2('data')[0].text );
+
+
+                $("select[name='cmbIdPaisDomicilio']").val( response.IdPaisDomicilio);
+                $("select[name='cmbIdPaisDomicilio']").select2();
+                $("select[name='cmbEtnia']").val( response.IdEtnia);
+                $("select[name='cmbEtnia']").select2();
+                $("select[name='cmbIdIdioma']").val( response.IdIdioma);
+                $("select[name='cmbIdIdioma']").select2();
+
+                // Cargar foto
+                $('#imagenPacientePreview').attr('src', "data:image/jpeg;base64,"+response.foto_base64);
+                $('#imagenPacientePreview').attr('title', response.NroDocumento);
+                $('#foto_base64').val(response.foto_base64);
+
+
+                // Obtener códigos de departamentos
+                verificarUbigeoParaCargarCombos(response.IdDistritoDomicilio, 'Domicilio');
+
+                // Cargar combos anidados nacimiento
+                verificarUbigeoParaCargarCombos(response.IdDistritoNacimiento, 'Nacimiento');
+
+                // Generar nombre completo del paciente
+                writeFullname();
+
+
+            },
+        });
+    }
+}
+
+function limpiarCampos()
+{
+    $('select[name="cmbIdDocIndentidad"]').val("1");
+    $('select[name="cmbIdTipoGenHistoriaClinica"]').val("1")
+    $("input[name='txtApellidoPaterno']").val("");
+    $("input[name='txtApellidoMaterno']").val("");
+    $("input[name='txtPrimerNombre']").val("");
+    $("input[name='txtSegundoNombre']").val("");
+    $("input[name='txtTercerNombre']").val("");
+    $("input[name='txtDireccionDomicilio']").val("");
+    $("input[name='txtNombrePadre']").val("");
+    $("input[name='txtMadreNombre']").val("");
+    verificarUbigeoParaCargarCombos("", 'Domicilio');
+    verificarUbigeoParaCargarCombos("", 'Nacimiento');
+    readURL('');
+    $('#foto_base64').val("");
+}
+
+function verificarUbigeoParaCargarCombos(IdDistrito, context)
+{
+    var ubigeoDistrito = IdDistrito;
+    var ubigeoProvincia = "";
+    var ubigeoDepartamento = "";
+
+    if (ubigeoDistrito != null || ubigeoDistrito != undefined)
+    {
+        if(ubigeoDistrito.length==5)
+        {
+            ubigeoProvincia     = ubigeoDistrito.substr(0,3);
+            ubigeoDepartamento  = ubigeoProvincia.substr(0,1);
+        }
+        else
+        {
+            ubigeoProvincia     = ubigeoDistrito.substr(0,4);
+            ubigeoDepartamento  = ubigeoProvincia.substr(0,2);
+        }
+
+        cargarCombosAnidados(ubigeoDepartamento, ubigeoProvincia, ubigeoDistrito, context);
+    }
+    else
+    {
+        resetCombo( 'cmbIdDepartamento'+context );
+        resetCombo( 'cmbIdProvincia'+context );
+        resetCombo( 'cmbIdDistrito'+context );
+        resetCombo( 'cmbIdCentroPoblado'+context );
+        $('select[name="cmbIdPais'+context+'"]').trigger('change');
+
+    }
+
+    console.log("IdDepartamento"+context, ubigeoDepartamento);
+    console.log("IdProvincia"+context, ubigeoProvincia);
+    console.log("IdDistrito"+context, ubigeoDistrito);
+
+
+}
+
+
+
+function cargarCombosAnidados(ubidep, ubiprov, ubidis, context)
+{
+    // Cargar departamentos
+    $.ajax({
+        data: {},
+        url: urlBase+'/controles?service=getDepartamentosData',
+        type:  'GET', dataType: 'json',
+        success:  function (cmbDepartamentoData)
+        {
+            cmbDepartamentoData.unshift(optionNull);
+            $('select[name="cmbIdDepartamento'+context+'"]').html ('').select2({ data: cmbDepartamentoData });
+            resetCombo( 'cmbIdProvincia'+context );
+            resetCombo( 'cmbIdDistrito'+context );
+            resetCombo( 'cmbIdCentroPoblado'+context );
+
+            // Seleccionar departamento
+            $('select[name="cmbIdDepartamento'+context+'"').val( ubidep).trigger('change');
+
+            // Cargar provincias
+            $.ajax({
+                data: {service: 'getProvinciasData', idDepartamento: ubidep },
+                url: urlBase+'/controles',
+                type:  'GET', dataType: 'json',
+                success:  function (cmbProvinciasData) {
+                    cmbProvinciasData.unshift(optionNull);
+
+                    $('select[name="cmbIdProvincia'+context+'"]').html ('').select2({ data: cmbProvinciasData });
+                    resetCombo( 'cmbIdDistrito'+context );
+                    resetCombo( 'cmbIdCentroPoblado'+context );
+
+                    // Seleccionar provincia
+                    $('select[name="cmbIdProvincia'+context+'"]').val( ubiprov).trigger('change');
+                    $('select[name="cmbIdProvincia'+context+'"]').select2();
+
+                    // Cargar distritos
+                    $.ajax({
+                        data: {service: 'getDistritosData', idProvincia: ubiprov },
+                        url: urlBase+'/controles',
+                        type:  'GET', dataType: 'json',
+                        success:  function (cmbDistritosData) {
+                            cmbDistritosData.unshift(optionNull);
+
+                            $('select[name="cmbIdDistrito'+context+'"]').html ('').select2({ data: cmbDistritosData });
+                            resetCombo( 'cmbIdCentroPoblado'+context );
+
+                            // Seleccionar distrito
+                            $('select[name="cmbIdDistrito'+context+'"]').val( ubidis).trigger('change');
+                            $('select[name="cmbIdDistrito'+context+'"]').select2();
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
+
 function cargarComboDepartamentos( idPais, context )
 {
     if( idPais == 166){//PERU
         $.ajax({
-            data: {}, 
+            data: {},
             url: urlBase+'/controles?service=getDepartamentosData',
             type:  'GET', dataType: 'json',
             success:  function (cmbDepartamentoData) {
@@ -400,7 +637,8 @@ function cargarComboDepartamentos( idPais, context )
                 resetCombo( 'cmbIdDistrito'+context );
                 resetCombo( 'cmbIdCentroPoblado'+context );
                 
-                if( typeof paciente['IdDepartamento'+context] !== 'undefined'){ // para seleccionar automaticamente los combos anidados
+                if( typeof paciente['IdDepartamento'+context] !== 'undefined')
+                { // para seleccionar automaticamente los combos anidados
                     $('select[name="cmbIdDepartamento'+context+'"]').val( paciente['IdDepartamento'+context] ).trigger( 'change' );
                 }
             }
@@ -486,11 +724,12 @@ function cargarComboCentrosPoblados( idDistrito, context )
     }
 }
 
+// Muestra formulario de paciente / sunasa
 function openModalCrud(accion, idPaciente = 0)
 {
     accion = accion.toUpperCase();
-    $('#accion').val( accion );
-    $('#idPaciente').val( idPaciente );
+    $('#accion').val(accion);
+    $('#idPaciente').val(idPaciente);
 
     $('a[href="#tab_paciente"]').tab('show');
     $('a[href="#tab_docmicilio"]').tab('show');
@@ -525,13 +764,13 @@ function openModalCrud(accion, idPaciente = 0)
         visible = false;
     }
 
-    if( accion == 'CANCEL' ) {
+    if( accion == 'CANCEL' )
+    {
         btn_class = 'btn-success';
         btn_name = 'CANCEL';
         visible = false;
     }
     $('.btn-save').removeClass( ['btn-primary', 'btn-default', 'btn-danger', 'btn-success'] ).addClass( [btn_class] ).html( btn_name);
-
     visible? $('.btn-save').show(): $('.btn-save').hide();
 }
 
@@ -541,15 +780,22 @@ function cancelItem()
     openModalCrud('CANCEL');
 } 
 
+// Muestra el formulario para registrar un paciente
 function createItem()
 {
     paciente = {};
     resetForm();
+    disableFormPaciente( false );
+    disableFormSunasa( false );
     openModalCrud('CREATE');
+    disableHistoriaAndFecha( true );
 }
 
 function editItem( idPaciente )
 {
+    disableFormPaciente( false );
+    disableFormSunasa( false );
+
     let url = getPathCtrl();
     $.ajax({
         data: {}, url: url+'/'+idPaciente+'/edit',
@@ -562,10 +808,12 @@ function editItem( idPaciente )
             openModalCrud('EDIT', paciente.IdPaciente);
 
             // PACIENTE
-            $('select[name="cmbIdDocIndentidad"').val( paciente.IdDocIdentidad ).trigger('change');
+            $('select[name="cmbIdDocIndentidad"]').val( paciente.IdDocIdentidad ).trigger('change');
             $('input[name="txtNroDocumento"]').val( paciente.NroDocumento );
-            $('select[name="cmbIdTipoGenHistoriaClinica"').val( paciente.IdTipoNumeracion ).trigger('change');
-            $('input[name="tipoNumeracionAnterior"').val( paciente.IdTipoGenHistoriaClinica_tag);
+            $('select[name="cmbIdTipoGenHistoriaClinica"]').val( paciente.IdTipoNumeracion ).trigger('change');
+            if( paciente.IdTipoNumeracion == 2) disableHistoriaAndFecha( false );
+
+            $('input[name="tipoNumeracionAnterior"]').val( paciente.IdTipoGenHistoriaClinica_tag);
             $('input[name="txtIdNroHistoria"]').val( paciente.NroHistoriaClinica );
             $('input[name="txtFechaCreacion"]').val( paciente.FechaCreacion );
             //-- Datos del paciente
@@ -619,7 +867,7 @@ function editItem( idPaciente )
             
 
             if( sunasa != null) {
-                enableFormSenasa( !sunasa.YaNoTieneSeguroUltimoRegistroGrabado );
+                habilitarFormSunasa( !sunasa.YaNoTieneSeguroUltimoRegistroGrabado );
 
 
                 $('input[name="chkNuevoSeguro"]').prop('checked', false);
@@ -666,15 +914,30 @@ function editItem( idPaciente )
                 $('select[name="cmbTipoOperacion"]').val( sunasa.idOperacion ).trigger('change');
                 $('input[name="txtFechaEnvio"]').val( sunasa.FechaEnvio );
                 $('input[name="txtHoraEnvio"]').val( sunasa.HoraEnvio );
+                
 
             }else{
-                enableFormSenasa(false);
+                habilitarFormSunasa(false);
             }
-
-            disableFormPaciente( false );
-            disableFormSunasa( false );
+            
         }
     });
+}
+
+function fixUbigeoCode()
+{
+    paciente.IdDepartamentoDomicilio = parseInt(paciente.IdDepartamentoDomicilio, 10).toString();
+    paciente.IdDepartamentoProcedencia = parseInt(paciente.IdDepartamentoDomicilio, 10).toString();
+    paciente.IdDepartamentoNacimiento = parseInt(paciente.IdDepartamentoNacimiento, 10).toString();
+
+    paciente.IdProvinciaDomicilio = parseInt(paciente.IdProvinciaDomicilio, 10).toString();
+    paciente.IdProvinciaProcedencia = parseInt(paciente.IdProvinciaProcedencia, 10).toString();
+    paciente.IdProvinciaNacimiento = parseInt(paciente.IdProvinciaNacimiento, 10).toString();
+
+    paciente.IdDistritoDomicilio = parseInt(paciente.IdDistritoDomicilio, 10).toString();
+    paciente.IdDistritoProcedencia = parseInt(paciente.IdDistritoProcedencia, 10).toString();
+    paciente.IdDistritoNacimiento = parseInt(paciente.IdDistritoNacimiento, 10).toString();
+
 }
 
 function showItem( idPaciente )
@@ -682,16 +945,19 @@ function showItem( idPaciente )
     $.ajax({
         data: {}, url: getPathCtrl()+'/'+idPaciente+'/edit',
         type:  'GET', dataType: 'json',
-        success:  function (response) {
+        success:  function (response)
+        {
             paciente = response.paciente;
             let sunasa = response.sunasa;
             openModalCrud('SHOW', paciente.IdPaciente);
+            fixUbigeoCode();
+
 
             // PACIENTE
-            $('select[name="cmbIdDocIndentidad"').val( paciente.IdDocIdentidad ).trigger('change');
+            $('select[name="cmbIdDocIndentidad"]').val( paciente.IdDocIdentidad ).trigger('change');
             $('input[name="txtNroDocumento"]').val( paciente.NroDocumento );
-            $('select[name="cmbIdTipoGenHistoriaClinica"').val( paciente.IdTipoNumeracion ).trigger('change');
-            $('input[name="tipoNumeracionAnterior"').val( paciente.IdTipoGenHistoriaClinica_tag);
+            $('select[name="cmbIdTipoGenHistoriaClinica"]').val( paciente.IdTipoNumeracion ).trigger('change');
+            $('input[name="tipoNumeracionAnterior"]').val( paciente.IdTipoGenHistoriaClinica_tag);
             $('input[name="txtIdNroHistoria"]').val( paciente.NroHistoriaClinica );
             $('input[name="txtFechaCreacion"]').val( paciente.FechaCreacion );
             //-- Datos del paciente
@@ -742,10 +1008,10 @@ function showItem( idPaciente )
             $('input[name="txtDocumento"]').val( $('select[name="cmbIdDocIndentidad"]').select2('data')[0].text );
             $('input[name="txtNdocumento"]').val( $('input[name="txtNroDocumento"]').val() );
             $('input[name="txtPais"]').val( $('select[name="cmbIdPaisDomicilio"]').select2('data')[0].text );
-            
 
-            if( sunasa != null) {
-                enableFormSenasa( !sunasa.YaNoTieneSeguroUltimoRegistroGrabado );
+            if( sunasa != null)
+            {
+                habilitarFormSunasa( !sunasa.YaNoTieneSeguroUltimoRegistroGrabado );
 
 
                 $('input[name="chkNuevoSeguro"]').prop('checked', false);
@@ -794,7 +1060,6 @@ function showItem( idPaciente )
                 $('input[name="txtHoraEnvio"]').val( sunasa.HoraEnvio );
 
             }
-            
             disableFormPaciente( true );
             disableFormSunasa( true );
         }
@@ -813,10 +1078,10 @@ function deleteItem( idPaciente )
             openModalCrud('DELETE', paciente.IdPaciente);
 
             // PACIENTE
-            $('select[name="cmbIdDocIndentidad"').val( paciente.IdDocIdentidad ).trigger('change');
+            $('select[name="cmbIdDocIndentidad"]').val( paciente.IdDocIdentidad ).trigger('change');
             $('input[name="txtNroDocumento"]').val( paciente.NroDocumento );
-            $('select[name="cmbIdTipoGenHistoriaClinica"').val( paciente.IdTipoNumeracion ).trigger('change');
-            $('input[name="tipoNumeracionAnterior"').val( paciente.IdTipoGenHistoriaClinica_tag);
+            $('select[name="cmbIdTipoGenHistoriaClinica"]').val( paciente.IdTipoNumeracion ).trigger('change');
+            $('input[name="tipoNumeracionAnterior"]').val( paciente.IdTipoGenHistoriaClinica_tag);
             $('input[name="txtIdNroHistoria"]').val( paciente.NroHistoriaClinica );
             $('input[name="txtFechaCreacion"]').val( paciente.FechaCreacion );
             //-- Datos del paciente
@@ -869,8 +1134,9 @@ function deleteItem( idPaciente )
             $('input[name="txtPais"]').val( $('select[name="cmbIdPaisDomicilio"]').select2('data')[0].text );
             
 
-            if( sunasa != null) {
-                enableFormSenasa( !sunasa.YaNoTieneSeguroUltimoRegistroGrabado );
+            if( sunasa != null)
+            {
+                habilitarFormSunasa( !sunasa.YaNoTieneSeguroUltimoRegistroGrabado );
 
 
                 $('input[name="chkNuevoSeguro"]').prop('checked', false);
@@ -929,40 +1195,50 @@ function deleteItem( idPaciente )
 function disableFormPaciente( status = false)
 {
     // desabilitar todos los select 2
-    $('#tab_paciente .select2-hidden-accessible').each( function() { $(this).select2('enable', false) });
+    $('#tab_paciente .select2-hidden-accessible').each( function() { $(this).prop('disabled', status) });
 
     // desabilita inputs
-    $('#tab_paciente  input').each( function() { $(this).prop('readonly', true) });
+    $('#tab_paciente  input').each( function() { $(this).prop('readonly', status) });
 
     // oculta botones de carga de imagen
     status? $('label[for="imagenPaciente"]').hide(): $('label[for="imagenPaciente"]').show();
     status? $('#imagenPacienteClear').hide(): $('#imagenPacienteClear').show();
+
 }
 
 function disableFormSunasa( status = false)
 {
     // desabilitar todos los select 2
-    $('#tab_sunasa .select2-hidden-accessible').each( function() { $(this).select2('enable', false) });
+    $('#tab_sunasa .select2-hidden-accessible').each( function() { $(this).prop('disabled', status) });
 
     // desabilita inputs
-    $('#tab_sunasa  input').each( function() { $(this).prop('readonly', true) });
+    $('#tab_sunasa  input').each( function() { $(this).prop('readonly', status) });
 
     // oculta checkbox de seguro
     status? $('label[for="chkNuevoSeguro"]').hide(): $('label[for="chkNuevoSeguro"]').show();
     status? $('label[for="chkNoTieneSeguro"]').hide(): $('label[for="chkNoTieneSeguro"]').show();
+
+    // INPUTS SIEMPRE DESACTIVADOS
+    $('input[name="txtSexo"]').prop('readonly', true);
+    $('input[name="txtDocumento"]').prop('readonly', true);
+    $('input[name="txtPais"]').prop('readonly', true);
+    $('input[name="txtPaciente"]').prop('readonly', true);
+    $('input[name="txtNdocumento"]').prop('readonly', true);
 }
 
 function saveItem()
 {
     url = getPathCtrl();
     form = $('#'+model+'-form');
-    data = new FormData(  form[0] );
+    data = new FormData(form[0]);
 
     accion = $("#accion").val().toUpperCase();
-    if ( accion == 'EDIT'){
+    if ( accion == 'EDIT')
+    {
         url += '/'+$('#idPaciente').val();
         data.append('_method', 'PUT');
-    } else if ( accion == 'DELETE') {
+    } else if ( accion == 'DELETE')
+    {
         url += '/'+$('#idPaciente').val();
         data.append('_method', 'DELETE');
         data.append('cmbIdTipoGenHistoriaClinica', $('select[name="cmbIdTipoGenHistoriaClinica"]').val() );
@@ -972,15 +1248,23 @@ function saveItem()
         data: data, url: url, contentType: false, cache: false, processData:false,
         type:  'POST', dataType: 'json',
         beforeSend: function(){
-            $(".btn-cancel").prop('disabled', true);
+            $(".btn-cancel").addClass('disabled');
+            $(".btn-save").addClass('disabled');
             $(".btn-save").html('<i class="fa fa-spinner fa-spin"></i> ESPERE');
         },  
         success:  function (response) {
-            if( response.success){
+            if( response.success)
+            {
                 toastr.success( response.message, 'Correcto!');
                 paciente = {};
+
+                // if( accion == 'EDIT') showListItems();
+
                 openModalCrud('CANCEL');
-                showListItems();
+                // showListItems();
+                $('#'+model+'-form-search').trigger("reset");
+
+                $('.'+model+'-tbody').html('<tr> <td colspan="12" class="text-center"> Sin resultados </td> </tr>');
             }else{
                 toastr.error( response.message, 'Error');
             }
@@ -990,7 +1274,9 @@ function saveItem()
             showErrosValidator(request);
         },
         complete: function( jqXHR, textStatus ){
-            $(".btn-cancel").prop('disabled', false);
+            $(".btn-cancel").removeClass('disabled');
+            $(".btn-save").removeClass('disabled');
+            $(".btn-save").html('GUARDAR');
         }
     });
 }
@@ -1018,10 +1304,12 @@ function showErrosValidator(request)
 }
 
 
-function readURL(input) {
+function readURL(input)
+{
     var url = input.value;
 
-    if( typeof url !== 'undefined'){
+    if( typeof url !== 'undefined')
+    {
         var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
 
         if( (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg") ){

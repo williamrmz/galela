@@ -8,6 +8,20 @@ use DB;
 
 class Parametros extends Model
 {
+    protected $table = "Parametros";
+    protected $primaryKey = "IdParametro";
+    protected $fillable = [
+        "IdParametro",
+        "Tipo",
+        "Codigo",
+        "ValorTexto",
+        "ValorInt",
+        "ValorFloat",
+        "Descripcion",
+        "Grupo"
+    ];
+
+
 	public function Insertar($oTabla)
 	{
 		$query = "

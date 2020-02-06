@@ -82,8 +82,8 @@ class DOPaciente extends Model
 
 		$queryPag = "ORDER BY dbo.Pacientes.idPaciente OFFSET :rowStart ROWS FETCH NEXT :size ROWS ONLY";
 
-		$querySelect = "SELECT
-			dbo.Pacientes.IdPaciente, 
+		$querySelect = "SELECT 
+		    dbo.Pacientes.IdPaciente, 
 			dbo.Pacientes.ApellidoPaterno, 
 			dbo.Pacientes.ApellidoMaterno, 
 			dbo.Pacientes.PrimerNombre, 
@@ -109,8 +109,8 @@ class DOPaciente extends Model
 
 
 		if( $this->nroHistoriaClinica > 0 ) $queryWhere .= " AND Pacientes.NroHistoriaClinica = $this->nroHistoriaClinica";
-		if( $this->fichaFamiliar <> '') $queryWhere .= " AND Pacientes.FichaFamiliar like $filtroFF";
-		if( $this->nroDocumento <> '') $queryWhere .= " AND Pacientes.NroDocumento = '$this->nroDocumento' AND Pacientes.idDocIdentidad = $this->idDocIdentidad";
+		if( $this->fichaFamiliar <> '') $queryWhere .= " AND Pacientes.FichaFamiliar like $fichaFamiliar";
+		if( $this->nroDocumento <> '') $queryWhere .= " AND Pacientes.NroDocumento = '$this->nroDocumento' AND Pacientes.idDocIdentidad = $this->idDocIdentidad ";
 		if( $this->apellidoPaterno <> '' ) $queryWhere .= " AND Pacientes.ApellidoPaterno like '$this->apellidoPaterno%' ";
 		if( $this->apellidoMaterno <> '' ) $queryWhere .= " AND Pacientes.ApellidoMaterno like '$this->apellidoMaterno%' ";
 		if( $this->primerNombre <> '' ) $queryWhere .= " AND Pacientes.PrimerNombre like '$this->primerNombre%' ";

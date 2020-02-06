@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 
 class EstadisticaController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.patologia-clinica.estadisticas.';
+    const PATH_VIEW = 'lab.patologia-clinica.estadisticas.';
 
     public function index(Request $request)
     {

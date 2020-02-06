@@ -69,6 +69,7 @@ class FactCatalogoServicios extends Model
     public function grupoExamen()
     {
         // App\Model\FactCatalogoServicios
+        
         return $this->hasOneThrough(
                 'App\Model\LabGrupos',
                 'App\Model\LabItemsCpt',

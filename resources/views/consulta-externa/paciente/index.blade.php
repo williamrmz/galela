@@ -28,7 +28,7 @@
 				<div class="box-header with-border">
 					<h3 class="box-title"><i class="fa fa-male text-aqua"></i> Paciente</h3>
 					<div class="box-tools pull-right">
-						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-create"> <i class="fa fa-plus"></i> Crear</a>
+						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-create"> <i class="fa fa-plus"></i>Crear</a>
 					</div>
 				</div>
 				<!-- /.box-header -->
@@ -88,7 +88,7 @@
 
 @endsection
 
-@section('scripts')
+@push('scripts')
 	<script src="{{ url('/js/consulta-externa/paciente.js') }}"></script>
-	<script src="{{ url('/js/consulta-externa/paciente.crud.js') }}"></script>
-@endsection
+	<script src="{{ url('/js/consulta-externa/paciente.crudv2.js') }}"></script>
+@endpush

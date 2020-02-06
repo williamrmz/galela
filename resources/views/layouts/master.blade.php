@@ -116,7 +116,7 @@
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
             <section class="content-header">
-                <h1>Blank page <small>it all starts here</small></h1>
+                <br>
                 <ol class="breadcrumb">
                     @yield('breadcrumb')
                 </ol>
@@ -370,6 +370,9 @@
     </script>
 
     <script>
+        var urlRoot = "x";
+        urlRoot = "{{ url('/') }}";
+
         $(function() {
             $(".integer").keypress( function (e) {
                 key = e.keyCode;
@@ -378,6 +381,6 @@
         });
     </script>
 
-    @yield('scripts')
+    @stack('scripts')
 </body>
 </html>

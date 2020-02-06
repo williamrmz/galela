@@ -92,9 +92,9 @@ class Pacientes extends Model
 			EXEC PacientesModificar :idPaisNacimiento, :apellidoMaterno, :direccionDomicilio, :observacion, :idTipoNumeracion, :idPaisProcedencia, :idPaciente, :apellidoPaterno, :primerNombre, :segundoNombre, :tercerNombre, :fechaNacimiento, :nroDocumento, :telefono, :autogenerado, :idTipoSexo, :idProcedencia, :idGradoInstruccion, :idEstadoCivil, :idDocIdentidad, :idTipoOcupacion, :idCentroPobladoDomicilio, :nombrePadre, :nombreMadre, :idPaisDomicilio, :nroHistoriaClinica, :idCentroPobladoNacimiento, :idCentroPobladoProcedencia, :idDistritoProcedencia, :idDistritoDomicilio, :idDistritoNacimiento, :fichaFamiliar, :idEtnia, :grupoSanguineo, :factorRh, :usoWebReniec, :idIdioma, :email, :madreDocumento, :madreApellidoPaterno, :madreApellidoMaterno, :madrePrimerNombre, :madreSegundoNombre, :nroOrdenHijo, :madreTipoDocumento, :sector, :sectorista, :idUsuarioAuditoria";
 
 		$params = [
-			'idPaisNacimiento' => ($oTabla->idPaisNacimiento == 0)? Null: $oTabla->idPaisNacimiento, 
-			'apellidoMaterno' => ($oTabla->apellidoMaterno == "")? Null: $oTabla->apellidoMaterno, 
-			'direccionDomicilio' => ($oTabla->direccionDomicilio == "")? Null: $oTabla->direccionDomicilio, 
+			'idPaisNacimiento' => ($oTabla->idPaisNacimiento == 0)? Null: $oTabla->idPaisNacimiento,
+			'apellidoMaterno' => ($oTabla->apellidoMaterno == "")? Null: $oTabla->apellidoMaterno,
+			'direccionDomicilio' => ($oTabla->direccionDomicilio == "")? Null: $oTabla->direccionDomicilio,
 			'observacion' => ($oTabla->observacion == "")? Null: $oTabla->observacion, 
 			'idTipoNumeracion' => ($oTabla->idTipoNumeracion == 0)? Null: $oTabla->idTipoNumeracion, 
 			'idPaisProcedencia' => ($oTabla->idPaisProcedencia == 0)? Null: $oTabla->idPaisProcedencia, 
@@ -113,13 +113,13 @@ class Pacientes extends Model
 			'idEstadoCivil' => ($oTabla->idEstadoCivil == 0)? Null: $oTabla->idEstadoCivil, 
 			'idDocIdentidad' => ($oTabla->idDocIdentidad == 0)? Null: $oTabla->idDocIdentidad, 
 			'idTipoOcupacion' => ($oTabla->idTipoOcupacion == 0)? Null: $oTabla->idTipoOcupacion, 
-			'idCentroPobladoDomicilio' => ($oTabla->idCentroPobladoDomicilio == 0)? Null: $oTabla->idCentroPobladoDomicilio, 
+			'idCentroPobladoDomicilio' => ($oTabla->idCentroPobladoDomicilio == 0)? Null: $oTabla->idCentroPobladoDomicilio,
 			'nombrePadre' => ($oTabla->nombrePadre == "")? Null: $oTabla->nombrePadre, 
 			'nombreMadre' => ($oTabla->nombreMadre == "")? Null: $oTabla->nombreMadre, 
 			'idPaisDomicilio' => ($oTabla->idPaisDomicilio == 0)? Null: $oTabla->idPaisDomicilio, 
 			'nroHistoriaClinica' => ($oTabla->nroHistoriaClinica == "")? Null: $oTabla->nroHistoriaClinica, 
-			'idCentroPobladoNacimiento' => ($oTabla->idCentroPobladoNacimiento == 0)? Null: $oTabla->idCentroPobladoNacimiento, 
-			'idCentroPobladoProcedencia' => ($oTabla->idCentroPobladoProcedencia == 0)? Null: $oTabla->idCentroPobladoProcedencia, 
+			'idCentroPobladoNacimiento' => ($oTabla->idCentroPobladoNacimiento == 0)? Null: $oTabla->idCentroPobladoNacimiento,
+			'idCentroPobladoProcedencia' => ($oTabla->idCentroPobladoProcedencia == 0)? Null: $oTabla->idCentroPobladoProcedencia,
 			'idDistritoProcedencia' => ($oTabla->idDistritoProcedencia == 0)? Null: $oTabla->idDistritoProcedencia, 
 			'idDistritoDomicilio' => ($oTabla->idDistritoDomicilio == 0)? Null: $oTabla->idDistritoDomicilio, 
 			'idDistritoNacimiento' => ($oTabla->idDistritoNacimiento == 0)? Null: $oTabla->idDistritoNacimiento, 
@@ -141,6 +141,7 @@ class Pacientes extends Model
 			'sectorista' => $oTabla->sectorista, 
 			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria, 
 		];
+
 
 		$data = \DB::update($query, $params);
 

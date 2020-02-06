@@ -8,7 +8,7 @@ use App\Model\WebGermenes as Germen;
 
 class ConfigAntibiogramaController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.patologia-clinica.config-antibiograma.';
+    const PATH_VIEW = 'lab.patologia-clinica.config-antibiograma.';
 
     public function index(Request $request)
     {

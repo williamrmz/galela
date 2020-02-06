@@ -1,4 +1,4 @@
-describe 'Morris.Grid#setData', ->
+describe 'Morris.Grid#initCargarCombos', ->
 
   it 'should not alter user-supplied data', ->
     my_data = [{x: 1, y: 1}, {x: 2, y: 2}]

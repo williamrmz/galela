@@ -752,7 +752,7 @@ class ReglasComunes extends Model
     }
 
     // Created By Romel Diaz at 2019-09-04 
-    public function TiposEmpleadosSeleccionarSiSeProgramaPorId( $lnIdTipoEmpleado )
+    public static function TiposEmpleadosSeleccionarSiSeProgramaPorId( $lnIdTipoEmpleado )
     {
         $sql = 'EXEC TiposEmpleadosSeleccionarSiSeProgramaPorId :idTipoEmpleado';
         $params = [
@@ -765,15 +765,28 @@ class ReglasComunes extends Model
         return $data[0]->EsProgramado? true: false;
     }
 
-    // Created By Romel Diaz at 2019-09-04 
-    public function EmpleadosObtenerConElMismoCodigoPlanilla( $oDOEmpleado )
+    // Created By Romel Diaz at 2019-09-04
+    public function EmpleadosObtenerConElMismoCodigoPlanilla( $oDOEmpleado)
     {
         $oEmpleado = new Empleados;
         return $oEmpleado->ObtenerConElMismoCodigoPlanilla($oDOEmpleado);
     }
 
+    // 30.01.2020 LA
+    public static function EmpleadosObtenerConElMismoCodigoPlanillaGood($pIdEmp, $pCodigoPlanilla)
+    {
+        return Empleados::ObtenerConElMismoCodigoPlanillaGood($pIdEmp, $pCodigoPlanilla);
+    }
+
     // Created By Romel Diaz at 2019-09-04 
     public function EmpleadosObtenerConelMismoDNI($lcDni, $lnIdTipoDocumento)
+    {
+        $oEmpleado = new Empleados;
+        $data = $oEmpleado->ObtenerConElMismoDNI($lcDni, $lnIdTipoDocumento);
+        return $data;
+    }
+
+    public static function EmpleadosObtenerConelMismoDNIGood($lcDni, $lnIdTipoDocumento)
     {
         $oEmpleado = new Empleados;
         $data = $oEmpleado->ObtenerConElMismoDNI($lcDni, $lnIdTipoDocumento);
@@ -785,6 +798,14 @@ class ReglasComunes extends Model
     {
         $oEmpleado = new Empleados;
         $data = $oEmpleado->ObtenerConElMismoUsuario($oDOEmpleado);
+        return $data;
+    }
+
+    // 30.01.2020 LA
+    public static function EmpleadosObtenerConElMismoUsuarioGood($idEmpleado, $usuario)
+    {
+        $oEmpleado = new Empleados;
+        $data = $oEmpleado->ObtenerConElMismoUsuario($idEmpleado, $usuario);
         return $data;
     }
     
@@ -1130,6 +1151,19 @@ class ReglasComunes extends Model
             'idPuntoCarga' => $lnIdPuntoCarga,
         ];
         return DB::select($sql, $params);
+    }
+
+    // 30.01.2020 LA
+    public function ColegiosHISseleccionarTodos()
+    {
+        $sql = "EXEC ColegiosHISseleccionarTodos";
+        $params = [];
+        return DB::select($sql, $params);
+    }
+
+    public static function EmpleadosObtenerConLaMismaColegiatura($nroColegiatura)
+    {
+        return Empleados::ObtenerConLaMismaCOLEGIATURA($nroColegiatura);
     }
 
     

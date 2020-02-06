@@ -8,7 +8,31 @@ use DB;
 
 class TiposServicio extends Model
 {
-	public function Insertar($oTabla)
+    protected $table = "TiposServicio";
+    protected $primaryKey = "IdTipoServicio";
+    protected $fillable = [
+        "IdTipoServicio",
+        "Descripcion"
+    ];
+
+    protected $appends = ["descripcion_larga"];
+
+    public function getDescripcionLargaAttribute()
+    {
+        return $this->IdTipoServicio." = "." ".$this->Descripcion;
+    }
+
+    public static function listadoParaTurno()
+    {
+        return self::whereIn('IdTipoServicio', [1,2,3,4])->get()->pluck('descripcion_larga', 'IdTipoServicio');
+    }
+
+    public static function listado()
+    {
+        return self::get()->pluck('descripcion_larga', 'IdTipoServicio');
+    }
+
+    public function Insertar($oTabla)
 	{
 		$query = "
 			EXEC TiposServicioAgregar :descripcion, :idTipoServicio, :idUsuarioAuditoria";
@@ -69,7 +93,7 @@ class TiposServicio extends Model
 		return $data;
 	}
 
-	public function SeleccionarTodos()
+	public static function SeleccionarTodos()
 	{
 		$query = "
 			EXEC TiposServicioSeleccionarTodos ";

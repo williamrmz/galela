@@ -9,7 +9,7 @@ use Image;
 
 class InsumoController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.insumos.';
+    const PATH_VIEW = 'lab.insumos.';
 
     public function index(Request $request)
     {

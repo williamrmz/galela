@@ -8,9 +8,84 @@ use DB;
 
 class Empleados extends Model
 {
+    protected $table = 'Empleados';
+    protected $primaryKey = 'IdEmpleado';
+    public $timestamps = false;
+
+    protected $fillable = [
+        "IdEmpleado",
+        "ApellidoPaterno",
+        "ApellidoMaterno",
+        "Nombres",
+        "IdCondicionTrabajo",
+        "IdTipoEmpleado",
+        "DNI",
+        "CodigoPlanilla",
+        "FechaIngreso",
+        "FechaAlta",
+        "Usuario",
+        "Clave",
+        "loginEstado",
+        "loginPC",
+        "FechaNacimiento",
+        "idTipoDestacado",
+        "IdEstablecimientoExterno",
+        "HisCodigoDigitador",
+        "ReniecAutorizado",
+        "idTipoDocumento",
+        "idSupervisor",
+        "RecordarToken",
+        "Correo",
+        "Firma"
+    ];
+
+    protected $hidden =
+        [
+            "loginEstado",
+            "loginPC",
+            "Clave",
+            "Firma",
+            "RecordarToken",
+        ];
+
+    protected $appends =
+        [
+            "nombre_completo",
+            "nombre_supervisor"
+        ];
+
+    public function getNombreCompletoAttribute()
+    {
+        return $this->ApellidoPaterno." ".$this->ApellidoMaterno." ".$this->Nombres;
+    }
+
+    public function getNombreSupervisorAttribute()
+    {
+        $oEmpleado = Empleados::find($this->idSupervisor);
+        if($oEmpleado)
+        {
+            return $oEmpleado->ApellidoPaterno." ".$oEmpleado->ApellidoMaterno." ".$oEmpleado->Nombres;
+        }
+    }
+
 	public function Insertar($oTabla)
 	{
-		// dd($oTabla);
+	    // 30.01.2020 LA
+        if ($oTabla->procedencia=="PROFESIONALESSALUD")
+        {
+            $oTabla->idTipoDocumento        = $oTabla->idTipoDocumento;
+            $oTabla->dNI                    = $oTabla->DNI;
+            $oTabla->apellidoPaterno        = $oTabla->ApellidoPaterno;
+            $oTabla->apellidoMaterno        = $oTabla->ApellidoMaterno;
+            $oTabla->nombres                = $oTabla->Nombres;
+            $oTabla->idCondicionTrabajo     = $oTabla->IdCondicionTrabajo;
+            $oTabla->idTipoEmpleado         = $oTabla->IdTipoEmpleado;
+            $oTabla->fechaNacimiento        = $oTabla->FechaNacimiento;
+            $oTabla->codigoPlanilla         = $oTabla->CodigoPlanilla;
+            $oTabla->idTipoDestacado        = $oTabla->idTipoDestacado;
+            $oTabla->idSupervisor           = $oTabla->idSupervisor;
+        }
+
 		$query = "
 			DECLARE @idEmpleado AS Int = :idEmpleado
 			SET NOCOUNT ON
@@ -207,14 +282,28 @@ class Empleados extends Model
 		return $data;
 	}
 
-	public function ObtenerConElMismoUsuario($oTabla)
+    public static function ObtenerConElMismoCodigoPlanillaGood($idEmpleado, $codigoPlanilla)
+    {
+        $query = "
+			EXEC EmpleadosXidentificadorYcodigoPlanilla :idEmpleado, :codigoPlanilla";
+
+        $params = [
+            'idEmpleado' => $idEmpleado,
+            'codigoPlanilla' => $codigoPlanilla,
+        ];
+
+        $data = \DB::select($query, $params);
+        return $data;
+    }
+
+	public function ObtenerConElMismoUsuario($idEmpleado, $usuario)
 	{
 		$query = "
 			EXEC EmpleadosXidentificadorYusuario :idEmpleado, :usuario";
 
 		$params = [
-			'idEmpleado' => $oTabla->idEmpleado,
-			'usuario' => $oTabla->usuario,
+			'idEmpleado' => $idEmpleado,
+			'usuario' => $usuario,
 		];
 
 		$data = \DB::select($query, $params);
@@ -355,7 +444,7 @@ class Empleados extends Model
 		return $data;
 	}
 
-	public function ObtenerConLaMismaCOLEGIATURA($lcCOLEGIATURA)
+	public static function ObtenerConLaMismaCOLEGIATURA($lcCOLEGIATURA)
 	{
 		$query = "
 			EXEC EmpleadosXcolegiatura :lcCOLEGIATURA";

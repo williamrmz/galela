@@ -8,6 +8,20 @@ use DB;
 
 class EspecialidadCE extends Model
 {
+    protected $table = "EspecialidadCE";
+    protected $primaryKey = "IdEspecialidadCE";
+    public $timestamps = false;
+    protected $fillable =
+        [
+            "IdEspecialidadCE",
+            "IdEspecialidad",
+            "TiempoPromedioAtencion",
+            "IdProductoConsulta",
+            "IdProductoInterconsulta",
+        ];
+
+
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -87,6 +101,21 @@ class EspecialidadCE extends Model
 
 		$params = [
 			'idEspecialidad' => $oTabla->idEspecialidad, 
+		];
+
+		$data = \DB::select($query, $params);
+
+		return $data;
+	}
+
+	// 05.02.2020 LA
+	public static function SeleccionarPorIdServicio($IdEspecialidad)
+	{
+		$query = "
+			EXEC EspecialidadCESeleccionarPorIdServicio :idEspecialidad";
+
+		$params = [
+			'idEspecialidad' => $IdEspecialidad,
 		];
 
 		$data = \DB::select($query, $params);

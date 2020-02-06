@@ -9,7 +9,7 @@ use Image;
 
 class FirmaController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.patologia-clinica.firmas.';
+    const PATH_VIEW = 'lab.patologia-clinica.firmas.';
 
     public function index(Request $request)
     {

@@ -19,13 +19,13 @@ class OrdenController extends Controller
         $query = \DB::table('v_ordenes')->where('idPuntoCarga', 2);// patologia clinica
         if( trim($request->filtro) != null) $query->where('filtro', 'LIKE', "%$request->filtro%");
         $labOrdenes = $query->orderBy('idMovimiento', 'desc')->paginate(10);
-        return view('laboratorio.patologia-clinica.ordenes.index', compact('labOrdenes'));
+        return view('lab.patologia-clinica.ordenes.index', compact('labOrdenes'));
     }
 
     public function detalle($idMovimiento)
     {
         $movLab = MovLaboratorio::where('IdMovimiento', $idMovimiento)->get()->first();
-        return view('laboratorio.patologia-clinica.ordenes.detalle', compact('movLab'));
+        return view('lab.patologia-clinica.ordenes.detalle', compact('movLab'));
     }
 
     public function resultados($idMovimiento, $idProductoCPT)
@@ -37,6 +37,8 @@ class OrdenController extends Controller
             ->where('idProductoCPT', $idProductoCPT)->get()->first();
         
         $user = \Auth::user();
+
+        
 
         //verificar si el usuario esta asignado al area de la prueba;
         try {
@@ -58,13 +60,14 @@ class OrdenController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
+
         $itemsData = ItemCPT::formItems($idMovimiento, $idProductoCPT);
 
         $responsable = MovimientoCPT::responsable($movLab->IdOrden, $idProductoCPT);
 
         if(!$responsable) $responsable = $user->empleado;
 
-        return view('laboratorio.patologia-clinica.ordenes.resultados', 
+        return view('lab.patologia-clinica.ordenes.resultados', 
             compact('movLab', 'movCPT', 'itemsData', 'responsable', 'user'));
     }
 
@@ -157,7 +160,6 @@ class OrdenController extends Controller
         }
     }
 
-
     private function actualizaInsumos($idOrden, $idProductoCpt, $user,  $data=[])
     {
         $insumos = [];
@@ -186,7 +188,7 @@ class OrdenController extends Controller
 
     public function create()
     {
-        return view('laboratorio.patologia-clinica.ordenes.create');
+        return view('lab.patologia-clinica.ordenes.create');
     }
     public function store(Request $request)
     {
@@ -215,18 +217,17 @@ class OrdenController extends Controller
     public function imprimir(Request $request)
     {
         $idOrden = $request->idOrden;
-        return view('laboratorio.patologia-clinica.ordenes.imprimir', compact('idOrden'));
+        return view('lab.patologia-clinica.ordenes.imprimir', compact('idOrden'));
     }
 
     public function previa(Request $request)
     {
         $idOrden = $request->idOrden;
-        return view('laboratorio.patologia-clinica.ordenes.previa', compact('idOrden'));
+        return view('lab.patologia-clinica.ordenes.previa', compact('idOrden'));
     }
 
 
     //METODOS PARA EL REGISTRO DE ORDENES
-
     public function ValidarDatosObligatorios($request)
     {
         $request->validator([

@@ -19,6 +19,7 @@ use App\VB\SIGHComun\DOPaciente;
 use App\VB\SIGHComun\DoSunasaPacientesHistoricos;
 use App\VB\SIGHDatos\SunasaPacientesHistoricos;
 use App\VB\SIGHDatos\PacientesDatosAdd;
+use mysql_xdevapi\Exception;
 
 
 class ReglasAdmision extends Model
@@ -38,31 +39,42 @@ class ReglasAdmision extends Model
     {
         $errors = collect([]);
 
-        $oPaciente = new Pacientes;
-        $oHistoria = new HistoriasClinicas;
-        $oDoHistoria = new DOHistoriaClinica;
-        $oSunasaPacientesHistoricos = new SunasaPacientesHistoricos;
-            
-        $oDoHistoria->nroHistoriaClinica = $oDOPaciente->nroHistoriaClinica;
-        $oDoHistoria->idUsuarioAuditoria = $oDOPaciente->idUsuarioAuditoria;
+        try
+        {
+            $oPaciente = new Pacientes;
+            $oHistoria = new HistoriasClinicas;
+            $oDoHistoria = new DOHistoriaClinica;
+            $oDoHistoria->nroHistoriaClinica = $oDOPaciente->nroHistoriaClinica;
+            $oDoHistoria->idUsuarioAuditoria = $oDOPaciente->idUsuarioAuditoria;
 
-        if( $oDOPaciente->idTipoNumeracion == param('sghHistoriaDefinitivaManual')
-            || $oDOPaciente->idTipoNumeracion == param('sghHistoriaDefinitivaAutomatica')
-            || $oDOPaciente->idTipoNumeracion == param('sghHistoriaDefinitivaReciclada') ){
-            $eliminarHistoria = $oHistoria->Eliminar($oDoHistoria);
-            if( $eliminarHistoria <> 1){
-                $errors->push('Se ha producido un error al intentar eliminar los datos de la historia clinica');
+
+            //NOTA: la base de siempre devuelve (1), por esta razon no se puede evaludar si se a eliminado algun registro o ninguno
+            if(isset($oDoSunasaPacientesHistoricos->idSunasaPacienteHistorico))
+            {
+                $objSunasa = SunasaPacientesHistoricos::find($oDoSunasaPacientesHistoricos->idSunasaPacienteHistorico);
+                if ($objSunasa) { $objSunasa->delete(); }
             }
+
+
+            if( $oDOPaciente->idTipoNumeracion == param('sghHistoriaDefinitivaManual')
+                || $oDOPaciente->idTipoNumeracion == param('sghHistoriaDefinitivaAutomatica')
+                || $oDOPaciente->idTipoNumeracion == param('sghHistoriaDefinitivaReciclada') )
+            {
+                $eliminarHistoria = $oHistoria->Eliminar($oDoHistoria);
+                if( $eliminarHistoria > 1)
+                {
+                    throw new Exception("Se ha producido un error al intentar eliminar los datos de la historia clinica");
+                }
+            }
+            $oPaciente->Eliminar($oDOPaciente);
+            AuditoriaAgregarV($oDOPaciente->idUsuarioAuditoria, "E", $oDOPaciente->idPaciente, "Pacientes", $mo_lnIdTablaLISTBARITEMS, $mo_lcNombrePc, $lcNpaciente);
+
+        }
+        catch (\Exception $e)
+        {
+            $errors->push($e->getMessage());
         }
 
-        // $oSunasaPacientesHistoricos->idPaciente = 0;
-        //NOTA: la base de siempre devuelve (1), por esta razon no se puede evaludar si se a eliminado algun registro o ninguno
-        $eliminarSunasa = $oSunasaPacientesHistoricos->Eliminar($oDoSunasaPacientesHistoricos);
-        // dd( $eliminarSunasa );
-        $eliminarPaciente = $oPaciente->Eliminar($oDOPaciente);
-
-        $auditar = AuditoriaAgregarV($oDOPaciente->idUsuarioAuditoria, "E", $oDOPaciente->idPaciente, "Pacientes", $mo_lnIdTablaLISTBARITEMS, $mo_lcNombrePc, $lcNpaciente); 
-    
         return jsonClass([ 
 			'status' => count($errors)==0? true: false, 
 			'errors' => $errors 
@@ -91,7 +103,8 @@ class ReglasAdmision extends Model
             if ( $lIdTipoGenHistoriaClinicaAnterior == $sghHistoriaDefinitivaManual ) {
                 $modificarHistoria = $oHistoria->Modificar($oDoHistoria); // == 1
             }
-        }else{
+        }else
+        {
             
             //'Si era temporal y ahora es definitiva => Genera y agrega la historia
             if( $oDoHistoria->idTipoNumeracion == $sghHistoriaDefinitivaManual
@@ -143,18 +156,21 @@ class ReglasAdmision extends Model
         $auditar = auditoriaAgregarV($oDOPaciente->idUsuarioAuditoria, "M", $oDOPaciente->idPaciente, "Pacientes", $mo_lnIdTablaLISTBARITEMS, $mo_lcNombrePc, $lcNpaciente);      //'ListBarItems.idListItem
         // dd( $auditar );
         
-        if ($oDoSunasaPacientesHistoricos->nuevoSeguro == true) {
+        if ($oDoSunasaPacientesHistoricos->nuevoSeguro == true)
+        {
             $insertarSeguro = $oSunasaPacientesHistoricos->Insertar($oDoSunasaPacientesHistoricos);
             // dd( $insertarSeguro );
             if( $insertarSeguro->idSunasaPacienteHistorico == 0 ) {
                 $errors->push('Error: insertar Sunasa Pacientes Historicos');
             }
-        }else{
-            
+        }
+        else
+        {
             $modificarSunasa = $oSunasaPacientesHistoricos->Modificar($oDoSunasaPacientesHistoricos);
             // dd( $modificarSunasa );
-            if ( $modificarSunasa == 0 ) {
-                $errors->push('Error: modificar Sunasa Pacientes Historicos');
+            if ( $modificarSunasa == 0 )
+            {
+                $errors->push('Error al modificar datos de SUNASA (Pacientes históricos)');
             }
         }
 
@@ -239,7 +255,8 @@ class ReglasAdmision extends Model
         }
         
         if ($oDoHistoria->nroHistoriaClinica == "") {  //'JHIMI 27062018
-            if ( $oDoHistoria->idTipoNumeracion == param('sghHistoriaDefinitivaReciclada') ) {
+            if ( $oDoHistoria->idTipoNumeracion == param('sghHistoriaDefinitivaReciclada') )
+            {
                 $errors->push("La opción de Historias Recicladas aun no esta implementada");
             }
         }
@@ -278,7 +295,8 @@ class ReglasAdmision extends Model
             }
         }
         
-        if ( $oDoSunasaPacientesHistoricos->yaNoTieneSeguro == false ) {
+        if ( $oDoSunasaPacientesHistoricos->yaNoTieneSeguro == false )
+        {
             $oDoSunasaPacientesHistoricos->idPaciente = $oDOPaciente->idPaciente;
             $insertarSunasa = $oSunasaPacientesHistoricos->Insertar($oDoSunasaPacientesHistoricos);
             if( (int) $insertarSunasa->idSunasaPacienteHistorico == 0){ //break;

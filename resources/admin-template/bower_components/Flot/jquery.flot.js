@@ -636,7 +636,7 @@ Licensed under the MIT license.
         plot = this;
 
         // public functions
-        plot.setData = setData;
+        plot.initCargarCombos = setData;
         plot.setupGrid = setupGrid;
         plot.draw = draw;
         plot.getPlaceholder = function() { return placeholder; };

@@ -8,6 +8,15 @@ use DB;
 
 class DepartamentosHospital extends Model
 {
+    protected $table = "DepartamentosHospital";
+    protected $primaryKey = "IdDepartamento";
+    public $timestamps = false;
+    protected $fillable =
+        [
+            "IdDepartamento",
+            "Nombre"
+        ];
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -74,7 +83,7 @@ class DepartamentosHospital extends Model
 		return $data;
 	}
 
-	public function SeleccionarTodos()
+	public static function SeleccionarTodos()
 	{
 		$query = "
 			EXEC DepartamentosHospitalSeleccionarTodos ";

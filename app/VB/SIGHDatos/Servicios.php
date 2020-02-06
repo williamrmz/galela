@@ -10,6 +10,34 @@ use App\VB\SIGHEntidades\Enumerados;
 
 class Servicios extends Model
 {
+    protected $table = "Servicios";
+    protected $primaryKey = "IdServicio";
+    public $timestamps = false;
+    protected $fillable = [
+        "IdServicio",
+        "Nombre",
+        "IdEspecialidad",
+        "IdTipoServicio",
+        "Codigo",
+        "SVG",
+        "IdProducto",
+        "soloTipoSexo",
+        "maximaEdad",
+        "codigoServicioSEM",
+        "ubicacionSEM",
+        "codigoServicioHIS",
+        "CostoCeroCE",
+        "MinimaEdad",
+        "idEstado",
+        "Triaje",
+        "EsObservacionEmergencia",
+        "UsaModuloNinoSano",
+        "UsaModuloMaterno",
+        "UsaGalenHos",
+        "TipoEdad",
+        "UsaFUA"
+    ];
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -165,13 +193,13 @@ class Servicios extends Model
 		return $data;
 	}
 
-	public function ServiciosSeleccionarConsultoriosPorEspecialidadDEBB($idEspecialidad, $lnTipoEstados)
+	public static function ServiciosSeleccionarConsultoriosPorEspecialidad($idEspecialidad)
 	{
 		$query = "
 			EXEC ServiciosSeleccionarConsultoriosPorEspecialidad :idEspecialidad";
 
 		$params = [
-			'idEspecialidad' => IdEspecialidad, 
+			'idEspecialidad' => $idEspecialidad,
 		];
 
 		$data = \DB::select($query, $params);

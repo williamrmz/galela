@@ -114,4 +114,11 @@ class Distritos extends Model
 		return $data;
 	}
 
+	public static function ubigeoPorIDReniec($ubigeoReniec)
+    {
+        $objDistrito = new Distritos();
+        $data = $objDistrito->where("IdReniec", $ubigeoReniec)->first();
+        return ($data)?$data->IdDistrito:null;
+    }
+
 }

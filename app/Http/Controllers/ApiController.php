@@ -142,6 +142,6 @@ class ApiController extends Controller
         ->select('IdProducto', 'Codigo', 'Nombre')
         ->orderBy('Nombre', 'ASC')->paginate(8);
 
-        return view('fact-config.config-resultados-laboratorio.partials.tabla-insumos', compact('insumos'));
+        return view('lab.insumos.config-resultados-laboratorio.partials.tabla-insumos', compact('insumos'));
     }
 }

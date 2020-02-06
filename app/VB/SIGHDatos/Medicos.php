@@ -8,8 +8,74 @@ use DB;
 
 class Medicos extends Model
 {
+    protected $table        = "Medicos";
+    protected $primaryKey   = "IdMedico";
+    public $timestamps      = false;
+    protected $fillable     = [
+        "IdMedico",
+        "Colegiatura",
+        "IdEmpleado",
+        "LoteHIS",
+        "idColegioHIS"
+    ];
+
+    // :: 29/01/2020 LA
+    public static function filtrarMedico($codPlanilla = '', $apePat = '', $apeMat = '', $nom = '')
+    {
+
+        $page = request()->page;
+        $size = 20;
+        $rowStart = ($page-1) * $size;
+
+        $params = [ 'size' => $size, 'rowStart' => $rowStart,];
+
+        $queryPag = "order by Empleados.ApellidoPaterno, Empleados.ApellidoMaterno, Empleados.Nombres OFFSET :rowStart ROWS FETCH NEXT :size ROWS ONLY";
+
+        $querySelect = "select Medicos.IdMedico, Empleados.CodigoPlanilla, Empleados.ApellidoPaterno,
+                        Empleados.ApellidoMaterno, Empleados.Nombres, 
+                        Especialidades.Nombre as Especialidad , Medicos.Colegiatura ";
+
+        $queryFrom   = " from ((Medicos left join Empleados on Medicos.IdEmpleado = Empleados.IdEmpleado) 
+                        left join MedicosEspecialidad on Medicos.IdMedico = MedicosEspecialidad.IdMedico) 
+                        left join Especialidades on MedicosEspecialidad.IdEspecialidad = Especialidades.IdEspecialidad";
+
+        $queryWhere = " WHERE 1=1 ";
+
+        if( $apePat != '')          $queryWhere .= " and Empleados.ApellidoPaterno like '%" . $apePat . "%' ";
+        if( $apeMat != '')          $queryWhere .= " and Empleados.ApellidoMaterno like '%" . $apeMat . "%' ";
+        if( $nom != '')             $queryWhere .= " and Empleados.Nombres like '%" . $nom . "%' ";
+        if( $codPlanilla != '' )    $queryWhere .= " and Empleados.CodigoPlanilla = '" . $codPlanilla . "' ";
+
+        $queryItems = $querySelect . $queryFrom . $queryWhere .$queryPag;
+
+        $queryCount = "SELECT count(*) total" . $queryFrom . $queryWhere;
+
+        $items = DB::select( $queryItems, $params );
+
+        $count = DB::select( $queryCount );
+        $total = reset( $count )->total; // first element of array
+
+        $pag = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect ( $items )->forPage(1, $size),
+            $total,
+            $size,
+            $page
+        );
+
+        return $pag;
+    }
+
 	public function Insertar($oTabla)
 	{
+        // 30.01.2020 LA
+        if ($oTabla->procedencia=="PROFESIONALESSALUD")
+        {
+            $oTabla->colegiatura = $oTabla->Colegiatura;
+            $oTabla->loteHis = $oTabla->LoteHIS;
+            $oTabla->idColegioHis = $oTabla->idColegioHIS;
+            $oTabla->idEmpleado = $oTabla->IdEmpleado;
+        }
+
 		$query = "
 			DECLARE @idMedico AS Int = :idMedico
 			SET NOCOUNT ON 
@@ -145,7 +211,8 @@ class Medicos extends Model
 	public function FiltrarPorDptosYEspecialidadEsActivoConEspecialidad($IdDepartamento, $IdEspecialidad)
 	{
 		$lcSql = "";
-    
+	
+		
 		// 'yamill palomino
 		if ( $IdDepartamento > 0 and $IdEspecialidad > 0 ) {
 			$lcSql = $lcSql . " where EsActivo = 1 and Especialidades.IdDepartamento = " . $IdDepartamento .
@@ -158,7 +225,7 @@ class Medicos extends Model
 			$lcSql = $lcSql . " where EsActivo = 1 and Especialidades.IdEspecialidad = " . $IdEspecialidad .
 					" order by Nombre";
 		} else if ( $IdDepartamento == 0 and $IdEspecialidad == 0) {
-			$lcSql = $lcSql . " where EsActivo = 1  order by Nombre";
+			$lcSql = $lcSql . " where EsActivo = 1  order by Nombre"; //TODO: no existe columna EsActivo en V3
 		}
 
 		$query = "
@@ -262,18 +329,17 @@ class Medicos extends Model
 		return $data;
 	}
 
-	public function FiltrarPorDptosYEspecialidad($idDepartamento, $idEspecialidad)
+	public static function FiltrarPorDptoYEspecialidad($IdDepartamento, $IdEspecialidad)
 	{
-		$query = "
-			EXEC MedicosPorFiltro :lcFiltro";
+        $cmbIdMedico = self::join('Empleados', 'Medicos.IdEmpleado', '=', 'Empleados.IdEmpleado')
+            ->join('MedicosEspecialidad', 'Medicos.IdMedico', '=', 'MedicosEspecialidad.IdMedico')
+            ->join('Especialidades', 'MedicosEspecialidad.IdEspecialidad', '=', 'Especialidades.IdEspecialidad')
+            ->where('Especialidades.IdDepartamento', $IdDepartamento)
+            ->where('Especialidades.IdEspecialidad', $IdEspecialidad)
+            ->selectRaw("distinct Medicos.IdMedico, Empleados.ApellidoPaterno + ' ' + Empleados.ApellidoMaterno + ' ' + Empleados.Nombres as DescripcionLarga")
+            ->get();
 
-		$params = [
-			'lcFiltro' => lcSql, 
-		];
-
-		$data = \DB::select($query, $params);
-
-		return $data;
+        return $cmbIdMedico;
 	}
 
 	public function SeleccionarPorIdEmpleado($oTabla)

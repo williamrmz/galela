@@ -8,7 +8,7 @@ use App\Model\WebAntibioticos as Antibiotico;
 
 class AntibioticoController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.patologia-clinica.config-antibiograma.';
+    const PATH_VIEW = 'lab.patologia-clinica.config-antibiograma.';
 
     public function index(Request $request)
     {

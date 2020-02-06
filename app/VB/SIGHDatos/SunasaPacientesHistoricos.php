@@ -8,6 +8,44 @@ use DB;
 
 class SunasaPacientesHistoricos extends Model
 {
+    protected $table = "SunasaPacientesHistoricos";
+
+    protected $primaryKey = "idSunasaPacienteHistorico";
+
+    protected $fillable =
+        [
+            "idSunasaPacienteHistorico",
+            "idPaciente",
+            "CodigoIAFA",
+            "idPaisTitular",
+            "idTipoDocumentoTitular",
+            "NroDocumentoTitular",
+            "ApellidoCasada",
+            "ValidacionRegIdentidad",
+            "NroCarnetIdentidad",
+            "EstadoDelSeguro",
+            "IdAfiliacion",
+            "ProductoYplan",
+            "FechaInicioAfiliacion",
+            "FechaFinalAfiliacion",
+            "idRegimen",
+            "CodigoEstablecimientoIAFA",
+            "CodigoEstablecimientoRENAES",
+            "idParentesco",
+            "RUCempleador",
+            "AnteriorIdTipoDocumentoAsegurado",
+            "AnteriorNroDocumentoAsegurado",
+            "DNIusarioOperacion",
+            "idOperacion",
+            "FechaEnvio",
+            "SisSepelioParienteEncargado",
+            "SisSepelioDni",
+            "SisSepelioFnacimiento",
+            "SisSepelioSexo",
+            "SisNroAfiliacion",
+            "YaNoTieneSeguro"
+        ];
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -101,6 +139,11 @@ class SunasaPacientesHistoricos extends Model
 
 		return $data;
 	}
+
+	public function EliminarSQL()
+    {
+
+    }
 
 	public function Eliminar($oTabla)
 	{

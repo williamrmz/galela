@@ -8,6 +8,28 @@ use DB;
 
 class ProgramacionMedica extends Model
 {
+    protected $table = "ProgramacionMedica";
+    protected $primaryKey = "IdProgramacion";
+    public $timestamps = false;
+    protected $fillable =
+        [
+            "IdProgramacion",
+            "IdMedico",
+            "IdDepartamento",
+            "Fecha",
+            "HoraInicio",
+            "HoraFin",
+            "IdTipoProgramacion",
+            "Descripcion",
+            "IdTurno",
+            "IdEspecialidad",
+            "Color",
+            "IdServicio",
+            "IdTipoServicio",
+            "FechaReg",
+            "TiempoPromedioAtencion"
+        ];
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -177,5 +199,39 @@ class ProgramacionMedica extends Model
 
 		return $data;
 	}
+
+	// 31.01.2020 (Lo mismo que SeleccionarPorMedico, pero con un mejor nombre y static)
+    public static function programacionPorMedico($idMedico)
+    {
+        $query = "
+			EXEC ProgramacionMedicaXmedico :lIdMedico";
+
+        $params = [
+            'lIdMedico' => $idMedico,
+        ];
+
+        $data = \DB::select($query, $params);
+
+        return $data;
+    }
+
+    public static function getProgramaciPorMedicoDia($idMedico, $fecha)
+    {
+        $items = self::join('Especialidades', 'ProgramacionMedica.IdEspecialidad', '=', 'Especialidades.IdEspecialidad')
+            ->where('ProgramacionMedica.IdMedico', $idMedico)
+            ->whereRaw("CAST(ProgramacionMedica.Fecha as date) = '$fecha'")
+            ->select('ProgramacionMedica.*', 'Especialidades.Nombre')
+            ->orderBy('ProgramacionMedica.HoraInicio', 'asc')->get();
+        return $items;
+    }
+
+
+    public static function SeleccionarPorMedicoFechaHora($IdMedico, $Fecha, $HoraInicio, $HoraFin)
+    {
+        return self::where('IdMedico', $IdMedico)
+            ->whereRaw("CAST(Fecha as date)='$Fecha'")
+            ->whereRaw("('$HoraInicio' between CONVERT(TIME, HoraInicio) and DATEADD(MINUTE, -1, CONVERT(TIME, HoraFin)) or '$HoraFin' between DATEADD(MINUTE, +1, CONVERT(TIME, HoraInicio)) and CONVERT(TIME, HoraFin))")
+            ->get();
+    }
 
 }

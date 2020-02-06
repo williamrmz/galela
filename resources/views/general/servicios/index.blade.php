@@ -24,7 +24,7 @@
 
 			<div class="box box-primary">
 				<div class="box-header with-border">
-					<h3 class="box-title"><i class="fa fa-headphones text-light-blue"></i> Servicios</h3>
+					<h3 class="box-title"><i class="fa fa-headphones text-light-blue"></i> Servicios 2</h3>
 					<div class="box-tools pull-right">
 						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-create"> <i class="fa fa-plus"></i> Crear</a>
 					</div>

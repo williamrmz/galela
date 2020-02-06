@@ -59,9 +59,9 @@ class RolesController extends Controller //Form
 	{
 
 		if(request()->ajax()) {
-			$this->validate($request, [
-				'nombreRol' => 'required',
-			]);
+			// $this->validate($request, [
+			// 	'nombreRol' => 'required',
+			// ]);
 
 			$this->CargaDatosAlObjetosDeDatos($request, 0);
 			// dd($this->mo_RolItems);

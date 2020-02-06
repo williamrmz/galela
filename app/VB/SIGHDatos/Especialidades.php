@@ -8,6 +8,18 @@ use DB;
 
 class Especialidades extends Model
 {
+    protected $table = "Especialidades";
+    protected $primaryKey = "IdEspecialidad";
+    public $timestamps = false;
+    protected $fillable =
+        [
+            "IdEspecialidad",
+            "Nombre",
+            "IdDepartamento",
+            "TiempoPromedioAtencion"
+        ];
+
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -89,13 +101,13 @@ class Especialidades extends Model
 		return $data;
 	}
 
-	public function SeleccionarPorDepartamento($idDepartamento)
+	public static function SeleccionarPorDepartamento($idDepartamento)
 	{
 		$query = "
 			EXEC EspecialidadesSeleccionarPorDepartamento :idDepartamento";
 
 		$params = [
-			'idDepartamento' => (IdDepartamento == 0)? Null: IdDepartamento, 
+			'idDepartamento' => ($idDepartamento == 0)? Null: $idDepartamento,
 		];
 
 		$data = \DB::select($query, $params);
@@ -117,13 +129,13 @@ class Especialidades extends Model
 		return $data;
 	}
 
-	public function SeleccionarPorMedico($idMedico)
+	public static function SeleccionarPorMedico($idMedico)
 	{
 		$query = "
 			EXEC EspecialidadesSeleccionarPorMedico :idMedico";
 
 		$params = [
-			'idMedico' => IdMedico, 
+			'idMedico' => $idMedico,
 		];
 
 		$data = \DB::select($query, $params);

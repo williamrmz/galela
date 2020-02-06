@@ -11,7 +11,7 @@ use DB;
 
 class InsumoConsumoController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.insumos.consumos.';
+    const PATH_VIEW = 'lab.insumos.consumos.';
 
     public function index(Request $request)
     {

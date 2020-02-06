@@ -14,12 +14,12 @@ use Illuminate\Validation\Rule;
 
 class PeriodoIndicadorController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.patologia-clinica.periodo-indicadores.';
+    const PATH_VIEW = 'lab.patologia-clinica.periodo-indicadores.';
 
     public function index(Request $request)
     {
         if(request()->ajax()) {
-            $periodos = Periodo::orderBy('IdPeriodo', 'desc')->paginate(3);
+            $periodos = Periodo::orderBy('IdPeriodo', 'desc')->paginate(12);
             return view(self::PATH_VIEW.'partials.tabla-periodos', compact('periodos'));
         }
         return view(self::PATH_VIEW.'index');

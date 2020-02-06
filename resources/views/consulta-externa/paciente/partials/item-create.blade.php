@@ -61,6 +61,15 @@
 									{{ Form::text('txtIdNroHistoria', null, ['class'=>'form-control input-ss']) }}
 								</div>
 							</div>
+
+							<div class="col-sm-4 hidden">
+								<div class="checkbox" style="margin-top:5px; margin-bottom:5px;">
+									<label for="chkNuevoSeguro">
+										{{ Form::checkbox('chkNN', 1, false, ["id"=>"chkNN"]) }}
+										<label for="chkNN">No identificado (N.N)</label>
+									</label>
+								</div>
+							</div>
 						</div>
 					</fieldset>
 
@@ -218,6 +227,7 @@
 										<div class="row">
 											<div class="col-sm-8">
 												<img src="{{url('/storage/images/config/SIN_IMAGEN.PNG')}}" alt="" width="90%" id="imagenPacientePreview">
+												<input type="hidden" id="foto_base64" name="foto_base64">
 											</div>
 											<div class="col-sm-4" style="padding-left: 5px">
 												<input type="file" class='hide' name="imagenPaciente" id="imagenPaciente">
@@ -375,12 +385,8 @@
 											{{ Form::select('cmbIdPaisProcedencia', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
 										</div>
 									</div>
-									<div class="col-sm-4 form-group">
-										<div class="checkbox" style="margin-top:5px; margin-bottom:5px;">
-											<label>
-												{{ Form::checkbox('chkIgualQueDomicilio', 1 , false) }} Igual que el domicilio
-											</label>
-										</div>
+									<div class="col-sm-4 form-group" style="margin-top: 5px;">
+										<a href="#!" class="btn btn-xs btn-default" id="btnIgualQueDomicilioP">Igual que el domicilio</a>
 									</div>
 								</div>
 							</div>
@@ -418,12 +424,8 @@
 											{{ Form::select('cmbIdPaisNacimiento', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
 										</div>
 									</div>
-									<div class="col-sm-4 form-group">
-										<div class="checkbox" style="margin-top:5px; margin-bottom:5px;">
-											<label>
-												{{ Form::checkbox('chkIgualQueDomicilioNac', 1 , false) }} Igual que el domicilio
-											</label>
-										</div>
+									<div class="col-sm-4 form-group" style="margin-top: 5px;">
+										<a href="#!" class="btn btn-xs btn-default" id="btnIgualQueDomicilioN">Igual que el domicilio</a>
 									</div>
 								</div>
 							</div>
@@ -476,7 +478,7 @@
 										<div class="col-sm-12 form-group">
 											<div class="input-group" style="width:100%">
 												<span class="input-group-addon" style="width:120px">Sexo</span>
-												{{ Form::text('txtSexo', null, ['class'=>'form-control input-ss', 'readonly']) }}
+												{{ Form::text('txtSexo', null, ['class'=>'form-control input-ss', 'readonly'=>'readonly']) }}
 											</div>
 										</div>
 										<div class="col-sm-12 form-group">
@@ -491,16 +493,16 @@
 									<div class="row">
 										<div class="col-sm-12 form-group">
 											<div class="checkbox" style="margin-top:5px; margin-bottom:5px;">
-												<label for="chkNuevoSeguro">
-													{{ Form::checkbox('chkNuevoSeguro', 1, false) }}
+												<label for="chkNuevoSeguroSunasa">
+													{{ Form::checkbox('chkNuevoSeguroSunasa', true, false, ["id" => "chkNuevoSeguroSunasa"]) }}
 													Nuevo Seguro
 												</label>
 											</div>
 										</div>
 										<div class="col-sm-12 form-group">
 											<div class="checkbox"  style="margin-top:5px; margin-bottom:5px;">
-												<label for="chkNoTieneSeguro">
-													{{ Form::checkbox('chkNoTieneSeguro', 1, false) }}
+												<label for="chkSinSeguroSunasa">
+													{{ Form::checkbox('chkSinSeguroSunasa', true, true, ["id" => "chkSinSeguroSunasa"]) }}
 													Sin Seguro
 												</label>
 											</div>
@@ -601,7 +603,7 @@
 									<div class="col-sm-4 form-group">
 										<div class="input-group" style="width:100%">
 											<span class="input-group-addon" style="width:140px">C.Afiliacion(SIS)</span>
-											{{ Form::text('txtNroAfiliacion1', 19, ['class'=>'form-control input-ss', 'readonly']) }}
+											{{ Form::text('txtNroAfiliacion1', "-", ['class'=>'form-control input-ss', 'readonly']) }}
 											<span class="input-group-addon" style="width: 0px;padding-right: 0px;padding-left: 0px;border-left-width: 0px;border-right-width: 0px;" ></span>
 											{{ Form::text('txtNroAfiliacion2', null, ['class'=>'form-control input-ss']) }}
 											<span class="input-group-addon" style="width: 0px;padding-right: 0px;padding-left: 0px;border-left-width: 0px;border-right-width: 0px;" ></span>

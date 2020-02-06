@@ -9,6 +9,25 @@ use DB;
 
 class HistoriasClinicas extends Model
 {
+    protected $table = "HistoriasClinicas";
+
+    protected $primaryKey = "NroHistoriaClinica";
+
+    protected $fillable =
+        [
+            "NroHistoriaClinica",
+            "FechaCreacion",
+            "FechaPasoAPasivo",
+            "IdTipoHistoria",
+            "IdEstadoHistoria",
+            "IdPaciente",
+            "IdTipoNumeracion",
+            "NroHistoriaClinicaAnterior",
+            "IdTipoNumeracionAnterior",
+            "HistoriaSistemaAnterior"
+        ];
+
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -62,7 +81,7 @@ class HistoriasClinicas extends Model
 
 		$params = 
 		[
-			'nroHistoriaClinica' => ($oTabla->nroHistoriaClinica == "")? Null: $oTabla->nroHistoriaClinica, 
+			'nroHistoriaClinica' => ($oTabla->nroHistoriaClinica == "")? null: $oTabla->nroHistoriaClinica,
 			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria, 
 		];
 
@@ -81,7 +100,6 @@ class HistoriasClinicas extends Model
 		];
 
 		$data = \DB::select($query, $params);
-
 		return $data;
 	}
 

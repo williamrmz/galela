@@ -15,11 +15,9 @@
 
 @section('content')
 
-	{{ Form::hidden($model.'-path-ctrl', route('programacion-general.turno.index')) }}
+	@include('programacion-general.turno.partials.item-form')
 
-	@include('partials.my-modal')
-
-	<div class='row'>
+	<div class='row' id="listado-{{$model}}">
 		<div class='col-sm-12'>
 
 			<div class="box box-primary">
@@ -61,6 +59,12 @@
 
 @endsection
 
-@section('scripts')
-    <script src="{{ url('/js/programacion-general/turno.js') }}"></script>
-@endsection
+@push('scripts')
+	<script>
+		var model = '{{ $model }}';
+		var url = '{{ route("programacion-general.turno.index") }}';
+		console.log(url);
+	</script>
+
+    <script src="{{ asset('js/programacion-general/turno.js') }}"></script>
+@endpush

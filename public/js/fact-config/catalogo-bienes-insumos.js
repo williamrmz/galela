@@ -1,5 +1,4 @@
 var model="catalogoBienesInsumos";
-var action = 'CREATE';
 
 $(function(){
     showListItems();
@@ -69,54 +68,18 @@ function createItem()
         data: {}, url: url+'/create',
         type:  'GET', dataType: 'html',
         success:  function (response) {
-
-            console.log(response);
             $('#myModalTitle').html('Crear '+model);
-
             $('#myModalSize').addClass('modal-lg'); //options: '', 'modal-lg'
-
             $('#myModalBody').html(response);
             
             $('#'+model+'-form').submit( function (e) {
                 e.preventDefault();
                 storeItem();
             });
-            cargarTablaPrecios();
 
             $('#myModal').modal('show');
         }
     });
-}
-
-
-function cargarTablaPrecios(idProducto = 0)
-{
-    let seUsaSinPrecioDisabled = ( action=='DELETE' || action=='SHOW')? 'disabled': '';
-    let precioUnitarioDisabled = ( action=='DELETE' || action=='SHOW')? 'disabled': '';
-    $.ajax({
-        data: {name: 'getDataPrecios', idProducto:idProducto}, url: 'catalogo-servicios/api/service',
-        type:  'GET', dataType: 'json',
-        success:  function (data) {
-            tbody = '';
-            for( i in data){
-                precio = data[i]
-                let seUsaSinPrecio = (typeof precio.SeUsaSinPrecio == 'undefined')? 0: precio.SeUsaSinPrecio;
-                seUsaSinPrecioChecked = seUsaSinPrecio=='1'? 'checked': '';
-                precioUnitario = (typeof precio.PrecioUnitario == 'undefined')? 0: precio.PrecioUnitario; 
-                precioUnitario = parseFloat(precioUnitario).toFixed(2);
-                
-                tbody += '<tr>';
-                    tbody += '<td>'+data[i].Descripcion+'<input type="hidden" name="precios['+i+'][idTipoFinanciamiento]" value="'+data[i].IdTipoFinanciamiento+'"></td>';
-                    tbody += '<td align="center"><input type="text" name="precios['+i+'][precioUnitario]" value="'+precioUnitario+'" '+precioUnitarioDisabled+' style="width:40px; text-align:center;"></td>';
-                    tbody += '<td align="center"><input type="checkbox" name="precios['+i+'][seUsaSinPrecio]" value="1" '+seUsaSinPrecioChecked+' '+seUsaSinPrecioDisabled+'></td>';
-                tbody += '</tr>';
-                // console.log(data[i]);
-            }
-            $('.tbody-precios').html(tbody);
-        }
-   });
-
-
 }
 
 function editItem(id)

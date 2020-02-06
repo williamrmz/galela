@@ -59,8 +59,25 @@ class Menu extends Model
             ],
         ];
 
+
+
         // dd($items);
         $items = \Auth::user()->menu();
+
+        //Se modifica temporalmente el ruteo del modulo de laboratorio;
+        if( isset( $items['LA']) ){
+
+            // LA.OrdenesLaboratorio
+            // dd( $items['LA'] );
+            array_push( $items['LA']['items'], [
+                "id" => "0000",
+                "key" => "LA.IN",
+                "index" => "4",
+                "label" => "Insumos",
+                "icon" => "fa fa-briefcase text-purple",
+                "url" => "/laboratorio/insumos",
+            ] );
+        }
         // dd($items);
         return json_decode(json_encode($items));
     }

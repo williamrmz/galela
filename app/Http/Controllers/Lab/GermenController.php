@@ -8,14 +8,14 @@ use App\Model\WebGermenes as Germen;
 
 class GermenController extends Controller
 {
-    const PATH_VIEW = 'laboratorio.patologia-clinica.config-antibiograma.';
+    const PATH_VIEW = 'lab.patologia-clinica.config-antibiograma.';
 
     public function index(Request $request)
     {
         if(request()->ajax()) {
             $germenes = Germen::whereNull('date_deleted')
                 ->filtro($request->filtro)                
-                ->orderBy('id', 'desc')->paginate(3);
+                ->orderBy('id', 'desc')->paginate(10);
             return view(self::PATH_VIEW.'germenes.tabla-germenes', compact('germenes'));
         }
     }

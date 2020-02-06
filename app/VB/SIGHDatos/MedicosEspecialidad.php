@@ -8,6 +8,23 @@ use DB;
 
 class MedicosEspecialidad extends Model
 {
+    protected $table = "MedicosEspecialidad";
+    protected $primaryKey = "IdMedicoEspecialidad";
+    public $timestamps = false;
+    protected $fillable = [
+        "IdMedicoEspecialidad",
+        "IdEspecialidad",
+        "IdMedico"
+    ];
+
+    protected $appends = ["descripcion"];
+
+    public function getDescripcionAttribute()
+    {
+        return Especialidades::find($this->IdEspecialidad)->Nombre;
+    }
+
+
 	public function Insertar($oTabla)
 	{
 		$query = "

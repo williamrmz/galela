@@ -1,23 +1,23 @@
 var model="paciente";
 
-$(function(){
+$(function()
+{
     showListItems();
 
-    $('#'+model+'-form-search').submit( function(e) {
+    $('#'+model+'-form-search').submit( function(e)
+    {
         e.preventDefault();
         showListItems();
     });
 
-    $('#'+model+'-btn-clear').click( function(e) {
+    $('#'+model+'-btn-clear').click( function(e)
+    {
         e.preventDefault();
         $('#'+model+'-form-search').trigger("reset");
+        $(".paciente-paginator").html("");
         $('.'+model+'-tbody').html('<tr> <td colspan="12" class="text-center"> Sin resultados </td> </tr>');
     });
 
-    $('#'+model+'-btn-create').click( function (e) {
-        e.preventDefault();
-        createItem();
-    });
 });
 
 function getPathCtrl()
@@ -52,19 +52,19 @@ function showListItems(page=1)
                 $('.'+model+'-btn-edit').click( function (e) {
                     e.preventDefault();
                     id = $(this).siblings('input').val();
-                    editItem(id);
+                    form_edit(id);
                 });
             
                 $('.'+model+'-btn-delete').click( function (e) {
                     e.preventDefault();
                     id = $(this).siblings('input').val();
-                    deleteItem(id);
+                    form_delete(id);
                 });
 
                 $('.'+model+'-btn-show').click( function (e) {
                     e.preventDefault();
                     id = $(this).siblings('input').val();
-                    showItem(id);
+                    form_show(id);
                 });
 
             }

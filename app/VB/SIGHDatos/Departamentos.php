@@ -82,4 +82,11 @@ class Departamentos extends Model
 		return $data;
 	}
 
+    public static function buscarPorNombre($nombreDep)
+    {
+        $objDepartamento = new Departamentos();
+        $data = $objDepartamento->whereRaw("upper(Nombre) = ?", strtoupper($nombreDep))->first();
+        return $data;
+    }
+
 }
