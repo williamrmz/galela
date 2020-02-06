@@ -102,6 +102,72 @@ class ProgramacionController extends Controller
         }
     }
 
+    public function update(ProgramacionRequest $request, $id)
+    {
+        try
+        {
+            DB::beginTransaction();
+
+            // Validar reglas generales (Relacionadas a fecha de inicio o fin)
+            $this->validarReglasGenerales($request->txtFechaInicio, $request->txtFechaFin);
+
+            // Recorrer los dias acorde al rango de dia indicado
+            $fechaInicio = Carbon::createFromFormat("Y-m-d", $request->txtFechaInicio);
+            $fechaFin = Carbon::createFromFormat("Y-m-d", $request->txtFechaFin);
+            $dias = $fechaInicio->diffInDays($fechaFin, false);
+            for($i = 0; $i < $dias+1; $i++)
+            {
+
+
+                $oProgramacion      = $this->fillFromRequest($request);
+                $oProgramacionTemp  = $this->generarProgramacionSiguienteDia($oProgramacion);
+
+                if ($oProgramacionTemp != null)
+                {
+                    $oProgramacion->HoraFin = '23:59';
+                }
+
+                // Aplicar reglas de validacion
+                $this->validarReglas($oProgramacion);
+                $this->validarReglas($oProgramacionTemp);
+
+
+                // Obtener tiempo promedio de atencion por servicio
+                $resultados = EspecialidadCE::SeleccionarPorIdServicio($oProgramacion->IdServicio);
+                if(count($resultados)>0)
+                {
+                    $oProgramacion->TiempoPromedioAtencion = $resultados[0]->TiempoPromedioAtencion;
+                    if ($oProgramacionTemp != null) { $oProgramacionTemp->TiempoPromedioAtencion = $resultados[0]->TiempoPromedioAtencion; }
+                }
+
+
+                // Guardar (Dar formato a la fecha)
+                $oProgramacion->save();
+                $this->agregarAuditoria($oProgramacion, "A", $request->txtNombreMedico);
+
+                if ($oProgramacionTemp != null)
+                {
+                    $oProgramacionTemp->save();
+                    $this->agregarAuditoria($oProgramacionTemp, "A", $request->txtNombreMedico);
+                }
+
+                // Cambiar 'txtFechaInicio' del Request a la siguiente fecha
+                $fechaInicio->addDay();
+                $request->txtFechaInicio = $fechaInicio->format('Y-m-d');
+
+                // Limpiar variables
+                unset($oProgramacion);
+                unset($oProgramacionTemp);
+            }
+            DB::commit();
+            return imprimeJSON(true, "Registrado correctamente", null);
+        } catch (\Exception $e)
+        {
+            DB::rollBack();
+            return imprimeJSON(false, $e->getMessage());
+        }
+    }
+
     public function generarProgramacionSiguienteDia(ProgramacionMedica $oProgramacion)
     {
         // Si la hora de fin es menor a la hora de inicio, se trata de otro dia
@@ -246,7 +312,39 @@ class ProgramacionController extends Controller
         $oProgramacion = ProgramacionMedica::find($id);
         $oProgramacion->Fecha = rtrim($oProgramacion->Fecha, " 00:00:00.000");
         $oProgramacion->Color = "#".dechex($oProgramacion->Color);
-        return $oProgramacion;
+        $oProgramacion->NombreMedico = Medicos::getNombreMedico($oProgramacion->IdMedico);
+
+        $data = $this->getDataFormsAPI($oProgramacion->IdMedico);
+        $data["programacion"] = $oProgramacion;
+        $data["fcmbIdDepartamento"] = $this->getDataDepartamentoAPI();
+        $data["fcmbIdEspecialidad"] = $this->getDataEspecialidadesAPI($oProgramacion->IdDepartamento);
+        $data["fcmbIdMedico"] = $this->getMedicosAPI($oProgramacion->IdDepartamento, $oProgramacion->IdEspecialidad);
+        $data["cmbIdServicio"] = $this->getServiciosAPI($oProgramacion->IdEspecialidad);
+        $data["cmbIdTurno"] = $this->getTurnosAPI($oProgramacion->IdTipoServicio);
+
+        return $data;
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        try
+        {
+            DB::beginTransaction();
+
+            $oProgramacion = ProgramacionMedica::find($id);
+            $oProgramacion->delete();
+
+            // Agregar auditoria
+            $this->agregarAuditoria($oProgramacion, "E", $request->txtNombreMedico);
+
+            DB::commit();
+            return imprimeJSON(true, "Eliminado correctamente", null);
+        }
+        catch (\Exception $e)
+        {
+            return imprimeJSON(false, "No es posible eliminar, se está utilizando la programación en otros módulos del sistema.");
+        }
+
     }
 
     private function getDataDepartamentoAPI()
@@ -370,7 +468,7 @@ class ProgramacionController extends Controller
             case 'getProgramacionDia':
                 {
                     $IdMedico = $request->IdMedico;
-                    $fecha = '2020-02-06';
+                    $fecha = '2020-02-08';
                     return $this->getProgramacionDiaAPI($IdMedico, $fecha);
                 }
                 break;

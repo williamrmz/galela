@@ -19,6 +19,12 @@ class Medicos extends Model
         "idColegioHIS"
     ];
 
+    public static function getNombreMedico($idMedico)
+    {
+        $medico = self::select('IdEmpleado')->find($idMedico);
+        return Empleados::find($medico->IdEmpleado)->nombre_completo;
+    }
+
     // :: 29/01/2020 LA
     public static function filtrarMedico($codPlanilla = '', $apePat = '', $apeMat = '', $nom = '')
     {

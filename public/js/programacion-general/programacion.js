@@ -29,6 +29,20 @@ function initEventos()
         formCreate();
     });
 
+    // :: Editar
+    $('body').on('click', '.' + model + '-btn-edit', function (e) {
+        e.preventDefault();
+        idProgramacion = $(this).siblings('input').val();
+        formEdit(idProgramacion);
+    });
+
+    // :: Eliminar
+    $('body').on('click', '.' + model + '-btn-delete', function (e) {
+        e.preventDefault();
+        idProgramacion = $(this).siblings('input').val();
+        formDelete(idProgramacion);
+    });
+
     // :: Botón cancelar
     $(".btn-cancel").click(function (e) {
         e.preventDefault();
@@ -145,6 +159,8 @@ function mostrarErrores(request)
 
 function formCreate()
 {
+    initForm();
+
     // Verificar que haya seleccionado un medico
     if($("input[name=txtIdMedico]").val() == "")
     {
@@ -152,9 +168,16 @@ function formCreate()
         return;
     }
 
-    initForm();
     habilitarForm(true);
     openModalCrud('CREATE');
+}
+
+function formEdit(IdProgramacion)
+{
+    initForm();
+    cargarDatos(IdProgramacion, false);
+    habilitarForm(true);
+    openModalCrud('EDIT', IdProgramacion);
 }
 
 function formShow(IdProgramacion)
@@ -165,6 +188,13 @@ function formShow(IdProgramacion)
     openModalCrud('SHOW');
 }
 
+function formDelete(IdProgramacion) {
+    initForm();
+    cargarDatos(IdProgramacion, true);
+    habilitarForm(false);
+    openModalCrud('DELETE', IdProgramacion);
+}
+
 function cargarDatos(IdProgramacion)
 {
     $.ajax({
@@ -173,20 +203,65 @@ function cargarDatos(IdProgramacion)
         success: function (response)
         {
 
-            $("input[name=txtIdMedico]").val(response.IdMedico);
-            $("input[name=txtFechaInicio]").val(response.Fecha);
-            $("input[name=txtFechaFin]").val(response.Fecha);
-            $("input[name=txtColor]").val(response.Color);
-            $("input[name=txtHoraInicio]").val(response.HoraInicio);
-            $("input[name=txtHoraFin]").val(response.HoraFin);
-            $("input[name=txtDescripcion]").val(response.Descripcion);
+            var form = response;
+            var programacion = form.programacion;
+            var fcmbIdDepartamento = form.fcmbIdDepartamento;
+            var fcmbIdEspecialidad = form.fcmbIdEspecialidad;
+            var fcmbIdMedico = form.fcmbIdMedico;
+
+            var cmbIdTipoProgramacion = form.cmbIdTipoProgramacion;
+            var cmbIdTipoServicio = form.cmbIdTipoServicio;
+            var cmbIdEspecialidad = form.cmbIdEspecialidad;
+            var cmbIdServicio = form.cmbIdServicio;
+            var cmbIdTurno = form.cmbIdTurno;
+
+            // Cargar opcion vacio( "..." ) a los combos en el inicio
+            fcmbIdDepartamento.unshift(opcionBlanco);
+            fcmbIdEspecialidad.unshift(opcionBlanco);
+            fcmbIdMedico.unshift(opcionBlanco);
+            cmbIdTipoProgramacion.unshift(opcionBlanco);
+            cmbIdTipoServicio.unshift(opcionBlanco);
+            cmbIdEspecialidad.unshift(opcionBlanco);
+            cmbIdServicio.unshift(opcionBlanco);
+            cmbIdTurno.unshift(opcionBlanco);
+
+            // Mostrar informacion en los combos, y aplicar plugin select2
+            $('select[name="fcmbIdDepartamento"]').select2({data: fcmbIdDepartamento});
+            $('select[name="fcmbIdEspecialidad"]').select2({data: fcmbIdEspecialidad});
+            $('select[name="fcmbIdMedico"]').select2({data: fcmbIdMedico});
+
+            $('select[name="cmbIdTipoProgramacion"]').select2({data: cmbIdTipoProgramacion});
+            $('select[name="cmbIdTipoServicio"]').select2({data: cmbIdTipoServicio});
+            $('select[name="cmbIdEspecialidad"]').select2({data: cmbIdEspecialidad});
+            $('select[name="cmbIdServicio"]').select2({data: cmbIdServicio});
+            $('select[name="cmbIdTurno"]').select2({data: cmbIdTurno});
+
+            // Agregar datos y seleccion
+
+            $("input[name=txtIdMedico]").val(programacion.IdMedico);
+            $("input[name=txtNombreMedico]").val(programacion.NombreMedico);
+            $("input[name=txtFechaInicio]").val(programacion.Fecha);
+            $("input[name=txtFechaFin]").val(programacion.Fecha);
+            $("input[name=txtColor]").val(programacion.Color);
+            $("input[name=txtHoraInicio]").val(programacion.HoraInicio);
+            $("input[name=txtHoraFin]").val(programacion.HoraFin);
+            $("input[name=txtDescripcion]").val(programacion.Descripcion);
 
             // Cargar combos de manera progresiva
-            $("select[name=cmbIdTipoServicio]").val(response.IdTipoServicio).trigger('change');
-            // $("select[name=cmbIdEspecialidad]").val(response.IdEspecialidad);
-            // $("select[name=cmbIdServicio]").val(response.IdServicio);
-            // $("select[name=cmbIdTipoProgramacion]").val(response.IdTipoProgramacion);
-            // $("select[name=cmbIdTurno]").val(response.IdTurno);
+
+            $('select[name="fcmbIdDepartamento"]').val(programacion.IdDepartamento).trigger('change');
+            $('select[name="fcmbIdEspecialidad"]').val(programacion.IdEspecialidad).trigger('change');
+            $('select[name="fcmbIdMedico"]').val(programacion.IdMedico).trigger('change');
+
+            $("select[name=fcmbIdDepartamento]").val(programacion.IdTipoServicio).trigger('change');
+            $("select[name=cmbIdTipoServicio]").val(programacion.IdTipoServicio).trigger('change');
+            $("select[name=cmbIdEspecialidad]").val(programacion.IdEspecialidad).trigger('change');
+            $("select[name=cmbIdServicio]").val(programacion.IdServicio).trigger('change');
+            $("select[name=cmbIdTipoProgramacion]").val(programacion.IdTipoProgramacion).trigger('change');
+            $("select[name=cmbIdTurno]").val(programacion.IdTurno).trigger('change');
+
+            // Listar
+            cargarProgramacionDia();
         }
     });
 }
@@ -265,37 +340,6 @@ function cargarCombos()
 
 }
 
-function cargarCombosAnidadosShow(IdTipoServicio, IdEspecialidad, IdServicio, IdTurnoProgramacion, IdTurno)
-{
-    var idMedico = $("input[name=txtIdMedico]").val();
-
-    if(idMedico=="") { return; }
-
-    $.ajax({
-        data: {IdMedico: idMedico}, url: url + '/api/service?name=getDataForms',
-        type: 'GET', dataType: 'json',
-        success: function (data)
-        {
-
-            var form = data;
-
-            // Cargar opcion vacio( "..." ) a los combos en el inicio
-            form.cmbIdTipoProgramacion.unshift(opcionBlanco);
-            form.cmbIdTipoServicio.unshift(opcionBlanco);
-            form.cmbIdEspecialidad.unshift(opcionBlanco);
-
-            // Mostrar informacion en los combos, y aplicar plugin select2
-            $('select[name="cmbIdTipoProgramacion"]').select2({data: form.cmbIdTipoProgramacion});
-            $('select[name="cmbIdTipoServicio"]').select2({data: form.cmbIdTipoServicio});
-            $('select[name="cmbIdEspecialidad"]').select2({data: form.cmbIdEspecialidad});
-
-            // Setear tipo de servicio
-            $('select[name="cmbIdTipoServicio"]').val(IdTipoServicio).trigger('change');
-        }
-    });
-
-}
-
 function openModalCrud(accion, IdProgramacion = "")
 {
     $('#listado-programacion').toggle();
@@ -340,7 +384,8 @@ function cargarComboEspecialidad()
 {
     var IdDepartamento = $("select[name=fcmbIdDepartamento]").val();
 
-    if(IdDepartamento=="") {
+    if(IdDepartamento=="")
+    {
         $('select[name=fcmbIdEspecialidad]').html('');
         $('select[name=fcmbIdMedico]').html('');
         return;
@@ -353,7 +398,7 @@ function cargarComboEspecialidad()
         {
             var form = data;
             form.unshift(opcionBlanco);
-            $('select[name="fcmbIdEspecialidad"]').select2({data: form});
+            $('select[name="fcmbIdEspecialidad"]').html('').select2({data: form});
             $('select[name=fcmbIdMedico]').html('');
         }
     });
