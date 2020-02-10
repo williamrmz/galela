@@ -1,6 +1,7 @@
 // Se ejecuta cuando carga la página
 $(document).ready(function ()
 {
+    ajaxConfig();
     listar();
     initEventos();
     initForm();

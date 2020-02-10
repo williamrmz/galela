@@ -1,9 +1,13 @@
+var fechaSeleccion = "";
+
 // Se ejecuta cuando carga la página
 $(document).ready(function ()
 {
+    ajaxConfig();
     initEventos();
     initForm();
     cargarComboDepartamento();
+    cargarCalendario();
 });
 
 function initEventos()
@@ -19,8 +23,10 @@ function initEventos()
     });
 
     // :: Cada vez que cambie medico, traer programacion dia
-    $('select[name=fcmbIdMedico]').on('select2:select', function (e) {
+    $('select[name=fcmbIdMedico]').on('select2:select', function (e)
+    {
         cargarProgramacionDia();
+        cargarProgramacionMes();
     });
 
     // :: Botón crear <- Muestra el formulario para crear un paciente
@@ -33,14 +39,22 @@ function initEventos()
     $('body').on('click', '.' + model + '-btn-edit', function (e) {
         e.preventDefault();
         idProgramacion = $(this).siblings('input').val();
-        formEdit(idProgramacion);
+        var respuesta = puedeModificarseoEliminar(idProgramacion);
+        if (respuesta == true)
+        {
+            formEdit(idProgramacion);
+        }
     });
 
     // :: Eliminar
     $('body').on('click', '.' + model + '-btn-delete', function (e) {
         e.preventDefault();
         idProgramacion = $(this).siblings('input').val();
-        formDelete(idProgramacion);
+        var respuesta = puedeModificarseoEliminar(idProgramacion);
+        if (respuesta == true)
+        {
+            formDelete(idProgramacion);
+        }
     });
 
     // :: Botón cancelar
@@ -86,6 +100,42 @@ function initEventos()
     {
         cargarServicioPorEspecialidad();
     });
+
+    // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    // Eventos de calendario
+    // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    $('select[name=cmbMes],select[name=cmbAnio]').change(function (e) {
+        cargarCalendario();
+    });
+}
+
+function puedeModificarseoEliminar(IdProgramacion)
+{
+    var rpta = false;
+
+    $.ajax({
+        data: {IdProgramacion: IdProgramacion}, url: url + '/api/service?name=puedeModificarse',
+        async: false,
+        type: 'GET', dataType: 'json',
+        success: function (data)
+        {
+            if(data.estado == true)
+            {
+                rpta = true;
+            }
+            else
+            {
+                toastr.error(data.mensaje, "Error");
+                rpta = false;
+            }
+        },
+        error: function (request, status, error)
+        {
+            rpta = false;
+        }
+    });
+
+    return rpta;
 }
 
 function actionSave()
@@ -124,7 +174,10 @@ function actionSave()
         },
         success: function (response)
         {
-            if (response.estado) {
+            if (response.estado)
+            {
+                cargarProgramacionDia();
+                cargarProgramacionMes();
                 toastr.success(response.mensaje, 'Información');
                 $('#' + model + '-btn-clear').trigger("click");
                 openModalCrud('CANCEL');
@@ -177,6 +230,11 @@ function formEdit(IdProgramacion)
     initForm();
     cargarDatos(IdProgramacion, false);
     habilitarForm(true);
+
+    // Bloquear campos
+    $("input[name=txtFechaInicio]").prop('readonly', true);
+    $("input[name=txtFechaFin]").prop('readonly', true);
+
     openModalCrud('EDIT', IdProgramacion);
 }
 
@@ -259,9 +317,6 @@ function cargarDatos(IdProgramacion)
             $("select[name=cmbIdServicio]").val(programacion.IdServicio).trigger('change');
             $("select[name=cmbIdTipoProgramacion]").val(programacion.IdTipoProgramacion).trigger('change');
             $("select[name=cmbIdTurno]").val(programacion.IdTurno).trigger('change');
-
-            // Listar
-            cargarProgramacionDia();
         }
     });
 }
@@ -335,6 +390,8 @@ function cargarCombos()
             $('select[name="cmbIdTipoProgramacion"]').select2({data: form.cmbIdTipoProgramacion});
             $('select[name="cmbIdTipoServicio"]').select2({data: form.cmbIdTipoServicio});
             $('select[name="cmbIdEspecialidad"]').select2({data: form.cmbIdEspecialidad});
+            $('input[name="txtFechaInicio"]').val(form.Fecha);
+            $('input[name="txtFechaFin"]').val(form.Fecha);
         }
     });
 
@@ -426,11 +483,10 @@ function cargarComboMedicos()
 function cargarProgramacionDia()
 {
     var IdMedico = $("select[name=fcmbIdMedico]").val();
-
     copiarDatosMedicosForm();
 
     $.ajax({
-        data: {IdMedico: IdMedico}, url: url + '/api/service?name=getProgramacionDia',
+        data: {IdMedico: IdMedico, Fecha: fechaSeleccion}, url: url + '/api/service?name=getProgramacionDia',
         type: 'GET', dataType: 'html',
         beforeSend: function()
         {
@@ -495,4 +551,170 @@ function cargarServicioPorEspecialidad()
     });
 
 }
+
+// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// Funciones relacionadas a calendario
+// ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+function cargarCalendario()
+{
+    var IdMes       = $("select[name=cmbMes]").val();
+    var IdAnio      = $("select[name=cmbAnio]").val();
+    var fecha       = '01-'+IdMes+'-'+IdAnio;
+    var urlTemp     = url +'/api/service?name=getCalendario';
+
+    $.ajax({
+        data: { Fecha:fecha }, url: urlTemp,
+        type:  'GET', dataType: 'json',
+        success:  function (response)
+        {
+            renderizarCalendario( response );
+        }
+    });
+}
+
+function renderizarCalendario( calendario )
+{
+    html = '';
+    let loop = 1;
+
+    // ::: Si ya existe fecha de seleccion previa
+    if(fechaSeleccion != "")
+    {
+        // :: Indicar que el dia de la fecha seleccion debe mantener
+        let dia = fechaSeleccion.split("-")[2];
+        calendario.sistema_dia_actual = dia;
+        calendario.sistema_mes_actual = calendario.mes_actual;
+        calendario.sistema_anio_actual = calendario.anio_actual;
+        calendario.sistema_fecha_actual = calendario.anio_actual +"-"+ calendario.mes_actual +"-"+ dia;
+    }
+
+    calendario.dias.forEach(item =>
+    {
+
+        // console.log( item );
+        if( loop == 1) html += '<tr>';
+
+        html += '<td style="padding:0" align="center">';
+        if( item.valido )
+        {
+            var seleccion = "";
+
+            if(calendario.sistema_anio_actual == calendario.anio_actual && calendario.sistema_mes_actual == calendario.mes_actual && calendario.sistema_dia_actual == item.dia)
+            {
+                fechaSeleccion = calendario.sistema_fecha_actual;
+                seleccion = "btn-warning";
+            }
+
+            html += '<div class="btn btn-default btn-block btn-dia '+seleccion+'" style="padding:1px;">';
+            html += '<input type="hidden" class="dia-data" value=\''+JSON.stringify(item)+'\'>';
+            html += '<input type="hidden" class="prog-index prog-index-'+item.dia+'" value="">';
+            html += '<table >';
+            html += '<tr height="50px;">';
+            html += '<td style="width:30px;">';
+            html += '<div class="label label-primary" id="dia-numero-'+item.dia+'" style="width:100px">'+item.dia+'</div> ';
+            html += '</td>';
+            html += '<td style="width:0px;"></td>';
+            html += '</tr>';
+            html += '<tr height="22px;">';
+            html += '<td colspan="2" width="53px;"> ';
+            html += '<i class="dia-icon dia-icon-'+item.dia+'"></i>';
+            html += '<span class="dia-programacion dia-programacion-'+item.dia+'"></span>';
+            html += '</td>';
+            html += '</tr>';
+            html += '</table>';
+            html += '</div>';
+        }
+        html += '</td>';
+
+        loop++
+
+        if( loop == 8) { html += '</tr>'; loop=1; }
+    });
+
+
+    $('#tbody-calendario').html( html );
+
+    $('.btn-dia').click( function() { calClick( $(this) ); });
+
+    // Listar programacion si existe medico seleccionado y fechaSeleccion
+    let IdMedico = $("select[name=fcmbIdMedico]").val();
+
+    if(IdMedico != "" && IdMedico != null && fechaSeleccion != "")
+    {
+        cargarProgramacionDia();
+        cargarProgramacionMes();
+    }
+}
+
+function leftPad(value, length)
+{
+    return ('0'.repeat(length) + value).slice(-length);
+}
+
+function cargarProgramacionMes()
+{
+    let IdMedico = $("select[name=fcmbIdMedico]").val();
+    let mes = $('select[name=cmbMes]').val();
+    let anio = $('select[name=cmbAnio]').val();
+
+    $.ajax({
+        data: { IdMedico: IdMedico, mes: mes, anio: anio}, url: url + '/api/service?name=cargarProgramacionMes',
+        type:  'GET', dataType: 'json',
+        success:  function (response)
+        {
+            renderProg( response );
+        }
+    });
+}
+
+function calClick( btn )
+{
+    // Remover clave warning de todos los botones
+    $('.btn-dia').each( function() {  $(this).removeClass('btn-warning'); });
+    // Agregar clase sobre la opcion en la cual se hizo click
+    btn.addClass('btn-warning');
+
+    // Obtener la informacion del dia
+    let infoDia = btn.find('.dia-data').val();
+    // Obtener dia del mes|
+    let dia = JSON.parse(infoDia).dia;
+    dia = leftPad(dia, 2);
+
+    // Construir fecha
+    let anio = $("select[name=cmbAnio]").val();
+    let mes = $("select[name=cmbMes]").val();
+    let fecha = anio +"-"+ mes +"-"+ dia;
+    fechaSeleccion = anio+"-"+mes+"-"+dia;
+
+    // :: Verificar que haya seleccionado un medico para cargar la programacion del dia
+    if( $("select[name=fcmbIdMedico]").val() == "" || $("select[name=fcmbIdMedico]").val() == null )
+    {
+        toastr.clear();
+        toastr.warning("Debe seleccionar un médico en el filtro de búsqueda para cargar la programación por día", "");
+        return;
+    }
+
+    cargarProgramacionDia();
+}
+
+// muestra la programacion del medico en el calendario
+function renderProg( data )
+{
+    clearProg();
+    data.forEach( (item, index ) =>{
+        $('.dia-icon-'+item.dia ).addClass('glyphicon glyphicon-calendar');
+        $('.dia-programacion-'+item.dia ).html(' ('+item.Programacion.length+')');
+        $('.dia-programacion-'+item.dia ).prop('title',item.Resumen+'');
+        $('.prog-index-'+item.dia ).val( index );
+    } );
+}
+
+// Limpia datos de una programacion en el calendario
+function clearProg(){
+    $('.prog-index').each( function() { $(this).val('') });
+    $('.dia-icon').each( function() { $(this).removeClass('glyphicon glyphicon-calendar') });
+    $('.dia-programacion').each( function() { $(this).html('') });
+}
+
 

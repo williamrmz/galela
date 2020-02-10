@@ -76,7 +76,11 @@ class ProfesionalesSaludController extends Controller
             DB::beginTransaction();
 
             // Especialidades
+            $request->especialidades = ($request->especialidades==null)?Array():$request->especialidades;
+
+            $request->especialidades = $request->get('especialidades', Array());
             $especialidades = Array();
+
             foreach ($request->especialidades as $espString)
             {
                 $especialidades[] = json_decode($espString);
@@ -146,7 +150,9 @@ class ProfesionalesSaludController extends Controller
 
             MedicosEspecialidad::where('IdMedico', $this->oMedico->IdMedico)->delete();
 
+            $request->especialidades = $request->get('especialidades', Array());
             $especialidades = Array();
+
             foreach ($request->especialidades as $espString)
             {
                 $especialidades[] = json_decode($espString);

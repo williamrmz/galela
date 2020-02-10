@@ -80,7 +80,7 @@
                                 <div class="col-sm-12 form-group">
                                     <div class="input-group" style="width:100%">
                                         <span class="input-group-addon" style="width:120px">Turno</span>
-                                        {{ Form::select('cmbIdTurno', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
+                                        {{ Form::select('cmbIdTurno', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%', 'required']) }}
                                     </div>
                                 </div>
 
@@ -92,14 +92,14 @@
                                 <div class="col-sm-12 form-group">
                                     <div class="input-group" style="width:100%">
                                         <span class="input-group-addon" style="width:120px">Hora inicio</span>
-                                        {{ Form::time('txtHoraInicio', null, ['class'=>'form-control input-ss']) }}
+                                        {{ Form::time('txtHoraInicio', null, ['class'=>'form-control input-ss', 'required']) }}
                                     </div>
                                 </div>
 
                                 <div class="col-sm-12 form-group">
                                     <div class="input-group" style="width:100%">
                                         <span class="input-group-addon" style="width:120px">Hora fin</span>
-                                        {{ Form::time('txtHoraFin', null, ['class'=>'form-control input-ss']) }}
+                                        {{ Form::time('txtHoraFin', null, ['class'=>'form-control input-ss', 'required']) }}
                                     </div>
                                 </div>
 

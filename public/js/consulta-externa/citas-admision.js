@@ -26,7 +26,8 @@ function calClick( btn ){
 }
 
 // Obtiene 42 dias de acuerdo al mes y anio
-function getCalendario() {
+function getCalendario()
+{
     let fecha = '01-'+$('#cmbMes').val()+'-'+$('#cmbAnio').val();
     $.ajax({
         data: { fecha }, url: getPathCtrl()+'/api/service?name=getCalendario',
@@ -39,7 +40,8 @@ function getCalendario() {
 }
 
 // Dibuja la tabla con 42 configurada para el mes y anio
-function renderDias( calendario ){
+function renderDias( calendario )
+{
 
     html = '';
     let loop = 1;

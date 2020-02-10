@@ -215,14 +215,25 @@ class ProgramacionMedica extends Model
         return $data;
     }
 
-    public static function getProgramaciPorMedicoDia($idMedico, $fecha)
+    public static function getProgramaciPorMedicoDia($IdMedico, $fecha)
     {
         $items = self::join('Especialidades', 'ProgramacionMedica.IdEspecialidad', '=', 'Especialidades.IdEspecialidad')
-            ->where('ProgramacionMedica.IdMedico', $idMedico)
+            ->where('ProgramacionMedica.IdMedico', $IdMedico)
             ->whereRaw("CAST(ProgramacionMedica.Fecha as date) = '$fecha'")
             ->select('ProgramacionMedica.*', 'Especialidades.Nombre')
             ->orderBy('ProgramacionMedica.HoraInicio', 'asc')->get();
         return $items;
+    }
+
+    public static function getProgramacionMesSmall($IdMedico, $mes, $anio)
+    {
+        return self::join("Turnos", "ProgramacionMedica.IdTurno", "=", "Turnos.IdTurno")
+            ->whereRaw("MONTH(ProgramacionMedica.Fecha) = $mes and YEAR(ProgramacionMedica.Fecha) = $anio and ProgramacionMedica.IdMedico = $IdMedico")
+            ->selectRaw("ProgramacionMedica.IdProgramacion, ProgramacionMedica.Fecha, DAY(ProgramacionMedica.Fecha) as dia, ProgramacionMedica.HoraInicio, ProgramacionMedica.HoraFin, Turnos.Codigo,
+                        DATEDIFF(HOUR, convert(time, ProgramacionMedica.HoraInicio), convert(time, ProgramacionMedica.HoraFin)) as horas,
+                        RTRIM(LTRIM(Turnos.Codigo))+' ('+CAST(DATEDIFF(HOUR, convert(time, ProgramacionMedica.HoraInicio), convert(time, ProgramacionMedica.HoraFin))  as varchar)+')'  as descripcion")
+            ->orderBy("ProgramacionMedica.Fecha", "asc")
+            ->get();
     }
 
 
@@ -231,6 +242,28 @@ class ProgramacionMedica extends Model
         return self::where('IdMedico', $IdMedico)
             ->whereRaw("CAST(Fecha as date)='$Fecha'")
             ->whereRaw("('$HoraInicio' between CONVERT(TIME, HoraInicio) and DATEADD(MINUTE, -1, CONVERT(TIME, HoraFin)) or '$HoraFin' between DATEADD(MINUTE, +1, CONVERT(TIME, HoraInicio)) and CONVERT(TIME, HoraFin))")
+            ->get();
+    }
+
+    public static function SeleccionarPorMedicoFechaHoraOtrosServicios($IdMedico, $Fecha, $HoraInicio, $HoraFin, $IdServicio)
+    {
+        return self::where('IdMedico', $IdMedico)
+            ->where("IdServicio", "!=", $IdServicio)
+            ->whereRaw("CAST(Fecha as date)='$Fecha'")
+            ->whereRaw("('$HoraInicio' between CONVERT(TIME, HoraInicio) and DATEADD(MINUTE, -1, CONVERT(TIME, HoraFin)) or '$HoraFin' between DATEADD(MINUTE, +1, CONVERT(TIME, HoraInicio)) and CONVERT(TIME, HoraFin))")
+            ->get();
+    }
+
+
+    public static function CitasSeleccionarPorServicioYfecha($IdServicio, $Fecha)
+    {
+        return DB::table("Citas")
+            ->leftJoin("Pacientes", "Citas.IdPaciente", "=", "Pacientes.IdPaciente")
+            ->whereRaw("CONVERT(DATE, dbo.Citas.Fecha) = '$Fecha' and Citas.idServicio = $IdServicio")
+            ->selectRaw("Citas.IdProgramacion, Citas.Fecha, Citas.HoraInicio, Pacientes.ApellidoPaterno, 
+            Pacientes.ApellidoMaterno, Pacientes.idDistritoDomicilio, Pacientes.PrimerNombre , 
+            Pacientes.SegundoNombre, Pacientes.FechaNacimiento, Pacientes.NroHistoriaClinica,Citas.idServicio, 
+            Pacientes.NroDocumento, Pacientes.IdTipoSexo,Pacientes.idPaciente")
             ->get();
     }
 

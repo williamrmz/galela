@@ -25,11 +25,15 @@ class ProgramacionRequest extends FormRequest
     {
         return [
             'txtIdMedico' => 'required',
+            'txtFechaFin' => 'required|date',
+            'txtFechaInicio' => 'required|date',
+            'cmbIdTipoServicio' => 'required',
+            'cmbIdEspecialidad' => 'required',
+            'cmbIdServicio' => 'required',
+            'cmbIdTipoProgramacion' => 'required',
+            'cmbIdTurno' => 'required',
             'txtHoraInicio' => 'required|date_format:H:i',
             'txtHoraFin' => 'required|date_format:H:i',
-            'txtFechaInicio' => 'required|date',
-            'txtFechaFin' => 'required|date',
-            'cmbIdTurno' => 'required',
         ];
     }
 
@@ -43,7 +47,10 @@ class ProgramacionRequest extends FormRequest
                 'txtFechaFin' => 'fecha de fin',
                 'txtIdMedico' => 'médico',
                 'cmbIdTurno' => 'turno',
-
+                'cmbIdEspecialidad' => 'especialidad',
+                'cmbIdTipoProgramacion' => 'tipo de programación',
+                'cmbIdTipoServicio' => 'tipo de servicio',
+                'cmbIdServicio' => 'servicio',
             ];
     }
 }

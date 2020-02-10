@@ -90,5 +90,4 @@
 
 @push('scripts')
 	<script src="{{ url('/js/consulta-externa/paciente.js') }}"></script>
-	<script src="{{ url('/js/consulta-externa/paciente.crudv2.js') }}"></script>
 @endpush

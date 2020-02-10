@@ -22,6 +22,11 @@ class TiposServicio extends Model
         return $this->IdTipoServicio." = "." ".$this->Descripcion;
     }
 
+    public static function SeleccionarProgramacionTurno()
+    {
+        return self::whereIn('IdTipoServicio', [1,2,3,4])->get();
+    }
+
     public static function listadoParaTurno()
     {
         return self::whereIn('IdTipoServicio', [1,2,3,4])->get()->pluck('descripcion_larga', 'IdTipoServicio');
