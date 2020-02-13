@@ -63,7 +63,6 @@
 	<script>
 		var model = '{{ $model }}';
 		var url = '{{ route("programacion-general.turno.index") }}';
-		console.log(url);
 	</script>
 
     <script src="{{ asset('js/programacion-general/turno.js') }}"></script>

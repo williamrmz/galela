@@ -137,13 +137,13 @@ class Servicios extends Model
 		return $data;
 	}
 
-	public function SeleccionarPorId($oTabla)
+	public static function SeleccionarPorId($idServicio)
 	{
 		$query = "
 			EXEC ServiciosSeleccionarPorId :idServicio";
 
 		$params = [
-			'idServicio' => $oTabla->idServicio, 
+			'idServicio' => $idServicio,
 		];
 
 		$data = \DB::select($query, $params);

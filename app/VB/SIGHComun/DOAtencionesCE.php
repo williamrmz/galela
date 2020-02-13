@@ -8,40 +8,46 @@ use DB;
 
 class DOAtencionesCE extends Model
 {
+    protected $connection = 'sqlsrv_ext';
+    protected $table = 'AtencionesCE';
+    protected $primaryKey = 'idAtencion';
 	public $timestamps = false;
 
-	public $incrementing = false;
-
 	public $fillable = [
-		'triajeFrecRespiratoria', 
-		'triajePulso', 
-		'triajePerimCefalico', 
-		'triajeFrecCardiaca', 
-		'triajeOrigen', 
-		'idUsuarioAuditoria', 
-		'idAtencion', 
-		'citaDniMedicoJamo', 
-		'citaFecha', 
-		'citaMedico', 
-		'citaServicioJamo', 
-		'citaIdServicio', 
-		'citaMotivo', 
-		'citaExamenClinico', 
-		'citaDiagMed', 
-		'citaExClinicos', 
-		'citaTratamiento', 
-		'citaObservaciones', 
-		'citaFechaAtencion', 
-		'citaIdUsuario', 
-		'triajeEdad', 
-		'triajePresion', 
-		'triajeTalla', 
-		'triajeTemperatura', 
-		'triajePeso', 
-		'triajeFecha', 
-		'triajeIdUsuario', 
-		'citaAntecedente', 
-		'triajeSaturacion', 
-		'nroHistoriaClinica', 
+        "idAtencion",
+        "NroHistoriaClinica",
+        "CitaDniMedicoJamo",
+        "CitaFecha",
+        "CitaMedico",
+        "CitaServicioJamo",
+        "CitaIdServicio",
+        "CitaMotivo",
+        "CitaExamenClinico",
+        "CitaDiagMed",
+        "CitaExClinicos",
+        "CitaTratamiento",
+        "CitaObservaciones",
+        "CitaFechaAtencion",
+        "CitaIdUsuario",
+        "TriajeEdad",
+        "TriajePresion",
+        "TriajeTalla",
+        "TriajeTemperatura",
+        "TriajePeso",
+        "TriajeFecha",
+        "TriajeIdUsuario",
+        "TriajePulso",
+        "TriajeFrecRespiratoria",
+        "CitaAntecedente"
 	];
+
+	public static function SeleccionarPorNroHistoria($NroHistoriaClinica)
+    {
+        $sql = "EXEC AtencionesCeXnrohistoriaTriaje :NroHistoriaClinica;";
+        $params = [
+            'NroHistoriaClinica' => $NroHistoriaClinica
+        ];
+
+        return DB::connection('sqlsrv_ext')->select($sql, $params);
+    }
 }

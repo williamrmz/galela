@@ -115,13 +115,13 @@ class TiposFinanciamiento extends Model
 		return $data;
 	}
 
-	public function SeleccionarPorIdentificador($lnIdTipoFinanciamiento)
+	public static function SeleccionarPorIdentificador($IdTipoFinanciamiento)
 	{
 		$query = "
 			EXEC TiposFinanciamientoSeleccionarPorId :idTipoFinanciamiento";
 
 		$params = [
-			'idTipoFinanciamiento' => LnIdTipoFinanciamiento, 
+			'idTipoFinanciamiento' => $IdTipoFinanciamiento,
 		];
 
 		$data = \DB::select($query, $params);
@@ -150,7 +150,7 @@ class TiposFinanciamiento extends Model
 
 		$params = [
 			'p_idProducto' => $lnIdProducto, 
-			'p_tipoFinanciamiento' => LnIdTipoFinanciamiento, 
+			'p_tipoFinanciamiento' => $$lnIdTipoFinanciamiento,
 		];
 
 		$data = \DB::select($query, $params);
@@ -221,7 +221,7 @@ class TiposFinanciamiento extends Model
 			EXEC scoreApacheSofaTiss_Registrar :idcuentaAtencion, :apache , :sofa , :tiss ";
 
 		$params = [
-			'idcuentaAtencion' => IdCuentaAtencion, 
+			'idcuentaAtencion' => $idCuentaAtencion,
 			'apache ' => $apache, 
 			'sofa ' => $sofa, 
 			'tiss ' => $tiss, 
@@ -238,7 +238,7 @@ class TiposFinanciamiento extends Model
 			EXEC ListarScoreApcheSofaTiss :idCuentaAtencion";
 
 		$params = [
-			'idCuentaAtencion' => IdCuentaAtencion, 
+			'idCuentaAtencion' => $idCuentaAtencion,
 		];
 
 		$data = \DB::select($query, $params);

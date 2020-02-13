@@ -8,6 +8,41 @@ use DB;
 
 class AtencionesCE extends Model
 {
+    protected $connection = 'sqlsrv_ext';
+    protected $table = "AtencionesCE";
+    protected $primaryKey = "idAtencion";
+    public $timestamps = false;
+    public $incrementing = false;
+
+    protected $fillable =
+        [
+            "idAtencion",
+            "NroHistoriaClinica",
+            "CitaDniMedicoJamo",
+            "CitaFecha",
+            "CitaMedico",
+            "CitaServicioJamo",
+            "CitaIdServicio",
+            "CitaMotivo",
+            "CitaExamenClinico",
+            "CitaDiagMed",
+            "CitaExClinicos",
+            "CitaTratamiento",
+            "CitaObservaciones",
+            "CitaFechaAtencion",
+            "CitaIdUsuario",
+            "TriajeEdad",
+            "TriajePresion",
+            "TriajeTalla",
+            "TriajeTemperatura",
+            "TriajePeso",
+            "TriajeFecha",
+            "TriajeIdUsuario",
+            "TriajePulso",
+            "TriajeFrecRespiratoria",
+            "CitaAntecedente"
+        ];
+
 	public function Insertar($oTabla)
 	{
 		$query = "
@@ -109,16 +144,16 @@ class AtencionesCE extends Model
 		return $data;
 	}
 
-	public function SeleccionarPorId($oTabla)
+	public static function SeleccionarPorId($idAtencion)
 	{
 		$query = "
 			EXEC atencionesCESeleccionarPorId :idAtencion";
 
 		$params = [
-			'idAtencion' => $oTabla->idatencion, 
+			'idAtencion' => $idAtencion,
 		];
 
-		$data = \DB::select($query, $params);
+		$data = \DB::connection('sqlsrv_ext')->select($query, $params);
 
 		return $data;
 	}

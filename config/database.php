@@ -91,6 +91,19 @@ return [
             'prefix_indexes' => true,
         ],
 
+        'sqlsrv_ext' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_EXTERNA', 'localhost'),
+            'port' => env('DB_PORT_EXTERNA', '1433'),
+            'database' => env('DB_DATABASE_EXTERNA', 'forge'),
+            'username' => env('DB_USERNAME_EXTERNA', 'forge'),
+            'password' => env('DB_PASSWORD_EXTERNA', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
+
 
         'sigh_externa' => [
             'driver' => 'sqlsrv',

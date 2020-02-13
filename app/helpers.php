@@ -191,7 +191,7 @@ function AuditoriaAgregarVGood ($accion, $idRegistroTabla, $tabla, $idListItem, 
         'idRegistroTabla' => $idRegistroTabla,
         'tabla' => $tabla,
         'idListItem' => $idListItem,
-        'nombrePc' => $nombrePc,
+        'nombrePc' => ($nombrePc=="")?gethostname():$nombrePc,
         'observaciones' => $observaciones,
     ];
     return \DB::update($sql, $params);

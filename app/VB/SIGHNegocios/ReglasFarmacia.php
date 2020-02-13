@@ -20,4 +20,13 @@ class ReglasFarmacia extends Model
         $oTabla = new FarmAlmacen;
         return $oTabla->SeleccionarSegunFiltro( $filtro );
     }
+
+    public static function AtencionesSelecionarPorCuenta($numCuenta)
+    {
+        $sql = "EXEC atencionesSelecionarPorCuenta :idCuentaAtencion;";
+        $params = [
+            'idCuentaAtencion' => $numCuenta
+        ];
+        return DB::select($sql, $params);
+    }
 }

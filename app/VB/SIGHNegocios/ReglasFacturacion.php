@@ -2,6 +2,8 @@
 
 namespace App\VB\SIGHNegocios;
 
+use App\VB\SIGHDatos\Servicios;
+use App\VB\SIGHEntidades\Enumerados;
 use Illuminate\Database\Eloquent\Model;
 
 use DB;
@@ -19,8 +21,8 @@ class ReglasFacturacion extends Model
         return $oTabla->SePuedeEliminar($lidPaciente);
     }
     
-    // 'Modificado por Yamill Palomino 02-10-13 Se cambio a Store Procedure
-    public function FacturacionPaquetesCEporIdPuntoCargaNrocuentaIdEspecialidad($lnIdCuentaAtencion, $lnIdEspecialidad, $lnIdPuntoCarga )
+    // LA 12.02.2020
+    public static function FacturacionPaquetesCEporIdPuntoCargaNrocuentaIdEspecialidad($lnIdCuentaAtencion, $lnIdEspecialidad, $lnIdPuntoCarga )
     {
         $sql = "EXEC FacturacionPaquetesCEporIdPuntoCargaNrocuentaIdEspecialidad :idPuntoCarga, :IdCuentaAtencion, :IdEspecialidad";
         $params = [
@@ -28,6 +30,18 @@ class ReglasFacturacion extends Model
             'IdCuentaAtencion' => $lnIdCuentaAtencion,
             'IdEspecialidad' => $lnIdEspecialidad,
         ];
+        return DB::select($sql, $params);
+    }
+
+    // LA 12.02.2020
+    public static function DevuelveSiPagoConsultaMedicaEnCaja($idAtencion, $motivoSalida)
+    {
+        $sql = "EXEC DevuelveSiPagoConsultaMedicaEnCaja :IdAtencion, :MotivoSalidaHistoria";
+        $params =
+            [
+                'IdAtencion' => $idAtencion,
+                'MotivoSalidaHistoria' => $motivoSalida,
+            ];
         return DB::select($sql, $params);
     }
 
@@ -91,4 +105,31 @@ class ReglasFacturacion extends Model
         ];
         return DB::update($sql, $params);
     }
+
+    public static function BuscaServicioActualDelPaciente($IdServicio)
+    {
+        $nombreServicio = Servicios::SeleccionarPorId($IdServicio) ? Servicios::SeleccionarPorId($IdServicio)[0]->Nombre : "";
+        return $nombreServicio;
+    }
+
+    public static function TiposFinanciamientoGeneraReciboPago($idTipoFinanciamiento)
+    {
+        $datos = TiposFinanciamiento::SeleccionarPorIdentificador($idTipoFinanciamiento);
+
+        if(count($datos)>0)
+        {
+            $datos = collect($datos[0]);
+            if($datos["GeneraPago"] == "1" || $idTipoFinanciamiento == Enumerados::data()['sghTipoFinanciamiento']['SisIndependiente'])
+            {
+                $generaPago = true;
+            }
+            else
+            {
+                $generaPago = false;
+            }
+        }
+        return $generaPago;
+    }
+
+
 }

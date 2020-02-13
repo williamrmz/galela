@@ -657,4 +657,22 @@ class ReglasAdmision extends Model
         return DB::select($sql, $params);
     }
 
+    public static function AtencionesCEFiltrarPorPaciente($nroHistoria, $apePaterno, $apeMaterno, $dni, $idNroCuenta, $fecTriaje = '', $fecInicio = '30-12-1899', $fecFin = '30-12-1899', $primerNombre = '')
+    {
+        $sql = "exec AtencionesCEFiltrarPorPaciente :NroHistoria, :ApePaterno, :ApeMaterno, :PrimerNombre, :Dni, :NroCuenta, :FecTriaje, :FecInicio, :FecFin";
+        $params = [
+            'NroHistoria' => $nroHistoria,
+            'ApePaterno' => $apePaterno,
+            'ApeMaterno' => $apeMaterno,
+            'PrimerNombre' => $primerNombre,
+            'Dni' => $dni,
+            'NroCuenta' => $idNroCuenta,
+            'FecTriaje' => $fecTriaje,
+            'FecInicio' => $fecInicio,
+            'FecFin' => $fecFin
+        ];
+
+        return DB::connection('sqlsrv_ext')->select($sql, $params);
+    }
+
 }
