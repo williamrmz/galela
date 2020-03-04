@@ -23,6 +23,7 @@ $(function(){
 function getPathCtrl()
 {
     return $("input[name='"+model+"-path-ctrl']").val();
+    console.log(model)
 }
 
 function showListItems(page=1)
