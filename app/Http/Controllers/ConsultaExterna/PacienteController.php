@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\ConsultaExterna;
 
 use App\Http\Controllers\ConsultaReniecController;
-use App\Model\Pacientes;
+use App\Http\Requests\PacienteRequest;
 use App\VB\SIGHDatos\HistoriasClinicas;
+use App\VB\SIGHDatos\Pacientes;
 use App\VB\SIGHDatos\SunasaPacientesHistoricos;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
@@ -28,29 +30,22 @@ use App\VB\SIGHComun\DoSunasaPacientesHistoricos;
 use App\VB\SIGHSis\ReglasSISgalenhos;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use mysql_xdevapi\Exception;
 
 
 class PacienteController extends Controller
 {
     const PATH_VIEW = 'consulta-externa.paciente.';
-
     private $mo_AdminArchivoClinico;
     private $mo_AdminServiciosGeograficos;
     private $mo_ReglasSISgalenhos;
     private $mo_AdminAdmision;
     private $lcBuscaParametro;
-    private $mo_CuentasAtencion;
-    private $mo_Atenciones;
-    private $mo_Cita;
-    private $mo_DoAtencionDatosAdicionales;
-    private $mo_Pacientes;
-    private $oDOPaciente;                               // Objeto: Paciente
-    private $oDOHistoria; //alias: $mo_Historia;
+    private $oPaciente;                               // Objeto: Paciente
+    private $oHistoria;
     private $oDOSunasaPacientesHistoricos;
     private $user;                                      // Variable que almacena información de usuario
     private $mi_Opcion;                                 // Opción a realizar: sghAgregar, etc...
-    private $idListBar;
+    private $idListItem;
     private $idPaciente;                                // Variable para ID-PACIENTE
     private $errors;                                    // Arreglo de error
 
@@ -63,35 +58,40 @@ class PacienteController extends Controller
         $this->mo_AdminFacturacion = new ReglasFacturacion;
         $this->mo_ReglasSISgalenhos = new ReglasSISgalenhos;
         $this->lcBuscaParametro = new Parametros;
-        $this->mo_CuentasAtencion = new DOCuentaAtencion;
-        $this->mo_Atenciones = new DOAtencion;
-        $this->mo_Cita = new DOCita;
-        $this->mo_Pacientes = new DOPaciente;
-        $this->mo_DoAtencionDatosAdicionales = new DoAtencionDatosAdicionales;
-        $this->oDOPaciente = new doPaciente;
-        $this->oDOHistoria = new DOHistoriaClinica;
         $this->oDOSunasaPacientesHistoricos = new DoSunasaPacientesHistoricos;
         $this->user = null;
-        $this->idListBar = 101; // Menu: 'Paciente'
+        $this->idListItem = 101; // Menu: 'Paciente'
         $this->mi_Opcion = 'sghAgregar';
         $this->errors = collect([]);
+
+        $this->oPaciente = new Pacientes();
+        $this->oHistoria = new HistoriasClinicas();
     }
 
     // :: Listado de pacientes en base a criterios de busqueda ::
     public function index(Request $request)
     {
+        $origen = $request->origen;
+        $origen = empty($origen)?"paciente":$origen;
 
-        if ($request->ajax()) {
-            $this->oDOPaciente->nroHistoriaClinica = (int)trim($request->ftxtNroHistoria);
-            $this->oDOPaciente->apellidoPaterno = trim($request->ftxtApellidoPaterno);
-            $this->oDOPaciente->apellidoMaterno = trim($request->ftxtApellidoMaterno);
-            $this->oDOPaciente->primerNombre = '';
-            $this->oDOPaciente->segundoNombre = '';
-            $this->oDOPaciente->idDocIdentidad = 1;
-            $this->oDOPaciente->nroDocumento = trim($request->ftxtDni);
-            $this->oDOPaciente->fichaFamiliar = '';
-            $items = $this->oDOPaciente->filtrar();
-            return view(self::PATH_VIEW . 'partials.item-list', compact('items'));
+        if ($request->ajax())
+        {
+            $NroHistoriaClinica = (int)trim($request->ftxtNroHistoria);
+            $ApellidoPaterno = trim($request->ftxtApellidoPaterno);
+            $ApellidoMaterno = trim($request->ftxtApellidoMaterno);
+            $IdDocIdentidad = 1;
+            $NroDocumento = trim($request->ftxtDni);
+
+            if($origen=="paciente")
+            {
+                $items = Pacientes::Filtrar($NroHistoriaClinica, $ApellidoPaterno, $ApellidoMaterno, '', '',$IdDocIdentidad, $NroDocumento, '');
+                return view(self::PATH_VIEW . 'partials.item-list', compact('items'));
+            }
+            else if($origen == "citas")
+            {
+                $items = Pacientes::Filtrar($NroHistoriaClinica, $ApellidoPaterno, $ApellidoMaterno, '', '',$IdDocIdentidad, $NroDocumento, '', 5);
+                return view(self::PATH_VIEW . 'partials.item-list-citas', compact('items'));
+            }
         }
 
         return view(self::PATH_VIEW . 'index');
@@ -105,38 +105,37 @@ class PacienteController extends Controller
     // Registrar nuevo paciente (POST)
     public function store(Request $request)
     {
-
-        if (request()->ajax()) {
+        try
+        {
+            DB::beginTransaction();
             $this->user = Auth::user();
             $this->mi_Opcion = 'sghAgregar';
-            $validarDatos = $this->ValidarDatosObligatorios($request);
-            if ($validarDatos->status == true) {
-                $this->CargaDatosAlObjetosDeDatos('sghAgregar', $request);
-                $validarReglas = $this->ValidarReglas();
 
-                if ($validarReglas->status == true) {
-                    DB::beginTransaction();
-                    try {
-                        $agregarDatos = $this->AgregarDatos();
-                        if ($agregarDatos->status == true) {
-                            DB::commit();
-                            return ['success' => true, 'message' => arrayHTML(['Los datos se guardaron correctamente'])];
-                        } else {
-                            return ['success' => false, 'message' => arrayHTML(['No se pudo agregar los datos'])];
-                        }
+            $this->ValidarDatosObligatorios($request);
+            $this->fillFromRequest($request);
+            $this->ucPacientesDetalleValidarReglas();
 
-                        // DB::commit();
-                    } catch (\Exception $e) {
-                        DB::rollback();
-                        return ['success' => false, 'message' => arrayHTML([$e->getMessage()])];
-                    }
-                } else {
-                    return ['success' => $validarReglas->status, 'message' => arrayHTML($validarReglas->errors)];
-                }
-            } else {
-                return ['success' => $validarDatos->status, 'message' => arrayHTML($validarDatos->errors)];
+            // Generar número de historia
+            if($this->oHistoria->IdTipoNumeracion == param('sghHistoriaDefinitivaAutomatica'))
+            {
+                $this->oHistoria->NroHistoriaClinica = HistoriasClinicas::GenerarNroHistoria($this->oHistoria->IdTipoNumeracion);
+                $this->oPaciente->NroHistoriaClinica = $this->oHistoria->NroHistoriaClinica;
             }
-            return $request->all();
+
+            $this->GrabaImagenesEnRutaDelServidor($request->imagenPaciente, $request->foto_base64);
+            $this->oPaciente->save();
+            $this->oHistoria->IdPaciente = $this->oPaciente->IdPaciente;
+            $this->oHistoria->save();
+
+            // Guardar datos
+            $nombrePaciente = "{$this->oPaciente->ApellidoPaterno} {$this->oPaciente->ApellidoMaterno} {$this->oPaciente->PrimerNombre}";
+            AuditoriaAgregarVGood('A', $this->oPaciente->IdPaciente, $this->oPaciente->getTable(), $this->idListItem, $nombrePaciente);
+
+            DB::commit();
+            return imprimeJSON(true, "Registrado correctamente");
+        } catch (\Exception $e) {
+            DB::rollback();
+            return imprimeJSON(false, $e->getMessage());
         }
     }
 
@@ -154,7 +153,6 @@ class PacienteController extends Controller
         }
     }
 
-    // :: Solo actualiza datos del paciente y sunasa.
     // :: No actualiza datos relacionados a historias clínicas.
     public function update(Request $request, $id)
     {
@@ -165,8 +163,9 @@ class PacienteController extends Controller
             // :: Buscar paciente ::
             $validarDatos = $this->ValidarDatosObligatorios($request);
 
-            if ($validarDatos->status == true) {
-                $this->CargaDatosAlObjetosDeDatos('sghModificar', $request);
+            if ($validarDatos->status == true)
+            {
+                $this->fillFromRequest($request);
 
                 $validarReglas = $this->ValidarReglas();
                 if ($validarReglas->status == true) {
@@ -174,8 +173,7 @@ class PacienteController extends Controller
                     try {
                         $modificarDatos = $this->ModificarDatos();
 
-                        if ($modificarDatos->status == true)
-                        {
+                        if ($modificarDatos->status == true) {
                             DB::commit();
                             return ['success' => true, 'message' => arrayHTML(['Los datos se modificaron correctamente'])];
                         } else {
@@ -207,72 +205,63 @@ class PacienteController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        if (request()->ajax()) {
+        if (request()->ajax())
+        {
             $errors = collect([]);
             $this->user = \Auth::user();
             $this->mi_Opcion = 'sghEliminar';
 
-            $this->oDOPaciente = Pacientes::find($id);
-            $this->oDOPaciente->idPaciente = $this->oDOPaciente->IdPaciente;
-            $this->oDOPaciente->idUsuarioAuditoria = $this->user->id;
+            $this->oPaciente = Pacientes::find($id);
+            $this->oPaciente->idPaciente = $this->oPaciente->IdPaciente;
+            $this->oPaciente->idUsuarioAuditoria = $this->user->id;
 
             DB::beginTransaction();
             try
             {
-                $puedeEliminarse = $this->mo_AdminFacturacion->PacienteSePuedeEliminar($this->oDOPaciente->idPaciente);
+                $puedeEliminarse = $this->mo_AdminFacturacion->PacienteSePuedeEliminar($this->oPaciente->IdPaciente);
                 if ($puedeEliminarse->respuesta == 1)
                 {
                     // 1. Eliminar registros SUNASA
-                    $regSunasaHistorico = SunasaPacientesHistoricos::where('idPaciente', $this->oDOPaciente->idPaciente)->delete();
+                    $regSunasaHistorico = SunasaPacientesHistoricos::where('idPaciente', $this->oPaciente->IdPaciente)->delete();
 
                     // 2. Eliminar historia clínica
-                    $oDoHistoria = new DOHistoriaClinica;
-                    $oDoHistoria->nroHistoriaClinica = $this->oDOPaciente->NroHistoriaClinica;
-                    $oDoHistoria->idUsuarioAuditoria = $this->oDOPaciente->idUsuarioAuditoria;
-                    $oHistoria = new HistoriasClinicas();
+                    $this->oHistoria = HistoriasClinicas::find($this->oPaciente->NroHistoriaClinica);
 
 
-                    if ($this->oDOPaciente->IdTipoNumeracion == param('sghHistoriaDefinitivaManual')
-                        || $this->oDOPaciente->IdTipoNumeracion == param('sghHistoriaDefinitivaAutomatica')
-                        || $this->oDOPaciente->IdTipoNumeracion == param('sghHistoriaDefinitivaReciclada'))
+                    if ($this->oPaciente->IdTipoNumeracion == param('sghHistoriaDefinitivaManual')
+                        || $this->oPaciente->IdTipoNumeracion == param('sghHistoriaDefinitivaAutomatica')
+                        || $this->oPaciente->IdTipoNumeracion == param('sghHistoriaDefinitivaReciclada'))
                     {
-                        $eliminarHistoria = $oHistoria->Eliminar($oDoHistoria);
-                        if ($eliminarHistoria > 1)
-                        {
-                            throw new Exception("Se ha producido un error al intentar eliminar los datos de la historia clinica");
-                        }
+                        $this->oHistoria->delete();
                     }
 
                     // 3. Eliminar paciente
-                    $oPaciente = new \App\VB\SIGHDatos\Pacientes();
-                    $oPaciente->Eliminar($this->oDOPaciente);
+                   $this->oPaciente->Eliminar($this->oPaciente->IdPaciente);
+
+                    $nombrePaciente = "{$this->oPaciente->ApellidoPaterno} {$this->oPaciente->ApellidoMaterno} {$this->oPaciente->PrimerNombre}";
+                    AuditoriaAgregarVGood('E', $this->oPaciente->IdPaciente, $this->oPaciente->getTable(), $this->idListItem, $nombrePaciente);
 
                     // 4. Agregar AuditoriaV
-                    AuditoriaAgregarV($this->oDOPaciente->idUsRealizarBusquedauarioAuditoria,
-                        "E",
-                        $this->oDOPaciente->IdPaciente,
-                        "Pacientes",
-                        $this->idListBar, nombrePC(),
-                        trim($this->oDOPaciente->apellidoPaterno) . " " . trim($this->oDOPaciente->apellidoMaterno) . " " . trim($this->oDOPaciente->primerNombre) . " " . trim($this->oDOPaciente->segundoNombre));
 
-                    if ($this->oDOPaciente->fichaFamiliar == "")
+                    if ($this->oPaciente->fichaFamiliar == "")
                     {
-                        $message = "Los datos se eliminaron correctamente  \nN° Historia Clínica: " . trim($this->oDOPaciente->NroHistoriaClinica); //'JHIMI 09032018
-                    } else {
-                        $message = "Los datos se eliminaron correctamente \nFicha Familiar:" . $this->oDOPaciente->FichaFamiliar;
+                        $mensaje = "Los datos se eliminaron correctamente  \nN° Historia Clínica: " . trim($this->oPaciente->NroHistoriaClinica); //'JHIMI 09032018
+                    } else
+                    {
+                        $mensaje = "Los datos se eliminaron correctamente \nFicha Familiar:" . $this->oPaciente->FichaFamiliar;
 
                     }
                     DB::commit();
-                    return ['success' => true, 'message' => arrayHTML([$message])];
+                    return imprimeJSON(true, $mensaje);
                 } else
                 {
-                    return ['success' => false, 'message' => arrayHTML(['El paciente no se puede eliminar porque tiene atenciones registradas'])];
+                    throw new \Exception("El paciente no se puede eliminar porque tiene atenciones registradas");
                 }
 
             } catch (\Exception $e)
             {
                 DB::rollback();
-                return ['success' => false, 'message' => arrayHTML([$e->getMessage()])];
+                return imprimeJSON(false, $e->getMessage());
             }
 
 
@@ -283,21 +272,13 @@ class PacienteController extends Controller
     {
         $errors = collect([]);
 
-        // Buscar y eliminar SunasaPacienteHistorico
-        $objSunasa = SunasaPacientesHistoricos::where('idPaciente', $this->oDOPaciente->idPaciente)->get();
-        if (count($objSunasa) > 0) {
-            $objSunasa->delete();
-        }
-
-
         $eliminar = $this->mo_AdminAdmision->PacientesEliminar(
-            $this->oDOPaciente,
-            $this->idListBar,
+            $this->oPaciente,
+            $this->idListItem,
             nombrePc(),
-            trim($this->oDOPaciente->apellidoPaterno) . " " . trim($this->oDOPaciente->apellidoMaterno) . " " . trim($this->oDOPaciente->primerNombre) . " " . trim($this->oDOPaciente->segundoNombre),
+            trim($this->oPaciente->apellidoPaterno) . " " . trim($this->oPaciente->apellidoMaterno) . " " . trim($this->oPaciente->primerNombre) . " " . trim($this->oPaciente->segundoNombre),
             $this->oDOSunasaPacientesHistoricos
-        );  //'JHIMI 10042018
-        // Kill lcArchivoImagenFinal
+        );
 
         if ($eliminar->status == false) {
             foreach ($eliminar->errors as $error) $errors->push($error);
@@ -314,11 +295,11 @@ class PacienteController extends Controller
         $errors = collect([]);
         $mo_DoPacientesDatosAdd = null;
         $agregar = $this->mo_AdminAdmision->PacientesAgregarPacienteEHistoriaClinica(
-            $this->oDOPaciente,
-            $this->oDOHistoria,
-            $this->idListBar,
+            $this->oPaciente,
+            $this->oHistoria,
+            $this->idListItem,
             nombrePc(),
-            trim($this->oDOPaciente->apellidoPaterno) . " " . trim($this->oDOPaciente->apellidoMaterno) . " " . trim($this->oDOPaciente->primerNombre) . " " . trim($this->oDOPaciente->segundoNombre),
+            trim($this->oPaciente->apellidoPaterno) . " " . trim($this->oPaciente->apellidoMaterno) . " " . trim($this->oPaciente->primerNombre) . " " . trim($this->oPaciente->segundoNombre),
             $this->oDOSunasaPacientesHistoricos,
             $mo_DoPacientesDatosAdd);
 
@@ -344,12 +325,12 @@ class PacienteController extends Controller
         $mo_DoPacientesDatosAdd = null;
 
         $modificar = $this->mo_AdminAdmision->PacientesModificarYActualizarHistoriaClinicaDefinitiva(
-            $this->oDOPaciente,
-            $this->oDOHistoria,
+            $this->oPaciente,
+            $this->oHistoria,
             request()->tipoNumeracionAnterior,
-            $this->idListBar,
+            $this->idListItem,
             nombrePc(),
-            Trim($this->oDOPaciente->apellidoPaterno) . " " . Trim($this->oDOPaciente->apellidoMaterno) . " " . Trim($this->oDOPaciente->primerNombre) . " " . $this->oDOPaciente->segundoNombre,
+            Trim($this->oPaciente->apellidoPaterno) . " " . Trim($this->oPaciente->apellidoMaterno) . " " . Trim($this->oPaciente->primerNombre) . " " . $this->oPaciente->segundoNombre,
             $this->oDOSunasaPacientesHistoricos,
             $mo_DoPacientesDatosAdd);  //'JHIMI 10042018
 
@@ -375,55 +356,38 @@ class PacienteController extends Controller
         $wxParametro333 = $this->lcBuscaParametro->SeleccionaFilaParametro(333);
         $wxParametro282 = isset($wxParametro282[0]) ? strtoupper($wxParametro282[0]->ValorTexto) : '';
         $wxParametro333 = isset($wxParametro333[0]) ? strtoupper($wxParametro333[0]->ValorTexto) : '';
-
-        // Recolector de errores
-        $errors = collect([]);
-
         // 2. VALIDA DATOS DE PACIENTES
         if ($request->cmbIdTipoGenHistoriaClinica == '') {
-            $errors->push("Ingrese el tipo de generacion de historia");
+            throw new \Exception("Ingrese el tipo de generacion de historia");
         } else {
-            switch ((int)$request->cmbIdTipoGenHistoriaClinica) {
-                case Enumerados::param('sghHistoriaTemporalCOnsultaExterna'):
-                    break;
-                case Enumerados::param('sghHistoriaTemporalEmergencia'):
-                    break;
-                case Enumerados::param('sghSinHistoria'):
-                    break;
-                case Enumerados::param('sghHistoriaDefinitivaManual'):
-                    if (trim($request->txtIdNroHistoria == "")) $errors->push('Ingrese el número de historia clínica');
-                    break;
-                default:
-                    break;
+            if ($request->cmbIdTipoGenHistoriaClinica == Enumerados::param('sghHistoriaDefinitivaManual') && trim($request->txtIdNroHistoria == "")) {
+                throw  new \Exception("Ingrese el número de historia clínica");
             }
         }
 
-        $mb_PacienteNoIdentificado = false;
+        $pacienteNoIdentificado = false;
 
-        $wxSinApellido = '***';
-
-        if (!$mb_PacienteNoIdentificado) {
-
+        if (!$pacienteNoIdentificado) {
             if (trim($request->txtApellidoPaterno) == "") {
-                $errors->push('Ingrese el Apellido Paterno');
+                throw new \Exception("Ingrese el Apellido Paterno");
             } else if (Teclado::TextoAlmenosExisteAlgunaLetra($request->txtApellidoPaterno) == false && $this->wxSinApellido <> $request->txtApellidoPaterno) {
-                $errors->push('El Apellido Paterno NO TIENE LETRA');
+                throw new \Exception("El Apellido Paterno NO TIENE LETRA");
             }
 
             if (trim($request->txtApellidoMaterno) == "") {
-                $errors->push('Ingrese el apellido materno');
+                throw new \Exception("Ingrese el apellido materno");
             } else if (Teclado::TextoAlmenosExisteAlgunaLetra($request->txtApellidoMaterno) == false && $this->wxSinApellido <> $request->txtApellidoMaterno) {
-                $errors->push('El Apellido Materno NO TIENE LETRA');
+                throw new \Exception("El Apellido Materno NO TIENE LETRA");
             }
 
             if (trim($request->txtPrimerNombre) == "") {
-                $errors->push('Ingrese el primer nombre');
+                throw new \Exception("Ingrese el primer nombre");
             } else if (Teclado::TextoAlmenosExisteAlgunaLetra($request->txtPrimerNombre) == false) {
-                $errors->push('El Primer Nombre NO TIENE LETRA');
+                throw new \Exception("El Primer Nombre NO TIENE LETRA");
             }
 
             if ($request->txtFechaNacimiento == "") {
-                $errors->push('Debe registrar la fecha de nacimiento');
+                throw new \Exception("Debe registrar la fecha de nacimiento");
             }
 
             // lnOpcionQueUsaEsteControl: 1->Pacientes, 2->Admision de Emergencia, 3->Admision de Hospitalizacion
@@ -431,287 +395,104 @@ class PacienteController extends Controller
 
             if ($lnOpcionQueUsaEsteControl <> 1) {
                 if ($request->cmbEtnia == "") {
-                    $errors->push('Elija la ETNIA');
+                    throw new \Exception("Elija la ETNIA");
                 }
-            }
 
-            if ($lnOpcionQueUsaEsteControl <> 1) {
                 if ($request->cmbIdIdioma == "") {
-                    $errors->push('Elija la IDIOMA');
+                    throw new \Exception("Elija la IDIOMA");
                 }
             }
 
             if ($request->txtEmail <> "") {
                 if (Cadena::DevuelveARROBAS($request->txtEmail) == false) {
-                    $errors->push('Debe haber un @ en el EMAIL');
+                    throw new \Exception("Debe haber un @ en el EMAIL");
                 } else if (strlen($request->txtEmail) < 3) {
-                    $errors->push('La longitud del Email no es adecuado');
+                    throw new \Exception("La longitud del Email no es adecuado");
                 }
             }
 
             if ($wxParametro282 == "S" and $wxParametro333 == "S") {  //'solo para CS y que se exija el ingreso
                 if (trim($request->txtSector) == "") {
-                    $errors->push('Debe registrar el SECTOR (por ser un CS/PS)');
+                    throw new \Exception("Debe registrar el SECTOR (por ser un CS/PS)");
                 }
                 if (trim($request->lblSectorista) == "") {
-                    $errors->push('Elija el SECTORISTA (por ser un CS/PS)');
+                    throw new \Exception("Elija el SECTORISTA (por ser un CS/PS)");
                 }
             }
 
-            //NEW
             if ($request->cmbIdTipoSexo == 0) {
-                $errors->push('Ingrese el sexo');
+                throw new \Exception("Ingrese el sexo");
             }
 
         } else {
             if ($request->cmbIdTipoSexo == 0) {
-                $errors->push('Ingrese el sexo');
+                throw new \Exception("Ingrese el sexo");
             }
             if ((trim($request->txtEdad) == "" or $request->cboTipoEdadPaciente == "") and $request->chkNN == 1) {
-                $errors->push('Ingrese una edad referencial del Paciente');
+                throw new \Exception("Ingrese una edad referencial del Paciente");
             }
         }
 
-        // $request->txtFechaCreacion = '';
-        // if ( $request->txtFechaCreacion == 'sighEntidades.FECHA_VACIA_DMY' ) {
         if ($request->txtFechaCreacion == '') {
-            $errors->push('Por favor ingrese la fecha de creación');
+            throw new \Exception("Por favor ingrese la fecha de creación");
         }
-
-        $data = jsonClass([
-            'status' => count($errors) == 0 ? true : false,
-            'errors' => $errors,
-        ]);
-        return $data;
     }
 
-    // mb_YaNoTieneSeguroUltimoRegistroGrabado As Boolean
-    private function CargaDatosAlObjetosDeDatos($operacion, $request)
-    {
-        // 1.  PACIENTES DETALLE
-        $this->CargaDatosAlObjetosDeDatosPaciente($operacion, $request);
-
-        if ($request->chkSinSeguroSunasa == 1 && $operacion == 'sghAgregar')
-        {
-            // 2.  SUNASA
-            $this->oDOSunasaPacientesHistoricos->yaNoTieneSeguro = true;
-        }
-        else
-        {
-            $this->CargaDatosAlObjetosDeDatosSunasa($operacion, $request);
-        }
-
-    }
-
-    private function CargaDatosAlObjetosDeDatosPaciente($mi_Opcion, $request)
+    private function fillFromRequest($request, $tempPaciente = null, $tempHistoria = null)
     {
         // :: Evita que al modificar se reemplacen estos valores
-        if ($mi_Opcion == 'sghAgregar')
+        $this->oPaciente = ($tempPaciente)?$tempPaciente:new Pacientes();
+        if ($tempPaciente == null)
         {
-            $this->oDOPaciente->idTipoNumeracion = $request->cmbIdTipoGenHistoriaClinica;
-            $this->oDOPaciente->nroHistoriaClinica = $request->txtIdNroHistoria;
+            $this->oPaciente->IdTipoNumeracion = $request->cmbIdTipoGenHistoriaClinica;
+            $this->oPaciente->NroHistoriaClinica = $request->txtIdNroHistoria;
         }
+        $this->oPaciente->ApellidoPaterno = $request->txtApellidoPaterno;
+        $this->oPaciente->ApellidoMaterno = $request->txtApellidoMaterno;
+        $this->oPaciente->PrimerNombre = $request->txtPrimerNombre;
+        $this->oPaciente->SegundoNombre = $request->txtSegundoNombre ?? '';
+        $this->oPaciente->TercerNombre = $request->txtTercerNombre ?? '';
+        $this->oPaciente->FechaNacimiento = Carbon::parse($request->txtFechaNacimiento)->format("Y-m-d\TH:i:s");
+        $this->oPaciente->NroDocumento = $request->txtNroDocumento;
+        $this->oPaciente->Telefono = $request->txtTelefono;
+        $this->oPaciente->DireccionDomicilio = $request->txtDireccionDomicilio;
+        $this->oPaciente->IdTipoSexo = $request->cmbIdTipoSexo;
+        $this->oPaciente->IdProcedencia = $request->cmbIdProcedencia;
+        $this->oPaciente->IdGradoInstruccion = $request->cmbIdGradoInstruccion;
+        $this->oPaciente->IdEstadoCivil = $request->cmbIdEstadoCivil;
+        $this->oPaciente->IdDocIdentidad = $request->cmbIdDocIdentidad;
+        $this->oPaciente->IdTipoOcupacion = $request->cmbIdTipoOcupacion;
+        $this->oPaciente->IdPaisNacimiento = $request->cmbIdPaisNacimiento;
+        $this->oPaciente->IdDistritoNacimiento = $request->cmbIdDistritoNacimiento;
+        $this->oPaciente->IdCentroPobladoNacimiento = $request->cmbIdCentroPobladoNacimiento;
+        $this->oPaciente->IdPaisDomicilio = $request->cmbIdPaisDomicilio;
+        $this->oPaciente->IdDistritoDomicilio = $request->cmbIdDistritoDomicilio;
+        $this->oPaciente->IdCentroPobladoDomicilio = $request->cmbIdCentroPobladoDomicilio;
+        $this->oPaciente->IdPaisProcedencia = $request->cmbIdPaisProcedencia;
+        $this->oPaciente->IdDistritoProcedencia = $request->cmbIdDistritoProcedencia;
+        $this->oPaciente->IdCentroPobladoProcedencia = $request->cmbIdCentroPobladoProcedencia;
+        $this->oPaciente->Autogenerado = $this->mo_AdminAdmision->PacienteCrearNroAutogenerado($this->oPaciente->FechaNacimiento, $this->oPaciente->PrimerNombre, $this->oPaciente->SegundoNombre, $this->oPaciente->ApellidoPaterno, $this->oPaciente->ApellidoMaterno, $this->oPaciente->IdTipoSexo);
+        $this->oPaciente->NombrePadre = $request->txtNombrePadre; // pasar a estado de desuso
+        $this->oPaciente->NombreMadre = trim($request->txtMadreNombre . ' ' . $request->txtMadreSnombre);
+        $this->oPaciente->IdEtnia = $request->cmbEtnia;
+        $this->oPaciente->IdIdioma = $request->cmbIdIdioma;
+        $this->oPaciente->UsoWebReniec = 0; //'mb_UsoWebReniec';
+        $this->oPaciente->Email = $request->txtEmail;
+        $this->oPaciente->NroOrdenHijo = $request->txtNroHijo;
+        $this->oPaciente->madreTipoDocumento = $request->cmbMadreTipoDocumento;
+        $this->oPaciente->madreDocumento = $request->txtMadreDocumento;
+        $this->oPaciente->madreApellidoPaterno = $request->txtMadreApellidoP;
+        $this->oPaciente->madreApellidoMaterno = $request->txtMadreApellidoM;
+        $this->oPaciente->madrePrimerNombre = $request->txtMadreNombre;
+        $this->oPaciente->madreSegundoNombre = $request->txtMadreSnombre;
+        $this->oPaciente->Observacion = $request->txtObservacion;
 
-        $this->oDOPaciente->idPaciente = $request->idPaciente;
-        $this->oDOPaciente->apellidoPaterno = $request->txtApellidoPaterno;
-        $this->oDOPaciente->apellidoMaterno = $request->txtApellidoMaterno;
-        $this->oDOPaciente->primerNombre = $request->txtPrimerNombre;
-        $this->oDOPaciente->segundoNombre = $request->txtSegundoNombre;
-        $this->oDOPaciente->tercerNombre = $request->txtTercerNombre;
-        if ($request->txtFechaNacimiento == "") {
-            $request->fechaNacimiento = 0;
-        } else {
-            $txtHoraNacimiento = $request->txtHoraNacimiento;
-            if ($request->txtHoraNacimiento == "") {
-                $request->txtHoraNacimiento = "00:00";
-            }
-            $this->oDOPaciente->fechaNacimiento = $request->txtFechaNacimiento . " " . $request->txtHoraNacimiento;
-        }
-
-        $this->oDOPaciente->nroDocumento = $request->txtNroDocumento;
-        $this->oDOPaciente->telefono = $request->txtTelefono;
-        $this->oDOPaciente->telefono2 = $request->txtTelefono2;
-        $this->oDOPaciente->telefono3 = $request->txtTelefono3;
-        $this->oDOPaciente->telefono4 = $request->txtTelefono4;
-        $this->oDOPaciente->direccionDomicilio = $request->txtDireccionDomicilio;
-        $this->oDOPaciente->direccionDomiciliotutor = $request->txtDireccionDomicilioTutor;
-        $this->oDOPaciente->idTipoSexo = $request->cmbIdTipoSexo;
-
-        $this->oDOPaciente->idProcedencia = $request->cmbIdProcedencia;
-        $this->oDOPaciente->idGradoInstruccion = $request->cmbIdGradoInstruccion;
-        $this->oDOPaciente->idEstadoCivil = $request->cmbIdEstadoCivil;
-        $this->oDOPaciente->idDocIdentidad = $request->cmbIdDocIndentidad;
-        $this->oDOPaciente->idTipoOcupacion = $request->cmbIdTipoOcupacion;
-
-        $this->oDOPaciente->idPaisNacimiento = $request->cmbIdPaisNacimiento;
-        $this->oDOPaciente->idDistritoNacimiento = $request->cmbIdDistritoNacimiento;
-        $this->oDOPaciente->idCentroPobladoNacimiento = $request->cmbIdCentroPobladoNacimiento;
-
-        $this->oDOPaciente->idPaisDomicilio = $request->cmbIdPaisDomicilio;
-        $this->oDOPaciente->idDistritoDomicilio = $request->cmbIdDistritoDomicilio;
-        $this->oDOPaciente->idCentroPobladoDomicilio = $request->cmbIdCentroPobladoDomicilio;
-
-        $this->oDOPaciente->idPaisDomicilioTutor = $request->mo_cmbIdPaisDomicilioTutor;
-        $this->oDOPaciente->idDistritoDomicilioTutor = $request->mo_cmbIdDistritoDomicilioTutor;
-        $this->oDOPaciente->idCentroPobladoDomicilioTutor = $request->mo_cmbIdCentroPobladoDomicilioTutor;
-        $this->oDOPaciente->direccionDomiciliotutor = $request->txtDireccionDomicilioTutor;
-
-        $this->oDOPaciente->idPaisProcedencia = $request->cmbIdPaisProcedencia;
-        $this->oDOPaciente->idDistritoProcedencia = $request->cmbIdDistritoProcedencia;
-        $this->oDOPaciente->idCentroPobladoProcedencia = $request->cmbIdCentroPobladoProcedencia;
-
-        $this->oDOPaciente->nombrePadre = $request->txtNombrePadre; // pasar a estado de desuso
-        $this->oDOPaciente->nombreMadre = trim($request->txtMadreNombre . ' ' . $request->txtMadreSnombre);
-
-        $this->oDOPaciente->autogenerado = $this->mo_AdminAdmision->PacienteCrearNroAutogenerado($this->oDOPaciente);
-        $autogenerado = $this->oDOPaciente->autogenerado;
-
-        $this->oDOPaciente->idUsuarioAuditoria = $this->user->id;
-        $this->oDOPaciente->observacion = $request->txtObservacion;
-
-        // TODO: implementar HTML de ficha familiar
-        if (strlen(trim($request->txtFichaFamiliar1)) > 0 and strlen(trim($request->txtFichaFamiliar2)) > 0 and strlen(trim($request->txtFichaFamiliar3)) > 0) {
-            $this->oDOPaciente->fichaFamiliar = $request->txtFichaFamiliar1 . "-" . $request->txtFichaFamiliar2 . "-" . $request->txtFichaFamiliar3;
-        } else {
-            $this->oDOPaciente->fichaFamiliar = "";
-        }
-
-        $this->oDOPaciente->idEtnia = $request->cmbEtnia;
-        $this->oDOPaciente->idIdioma = $request->cmbIdIdioma;
-        $this->oDOPaciente->usoWebReniec = 0; //'mb_UsoWebReniec';
-        $this->oDOPaciente->email = $request->txtEmail;
-
-        $this->oDOPaciente->nroOrdenHijo = $request->txtNroHijo;
-        $this->oDOPaciente->madreTipoDocumento = $request->cmbMadreTipoDocumento;
-        $this->oDOPaciente->madreDocumento = $request->txtMadreDocumento;
-        $this->oDOPaciente->madreApellidoPaterno = $request->txtMadreApellidoP;
-        $this->oDOPaciente->madreApellidoMaterno = $request->txtMadreApellidoM;
-        $this->oDOPaciente->madrePrimerNombre = $request->txtMadreNombre;
-        $this->oDOPaciente->madreSegundoNombre = $request->txtMadreSnombre;
-
-        if ($request->fraSector == true) { // fraSector enable ?
-            $this->oDoPaciente->sector = $request->txtSector;
-            $this->oDoPaciente->sectorista = $request->txtSectorista;
-        }
-
-        // 'ActualizaTipoYnroDocumentoDelPaciente oDOPaciente
         // 1.2. CARGA DATOS DE LA HISTORIA CLINICA
-        $this->oDOHistoria->nroHistoriaClinica = $request->txtIdNroHistoria; //'JHIMI 09032018 Val(txtIdNroHistoria)
-        $this->oDOHistoria->fechaCreacion = ($request->txtFechaCreacion == "" or $request->txtFechaCreacion == "") ? 0 : dateFormat($request->txtFechaCreacion, 'd-m-Y');
-        $this->oDOHistoria->idTipoNumeracion = $request->cmbIdTipoGenHistoriaClinica;
-        $this->oDOHistoria->fechaPasoAPasivo = 0;
-        $this->oDOHistoria->idEstadoHistoria = 1;
-        $this->oDOHistoria->idPaciente = $request->idPaciente;
-        $this->oDOHistoria->idTipoHistoria = 1;
-        $this->oDOHistoria->idUsuarioAuditoria = $this->user->id;
-
-    }
-
-    private function CargaDatosAlObjetosDeDatosSunasa($mi_Opcion, $request)
-    {
-        $this->oDOSunasaPacientesHistoricos->anteriorIdTipoDocumentoAsegurado = $request->cmbDocumentoAnterior;
-        $this->oDOSunasaPacientesHistoricos->anteriorNroDocumentoAsegurado = $request->txtNroDocumentoAnterior;
-        $this->oDOSunasaPacientesHistoricos->apellidoCasada = $request->txtApellidoCasada;
-        $this->oDOSunasaPacientesHistoricos->codigoEstablecimientoIAFA = $request->txtCodEstablecIAFA;
-        $this->oDOSunasaPacientesHistoricos->codigoEstablecimientoRENAES = $request->txtCodEstablecRENAES;
-        $this->oDOSunasaPacientesHistoricos->codigoIAFA = $request->txtCodigoIAFA;
-        $this->oDOSunasaPacientesHistoricos->dNIusarioOperacion = $request->txtDNIUsuario;
-        $this->oDOSunasaPacientesHistoricos->estadoDelSeguro = (int)$request->cmbEstadoSeguro;
-
-        if ($request->txtFechaEnvio <> '' and $request->txtHoraEnvio <> '') {
-            $this->oDOSunasaPacientesHistoricos->fechaEnvio = dateFormat(($request->txtFechaEnvio . " " . $request->txtHoraEnvio), 'd-m-Y H:i:s');
-        } else {
-            $this->oDOSunasaPacientesHistoricos->fechaEnvio = 0;
-        }
-
-        if ($request->txtFechaFinalAfiliacion <> '') {
-            $this->oDOSunasaPacientesHistoricos->fechaFinalAfiliacion = dateFormat($request->txtFechaFinalAfiliacion, 'd-m-Y');
-        } else {
-            $this->oDOSunasaPacientesHistoricos->fechaFinalAfiliacion = 0;
-        }
-        if ($request->txtFechaInicioAfiliacion <> "") {
-            $this->oDOSunasaPacientesHistoricos->fechaInicioAfiliacion = dateFormat($request->txtFechaInicioAfiliacion, 'd-m-Y');
-        } else {
-            $this->oDOSunasaPacientesHistoricos->fechaInicioAfiliacion = 0;
-        }
-
-        $this->oDOSunasaPacientesHistoricos->idAfiliacion = $request->cmbTipoAfiliacion;
-        $this->oDOSunasaPacientesHistoricos->idOperacion = $request->cmbTipoOperacion;
-        $this->oDOSunasaPacientesHistoricos->idPaciente = $request->idPaciente;
-        $this->oDOSunasaPacientesHistoricos->idPaisTitular = $request->cmbPaisTitular;
-        $this->oDOSunasaPacientesHistoricos->idParentesco = $request->cmbParentescoTitular;
-        $this->oDOSunasaPacientesHistoricos->idRegimen = $request->cmbRegimen;
-        $this->oDOSunasaPacientesHistoricos->idSunasaPacienteHistorico = $request->idSunasaPacienteHistorico;
-        $this->oDOSunasaPacientesHistoricos->idTipoDocumentoTitular = $request->cmbDocumentoTitular;
-        $this->oDOSunasaPacientesHistoricos->idUsuarioAuditoria = $this->user->id;
-        $this->oDOSunasaPacientesHistoricos->nroCarnetIdentidad = $request->txtCarnetIdentidad;
-        $this->oDOSunasaPacientesHistoricos->nroDocumentoTitular = $request->txtNdocumentoTitular;
-
-        if ($request->txtProductoPlan1 <> "" and $request->txtProductoPlan2 <> "") {
-            $this->oDOSunasaPacientesHistoricos->productoYplan = Right("     " . $request->txtProductoPlan1, 3) . $request->txtProductoPlan2;
-        } else {
-            $this->oDOSunasaPacientesHistoricos->productoYplan = "";
-        }
-
-        $this->oDOSunasaPacientesHistoricos->rUCempleador = $request->txtRUCempleador;
-
-        if ($request->txtNroAfiliacion1 <> "" and $request->txtNroAfiliacion2 <> "" and $request->txtNroAfiliacion3 <> "") {
-            $this->oDOSunasaPacientesHistoricos->sisNroAfiliacion = $request->txtNroAfiliacion1 . "-" . $request->txtNroAfiliacion2 . "-" . $request->txtNroAfiliacion3;
-        } else {
-            $this->oDOSunasaPacientesHistoricos->sisNroAfiliacion = "";
-        }
-
-        $this->oDOSunasaPacientesHistoricos->sisSepelioDni = $request->txtSpelioDNI;
-        if ($request->txtSepelioFnacimiento <> "") {
-            $this->oDOSunasaPacientesHistoricos->sisSepelioFnacimiento = dateFormat($request->txtSepelioFnacimiento, 'd-m-Y');
-        } else {
-            $this->oDOSunasaPacientesHistoricos->sisSepelioFnacimiento = 0;
-        }
-        $this->oDOSunasaPacientesHistoricos->sisSepelioParienteEncargado = $request->txtSepelioApellidosYnombre;
-        if ($request->cmbSepelioSexo <> "") {
-            $this->oDOSunasaPacientesHistoricos->sisSepelioSexo = $request->cmbSepelioSexo;
-        } else {
-            $this->oDOSunasaPacientesHistoricos->sisSepelioSexo = 0;
-        }
-
-        if ($request->cmbValidacionRegIden == "") {
-            $this->oDOSunasaPacientesHistoricos->validacionRegIdentidad = 0;
-        } else {
-            $this->oDOSunasaPacientesHistoricos->validacionRegIdentidad = $request->cmbValidacionRegIden;
-        }
-
-        $this->oDOSunasaPacientesHistoricos->yaNoTieneSeguro = (int)$request->chkNoTieneSeguro;
-        $this->oDOSunasaPacientesHistoricos->nuevoSeguro = (int)$request->chkNuevoSeguroSunasa;      //'No se graba en la BD
-
-
-        if ($mi_Opcion == 'sghModificar') {
-            // TODO: se modifica: en la carga de datos a la vista se marca 'nuevo seguro' si existe datos anteriores
-            // if ( $request->yaNoTieneSeguroUltimoRegistroGrabado == false and $request->chkNoTieneSeguro = 1 ){
-            // if ( $request->yaNoTieneSeguroUltimoRegistroGrabado == false and $request->chkNoTieneSeguro == 1 ){
-            // 	$this->oDOSunasaPacientesHistoricos->nuevoSeguro = true;
-            // }
-        }
-
-    }
-
-    private function ValidarReglas()
-    {
-        $errors = collect([]);
-
-        $ucPacientesDetalleValidarReglas = $this->ucPacientesDetalleValidarReglas($this->oDOPaciente);
-
-        if (!$ucPacientesDetalleValidarReglas->status) {
-            foreach ($ucPacientesDetalleValidarReglas->errors as $error) $errors->push($error);
-        }
-
-        if ($this->oDOPaciente->fechaNacimiento == 0) {
-            $errors->push('Tiene que registrar Fecha de Nacimiento');
-        }
-
-        return jsonClass([
-            'status' => count($errors) == 0 ? true : false,
-            'errors' => $errors
-        ]);
+        $this->oHistoria = ($tempHistoria)?$tempHistoria:new HistoriasClinicas();
+        $this->oHistoria->FechaCreacion = date('d-m-Y');
+        $this->oHistoria->IdTipoNumeracion = $request->cmbIdTipoGenHistoriaClinica;
+        $this->oHistoria->IdEstadoHistoria = 1;
+        $this->oHistoria->IdTipoHistoria = 1;
     }
 
     private $mb_PacienteNoIdentificado = false;
@@ -719,63 +500,58 @@ class PacienteController extends Controller
     private $wxSinApellido = '*****';
 
     // ucPacientesDetalles
-    private function ucPacientesDetalleValidarReglas($oDOPaciente)
+    private function ucPacientesDetalleValidarReglas()
     {
-        $request = request();
-        $rsPacientes = null;
-        $errors = collect([]);
-        //'Si el paciente aun no existe (IdPaciente = 0) se verifica que no haya duplicados
+        if ($this->oPaciente->IdPaciente == null)
+        {
 
-        if ($oDOPaciente->idPaciente == 0) {
-
-            $rsPacientes = $this->mo_AdminAdmision->PacientesObtenerConElAutogenerado($oDOPaciente);
-            if (count($rsPacientes) > 0) {
-                if ($request->chkNN == 0) {
-                    $errors->push("Existe un paciente con el mismo número autogenerado (HC: " . trim($rsPacientes[0]->NroHistoriaClinica) . ")");
-                } else {
-                    $errors->push("Existe un paciente con el mismo número autogenerado: " . $rsPacientes[0]->ApellidoPaterno . " " . $rsPacientes[0]->ApellidoMaterno . " " . $rsPacientes[0]->PrimerNombre . "  HC: " . trim($rsPacientes[0]->NroHistoriaClinica) . ". Desea continuar?");
-                }
+            $rsPacientes = Pacientes::ObtenerConElMismoAutogenerado($this->oPaciente->Autogenerado, $this->oPaciente->IdPaciente);
+            if (count($rsPacientes) > 0)
+            {
+                throw new \Exception("Existe un paciente con el mismo número autogenerado (HC: " . trim($rsPacientes[0]->NroHistoriaClinica) . ")");
             }
 
-            if ($oDOPaciente->idTipoNumeracion == Enumerados::param('sghHistoriaDefinitivaManual') ||
-                $oDOPaciente->idTipoNumeracion == Enumerados::param('sghHistoriaDefinitivaAutomatica') ||
-                $oDOPaciente->idTipoNumeracion == Enumerados::param('sghHistoriaDefinitivaReciclada')
-            ) {
-                $rsPacientes = $this->mo_AdminAdmision->PacientesObtenerConElMismoNroHistoriaDefinitiva($oDOPaciente);
+            if ($this->oPaciente->IdTipoNumeracion == Enumerados::param('sghHistoriaDefinitivaManual') ||
+                $this->oPaciente->IdTipoNumeracion == Enumerados::param('sghHistoriaDefinitivaAutomatica') ||
+                $this->oPaciente->IdTipoNumeracion == Enumerados::param('sghHistoriaDefinitivaReciclada')
+            )
+            {
+                $rsPacientes = Pacientes::ObtenerConLaMismaHistoriaDefinitiva($this->oPaciente->NroHistoriaClinica, $this->oPaciente->IdPaciente);
 
-                if (count($rsPacientes) > 0) {
-                    $errors->push("Existe un paciente con el mismo número de historia clínica: " . $rsPacientes[0]->ApellidoPaterno . " " . $rsPacientes[0]->ApellidoMaterno . " " . $rsPacientes[0]->PrimerNombre);
-                }
-            }
-            //'
-            if ($request->cmbIdDocIndentidad <> "" and $request->txtNroDocumento <> "") {
-                $rsPacientes = $this->mo_AdminAdmision->PacientesFiltraPorNroDocumentoYtipo($request->txtNroDocumento, $request->cmbIdDocIndentidad);
-                if (count($rsPacientes) > 0) {
-                    // 'Actualizado 20092014
-                    $errors->push("El nro de documento: " . $request->txtNroDocumento . ", ya existe para el Paciente: " . trim($rsPacientes[0]->NroHistoriaClinica) . " " . $rsPacientes[0]->ApellidoPaterno . " " . $rsPacientes[0]->ApellidoMaterno . " " . $rsPacientes[0]->PrimerNombre); //'JHIMI 12032018
-                }
-            }
-
-            // TODO: NO IMPLEMENTADO LA FICHA FAMILIAR
-            if ($this->mi_Opcion == 'sghAgregar' and $request->txtFichaFamiliar3Visible == true and $request->txtFichaFamiliar1 <> "" and $request->txtFichaFamiliar2 <> "" and $txtFichaFamiliar3 <> "") {
-                $existeFichaFamiliar = $this->mo_AdminAdmision->ExisteFichaFamiliar($this->DevuelveFichaFamiliarUnida($request->idPaciente));
-                if ($existeFichaFamiliar->status <> "") {
-                    $errors->push("Existe un paciente con la misma FICHA FAMILIAR: " . $existeFichaFamiliar->error);
+                if (count($rsPacientes) > 0)
+                {
+                    throw new \Exception("Existe un paciente con el mismo número de historia clínica: " . $rsPacientes[0]->ApellidoPaterno . " " . $rsPacientes[0]->ApellidoMaterno . " " . $rsPacientes[0]->PrimerNombre);
                 }
             }
 
 
-        } else {
-            if ($request->cmbIdDocIndentidad <> "" and $request->txtNroDocumento <> "") {
-                $rsPacientes = $this->mo_AdminAdmision->PacientesFiltraPorNroDocumentoYtipo($request->txtNroDocumento, $request->cmbIdDocIndentidad);
+            if ($this->oPaciente->IdDocIdentidad != "" and $this->oPaciente->NroDocumento <> "")
+            {
+                $rsPacientes = Pacientes::PacientesFiltraPorNroDocumentoYtipo($this->oPaciente->NroDocumento, $this->oPaciente->IdDocIdentidad);
+                if (count($rsPacientes) > 0)
+                {
+                    throw new \Exception("El nro de documento: " . $this->oPaciente->IdDocIdentidad . ", ya existe para el Paciente: " . trim($rsPacientes[0]->NroHistoriaClinica) . " " . $rsPacientes[0]->ApellidoPaterno . " " . $rsPacientes[0]->ApellidoMaterno . " " . $rsPacientes[0]->PrimerNombre);
+                }
+            }
 
-                if (count($rsPacientes) > 0) {
-                    foreach ($rsPacientes as $row) {
-                        if ($rsPacientes[0]->IdPaciente <> $oDOPaciente->idPaciente) {
-                            if (!is_null($rsPacientes[0]->NroHistoriaClinica)) {
-                                $errors->push("Es N° DOCUMENTO ya existe para el Paciente: " . Trim($rsPacientes[0]->NroHistoriaClinica) . " " . $rsPacientes[0]->ApellidoPaterno . " " . $rsPacientes[0]->ApellidoMaterno . " " . $rsPacientes[0]->PrimerNombre);  //'JHIMI 12032018
-                            } else {
-                                $errors->push("Es N° DOCUMENTO ya existe para el Paciente: " . $rsPacientes[0]->ApellidoPaterno . " " . $rsPacientes[0]->ApellidoMaterno . " " . $rsPacientes[0]->PrimerNombre);
+        } else
+        {
+            if ($this->oPaciente->IdDocIdentidad != "" and $this->oPaciente->NroDocumento <> "")
+            {
+                $rsPacientes = Pacientes::PacientesFiltraPorNroDocumentoYtipo($this->oPaciente->NroDocumento, $this->oPaciente->IdDocIdentidad);
+
+                if (count($rsPacientes) > 0)
+                {
+                    foreach ($rsPacientes as $row)
+                    {
+                        if ($rsPacientes[0]->IdPaciente != $this->oPaciente->NroDocumento)
+                        {
+                            if (!is_null($rsPacientes[0]->NroHistoriaClinica))
+                            {
+                                throw new \Exception("Es N° DOCUMENTO ya existe para el Paciente: " . Trim($rsPacientes[0]->NroHistoriaClinica) . " " . $rsPacientes[0]->ApellidoPaterno . " " . $rsPacientes[0]->ApellidoMaterno . " " . $rsPacientes[0]->PrimerNombre);
+                            } else
+                            {
+                                throw new \Exception("Es N° DOCUMENTO ya existe para el Paciente: " . $rsPacientes[0]->ApellidoPaterno . " " . $rsPacientes[0]->ApellidoMaterno . " " . $rsPacientes[0]->PrimerNombre);
                             }
                         }
                     }
@@ -783,90 +559,37 @@ class PacienteController extends Controller
             }
         }
 
-        //'
-        //'mgaray20141008
-        if ($request->txtFechaNacimiento <> '' and $this->mi_Opcion <> 'sghEliminar') {
-            if ($request->txtFechaNacimiento > $request->txtFechaCreacion) {
-                $errors->push("La fecha de nacimiento no puede ser mayor que la fecha de creación de la historia");
-            }
-        }
-        // TODO: HTML NO IMPLEMENTADO
-        if ($request->lbExigeIngresoDelDNI == true and $this->mi_Opcion <> 'sghEliminar') {
-            if ($request->cmbIdDocIdentidad == "" or $request->txtNroDocumento == "") {
-                $errors->push("Es obligatorio ingresar el DNI");
-            }
-        }
+        $edad = Carbon::parse($this->oPaciente->FechaNacimiento)->age;
+        if ($edad < 18 and $this->oPaciente->IdDocIdentidad <> "10" and ($this->oPaciente->NroDocumento == "" or $this->oPaciente->IdDocIdentidad == "8" or $this->oPaciente->IdDocIdentidad == "9") and $this->mi_Opcion <> 'sghEliminar' and $this->mb_PacienteNoIdentificado == false)
+        {
 
-        //'
-        if ($request->cmbIdDocIndentidad == "1" and len(trim($request->txtNroDocumento)) <> 8 and $this->mi_Opcion <> 'sghEliminar') {
-            $errors->push("DNI debe tener 8 dígitos");
-        }
-
-        // TODO: HTML NO IMPLEMENTADO
-        if ($request->lbExigeIngresoDeCentroPoblado == true and $this->mi_Opcion <> 'sghEliminar') {
-            if ($request->cmbIdCentroPobladoDomicilio == "") {
-                $errors->push("Es obligatorio elegir el CENTRO POBLADO para CS");
-            }
-        }
-
-        //'
-        if ($request->txtEdadActual < 18 and $request->cmbIdDocIndentidad <> "10" and ($request->txtNroDocumento == "" or $request->cmbIdDocIndentidad == "8" or $request->cmbIdDocIndentidad == "9") and $this->mi_Opcion <> 'sghEliminar' and $this->mb_PacienteNoIdentificado == false) {
-
-            if ($request->txtMadreDocumento == "") {
-                if ($request->txtNroHijo == 0) {
-                    $errors->push("El Paciente es MENOR DE EDAD, por favor debe registrar el N°HIJO y el DNI DE LA MADRE Si no tiene MADRE o TUTOR elegir en TIPO DOCUMENTO del PACIENTE= 10(Sin registro madre/tutor)");
+            if ($this->oPaciente->madreDocumento == "")
+            {
+                if ($this->oPaciente->NroOrdenHijo == 0)
+                {
+                    throw new \Exception("El Paciente es MENOR DE EDAD, por favor debe registrar el N°HIJO y el DNI DE LA MADRE Si no tiene MADRE o TUTOR elegir en TIPO DOCUMENTO del PACIENTE= 10(Sin registro madre/tutor)");
                 }
-                if ($request->txtMadreApellidoP == "" or $request->txtMadreApellidoM == "" or $request->txtMadreNombre == "") {
-                    $errors->push("El Paciente es MENOR DE EDAD, por favor debe registrar El N° DNI de la MADRE o los APELLIDOS Y NOMBRES DE LA MADRE Si no tiene MADRE o TUTOR elegir en TIPO DOCUMENTO del PACIENTE= 10(Sin registro madre/tutor)");
+                if ($this->oPaciente->madreApellidoPaterno == "" or $this->oPaciente->madreApellidoMaterno == "" or $this->oPaciente->madrePrimerNombre == "")
+                {
+                    throw new \Exception("El Paciente es MENOR DE EDAD, por favor debe registrar El N° DNI de la MADRE o los APELLIDOS Y NOMBRES DE LA MADRE Si no tiene MADRE o TUTOR elegir en TIPO DOCUMENTO del PACIENTE= 10(Sin registro madre/tutor)");
                 }
-            } else if (len($request->txtMadreDocumento) <> 8 and $request->cmbMadreTipoDocumento = "1") {
-                $errors->push("El N° DNI de la MADRE tiene longitud diferente a OCHO");
-            } else if ($request->txtNroHijo == 0) {
-                $errors->push("El Paciente es MENOR DE EDAD, por favor debe registrar el N° HIJO Si no tiene MADRE o TUTOR elegir en TIPO DOCUMENTO del PACIENTE= 10(Sin registro madre/tutor)");
+            } else if (len($this->oPaciente->madreDocumento) <> 8 and $this->oPaciente->madreTipoDocumento == "1")
+            {
+                throw new \Exception("El N° DNI de la MADRE tiene longitud diferente a OCHO");
+            } else if ($this->oPaciente->NroOrdenHijo == 0)
+            {
+                throw new \Exception("El Paciente es MENOR DE EDAD, por favor debe registrar el N° HIJO Si no tiene MADRE o TUTOR elegir en TIPO DOCUMENTO del PACIENTE= 10(Sin registro madre/tutor)");
             }
         }
 
         //'
-        if ($request->txtApellidoMaterno == $this->wxSinApellido or $request->txtApellidoPaterno == $this->wxSinApellido) {
-
-            if (!(len($request->txtNroDocumento) == 8 and $request->cmbIdDocIndentidad == "1")) {
-                $errors->push("Debe registrar el DNI para que el Paciente tenga un solo apellido");
+        if ($this->oPaciente->ApellidoMaterno == $this->wxSinApellido or $this->oPaciente->ApellidoPaterno == $this->wxSinApellido)
+        {
+            if (!(len($this->oPaciente->NroDocumento) == 8 and $this->oPaciente->IdDocIdentidad == "1"))
+            {
+                throw new \Exception("Debe registrar el DNI para que el Paciente tenga un solo apellido");
             }
         }
-
-        $validarHistoria = $this->ValidarNumeroDeHistoriaClinica();
-
-        if ($validarHistoria->status == false) {
-
-            foreach ($validarHistoria->errors as $error) $errors->push($error);
-        }
-
-        //'
-        return jsonClass([
-            'status' => count($errors) == 0 ? true : false,
-            'errors' => $errors,
-        ]);
-
-    }
-
-    // ucPacientesDetalle
-    private function ValidarNumeroDeHistoriaClinica()
-    {
-        $errors = collect([]);
-        if (request()->cmbIdTipoGenHistoriaClinica == Enumerados::param('sghHistoriaDefinitivaManual')) {
-            if (trim(request()->txtIdNroHistoria) <> "") {
-                $lUltimoNumeroHistoria = $this->mo_AdminAdmision->UltimoNroHistoriaGenerado();
-                $lUltimoNumeroHistoria = isset($lUltimoNumeroHistoria[0]) ? $lUltimoNumeroHistoria[0]->nroHistoriaClinica : 0;
-
-                if (request()->txtIdNroHistoria > $lUltimoNumeroHistoria + 1) {
-                    $errors->push("Número de Historia Ingresado no puede ser mayor que " . ($lUltimoNumeroHistoria + 1));
-                }
-            }
-        }
-        return jsonClass([
-            'status' => count($errors) == 0 ? true : false,
-            'errors' => $errors,
-        ]);
     }
 
     private function DevuelveFichaFamiliarUnida($request)
@@ -874,15 +597,14 @@ class PacienteController extends Controller
         return Trim($request->txtFichaFamiliar1) . "-" . Trim($request->txtFichaFamiliar2) . "-" . Trim($request->txtFichaFamiliar3);
     }
 
-    private function GrabaImagenesEnRutaDelServidor()
+    private function GrabaImagenesEnRutaDelServidor($imagenPaciente, $foto_base64)
     {
-        $imagen = request()->imagenPaciente;
-        $base64 = request()->foto_base64;
-        $targetPath = public_path() . "\\storage\\images\\pacientes\\" . $this->oDOPaciente->idPaciente . ".jpeg";
+        $targetPath = public_path() . "\\storage\\images\\pacientes\\" . $this->oPaciente->idPaciente . ".jpeg";
 
-        if ($imagen) {
+        if ($imagenPaciente)
+        {
             $filename = 'usuario.png';
-            $sourcePath = $imagen->getRealPath();
+            $sourcePath = $imagenPaciente->getRealPath();
 
             try {
                 if (move_uploaded_file($sourcePath, $targetPath)) {
@@ -893,10 +615,11 @@ class PacienteController extends Controller
             } catch (\Exception $e) {
                 throw new \Exception($e->getMessage());
             }
-        } else if (strlen($base64) > 0) {
+        } else if (!empty($foto_base64) > 0)
+        {
             // Mover de storage/app/pacientes al directorio path
-            $recursoPath = Storage::disk('public')->path("images/pacientes/") . $this->oDOPaciente->nroDocumento . ".jpeg";
-            $targetPath = Storage::disk('public')->path("images/pacientes/") . $this->oDOPaciente->idPaciente . ".jpeg";
+            $recursoPath = Storage::disk('public')->path("images/pacientes/") . $this->oPaciente->nroDocumento . ".jpeg";
+            $targetPath = Storage::disk('public')->path("images/pacientes/") . $this->oPaciente->idPaciente . ".jpeg";
             rename($recursoPath, $targetPath);
         }
     }
@@ -905,7 +628,6 @@ class PacienteController extends Controller
     private function traerTodosDatosPaciente()
     {
         $data['paciente'] = $this->cargarDatosPaciente();
-        $data['sunasa'] = $this->cargarDatosSUNASA();
         return $data;
     }
 
@@ -1037,66 +759,6 @@ class PacienteController extends Controller
         return $pacienteData;
     }
 
-    // ucPacientesDetalle1 > CargaDatosPersonales
-    private function CargaDatosPersonales($data, $wxParametro242, $wxParametro287)
-    {
-    }
-
-    // UcPacientesSunasa1 > CargarDatosDelUltimoSeguroDelPacienteALosControles
-    public function cargarDatosSUNASA()
-    {
-        // $oDoSunasaPacientesHistoricos = new DoSunasaPacientesHistoricos;
-        // 'CARGAR DATOS DE SUNASA
-        $data = $this->mo_AdminAdmision->SunasaPacientesHistoricosSeleccionarPorIdPaciente($this->idPaciente);
-        $oDoSunasaPacientesHistoricos = isset($data[0]) ? $data[0] : null;
-        // CargarDatos oDoSunasaPacientesHistoricos
-
-        if ($oDoSunasaPacientesHistoricos) { // UcPacientesSunasa1 > CargarDatos
-            if ($oDoSunasaPacientesHistoricos->idPaciente == 0) {
-                $oDoSunasaPacientesHistoricos->chkNoTieneSeguro = 1;
-                // chkNoTieneSeguro_Click
-            } else {
-                // Dim lnPos1 As Integer, lnPos2 As Integer
-
-                if ($oDoSunasaPacientesHistoricos->FechaEnvio) {
-                    $oDoSunasaPacientesHistoricos->HoraEnvio = dateFormat($oDoSunasaPacientesHistoricos->FechaEnvio, 'H:i');
-                    $oDoSunasaPacientesHistoricos->FechaEnvio = dateFormat($oDoSunasaPacientesHistoricos->FechaEnvio, 'Y-m-d');
-                }
-
-                if ($oDoSunasaPacientesHistoricos->FechaFinalAfiliacion) {
-                    $oDoSunasaPacientesHistoricos->FechaFinalAfiliacion = dateFormat($oDoSunasaPacientesHistoricos->FechaFinalAfiliacion, 'Y-m-d');
-                }
-
-                if ($oDoSunasaPacientesHistoricos->FechaInicioAfiliacion) {
-                    $oDoSunasaPacientesHistoricos->FechaInicioAfiliacion = dateFormat($oDoSunasaPacientesHistoricos->FechaInicioAfiliacion, 'Y-m-d');
-                }
-
-                if ($oDoSunasaPacientesHistoricos->ProductoYplan <> "") {
-                    $oDoSunasaPacientesHistoricos->ProductoPlan1 = trim(left($oDoSunasaPacientesHistoricos->ProductoYplan, 3));
-                    $oDoSunasaPacientesHistoricos->ProductoPlan2 = mid($oDoSunasaPacientesHistoricos->ProductoYplan, 4, 4);
-                }
-
-                if ($oDoSunasaPacientesHistoricos->SisNroAfiliacion <> "") {
-
-                    $lnPos1 = strpos($oDoSunasaPacientesHistoricos->SisNroAfiliacion, "-") + 1;
-                    $lnPos2 = strrpos($oDoSunasaPacientesHistoricos->SisNroAfiliacion, "-") + 1;
-                    $oDoSunasaPacientesHistoricos->NroAfiliacion1 = left($oDoSunasaPacientesHistoricos->SisNroAfiliacion, $lnPos1 - 1);
-                    $oDoSunasaPacientesHistoricos->NroAfiliacion2 = mid($oDoSunasaPacientesHistoricos->SisNroAfiliacion, $lnPos1 + 1, $lnPos2 - $lnPos1 - 1);
-                    $oDoSunasaPacientesHistoricos->NroAfiliacion3 = mid($oDoSunasaPacientesHistoricos->SisNroAfiliacion, $lnPos2 + 1, 100);
-                }
-
-                if ($oDoSunasaPacientesHistoricos->SisSepelioFnacimiento) {
-                    $oDoSunasaPacientesHistoricos->SisSepelioFnacimiento = dateFormat($oDoSunasaPacientesHistoricos->SisSepelioFnacimiento, 'Y-m-d');
-                }
-
-                $oDoSunasaPacientesHistoricos->YaNoTieneSeguroUltimoRegistroGrabado = (int)$oDoSunasaPacientesHistoricos->YaNoTieneSeguro;
-                $oDoSunasaPacientesHistoricos->NoTieneSeguro = (int)$oDoSunasaPacientesHistoricos->YaNoTieneSeguro;
-            }
-        }
-
-        return $oDoSunasaPacientesHistoricos;
-    }
-
     // Métodos API del servicio
     public function apiService(Request $request)
     {
@@ -1105,7 +767,8 @@ class PacienteController extends Controller
                 return $this->getData($request);
                 break;
             case 'getEdad':
-                return $this->getEdad($request);
+                $fechaNacimiento = $request->fechaNacimiento;
+                return $this->getEdadPaciente($fechaNacimiento);
                 break;
             case 'get_by_nro_documento':
                 return $this->apiConsultarDatosPaciente($request);
@@ -1115,15 +778,15 @@ class PacienteController extends Controller
         }
     }
 
-    private function getData($request)
+    public function getData()
     {
-        $data['forms'] = $this->getDataForms($request);
+        $data['forms'] = $this->getDataForms();
         return $data;
 
     }
 
     // Informacion para poblar Comboboxes
-    private function getDataForms($request)
+    private function getDataForms()
     {
         $cmbIdTipoGenHistoriaClinica = $this->mo_AdminArchivoClinico->TiposGeneracionHistoriasSeleccionarTodos();
 
@@ -1200,27 +863,6 @@ class PacienteController extends Controller
             $row->text = $row->DescripcionLarga;
         }
 
-        //PROC NO EXISTE
-        // $cmbReligion = $this->mo_AdminServiciosComunes->ReligionListarTodos();
-        // foreach($cmbReligion as $row){
-        // 	$row->id = $row->IdReligion;
-        // 	$row->text = $row->Descripcion;
-        // }
-
-        //PROC NO EXISTE
-        // $cmbGrupoSAnguineo = $this->mo_AdminServiciosComunes->ListarGrupoSanguineo();
-        // foreach($cmbGrupoSAnguineo as $row){
-        // 	$row->id = $row->IdGrupoSanguineo;
-        // 	$row->text = $row->Descripcion;
-        // }
-
-        //PROC NO EXISTE
-        // $cmbFactorRH = $this->mo_AdminServiciosComunes->ListarFactorRH();
-        // foreach($cmbFactorRH as $row){
-        // 	$row->id = $row->IdTipoEdad;
-        // 	$row->text = $row->DescripcionLarga;
-        // }
-
         $data['cmbTipoGenHistoriaClinica'] = $cmbIdTipoGenHistoriaClinica;
         $data['cmbTipoSexo'] = $cmbIdTipoSexo;
         $data['cmbProcedencia'] = $cmbIdProcedencia;
@@ -1280,9 +922,9 @@ class PacienteController extends Controller
         return $data;
     }
 
-    private function getEdad($request)
+    public function getEdadPaciente($fechaNacimiento)
     {
-        $edad = calcularEdad($request->fechaNacimiento, null);
+        $edad = calcularEdad($fechaNacimiento, null);
         return ['edad' => $edad];
     }
 

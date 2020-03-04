@@ -19,7 +19,7 @@
 
 	@include('partials.my-modal')
 
-	@include('consulta-externa.paciente.partials.item-create')
+	@include('consulta-externa.paciente.partials.item-form')
 
 	<div class='row' id="partial-list">
 		<div class='col-sm-12'>
@@ -89,5 +89,11 @@
 @endsection
 
 @push('scripts')
-	<script src="{{ url('/js/consulta-externa/paciente.js') }}"></script>
+	<script>
+		var model = '{{ $model }}';
+		var url = '{{ route("consulta-externa.paciente.index") }}';
+		var opcionBlanco = {id: '', text: '...'};
+	</script>
+
+	<script src="{{ asset('js/consulta-externa/paciente.js') }}"></script>
 @endpush

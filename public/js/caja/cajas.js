@@ -1,4 +1,5 @@
 var model="cajas";
+var method  = "CREATE";
 
 $(function(){
     showListItems();
@@ -68,6 +69,8 @@ function createItem()
         data: {}, url: url+'/create',
         type:  'GET', dataType: 'html',
         success:  function (response) {
+            setData();
+            
             $('#myModalTitle').html('Crear '+model);
             $('#myModalSize').addClass('modal-lg'); //options: '', 'modal-lg'
             $('#myModalBody').html(response);
@@ -199,3 +202,25 @@ function showErrosValidator(request)
     toastr.error(html, 'Error')
 }
 
+
+
+function setData()
+{
+    $.ajax({
+        data: {}, url: getPathCtrl()+'/api/service?name=getData',
+        type:  'GET', dataType: 'json',
+        success:  function (data) {
+            comprobantesTipo = $.map(data.cmbIdTipoComprobante, function (obj) {
+                obj.id = obj.IdTipoComprobante;
+                obj.text = obj.Descripcion;
+                return obj;
+            });
+
+            $('select[name="cmbIdTipoComprobante"]').select2({data: comprobantesTipo});
+            //$(".cmbIdTipoComprobante").select2({data: comprobantesTipo});
+
+            idTipoComprobante = $("#idtipocomprobante").val();
+            $('#cmbIdTipoComprobante').select2('val',idTipoComprobante,true);
+        }
+    });
+}

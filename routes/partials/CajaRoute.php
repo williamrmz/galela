@@ -9,6 +9,7 @@ Route::prefix('caja')->group( function () {
 		Route::get('/gestion-caja/api/service', 'Caja\GestionCajaController@apiService');
 
 		Route::resource('/cajas', 'Caja\CajasController');
+		Route::get('/cajas/{id}/edit', 'Caja\CajasController@edit');
 		Route::get('/cajas/{id}/delete', 'Caja\CajasController@delete');
 		Route::get('/cajas/api/service', 'Caja\CajasController@apiService');
 

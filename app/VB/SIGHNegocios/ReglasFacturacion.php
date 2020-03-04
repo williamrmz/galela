@@ -131,5 +131,14 @@ class ReglasFacturacion extends Model
         return $generaPago;
     }
 
+    public static function CitasMuestraAteriores($idPaciente)
+    {
+        $sql = "EXEC CitasMuestraAteriores :idPaciente";
+        $params = [
+            'idPaciente' => $idPaciente,
+        ];
+        return DB::select($sql, $params);
+    }
+
 
 }

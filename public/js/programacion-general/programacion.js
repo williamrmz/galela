@@ -390,8 +390,8 @@ function cargarCombos()
             $('select[name="cmbIdTipoProgramacion"]').select2({data: form.cmbIdTipoProgramacion});
             $('select[name="cmbIdTipoServicio"]').select2({data: form.cmbIdTipoServicio});
             $('select[name="cmbIdEspecialidad"]').select2({data: form.cmbIdEspecialidad});
-            $('input[name="txtFechaInicio"]').val(form.Fecha);
-            $('input[name="txtFechaFin"]').val(form.Fecha);
+            $('input[name="txtFechaInicio"]').val(fechaSeleccion);
+            $('input[name="txtFechaFin"]').val(fechaSeleccion);
         }
     });
 

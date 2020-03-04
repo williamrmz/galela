@@ -11,7 +11,7 @@ var action = '';
 $(function(){
 
     urlBase = $('meta[name="base-path"]').attr('content');
-    optionNull = { id: '', text: '...' };
+    opcionBlanco = { id: '', text: '...' };
 
     $('#'+model+'-btn-store').click( function (e) {
         e.preventDefault();
@@ -155,13 +155,13 @@ function setData()
             dateHTML = form.dateHTML;
             // data.cmbDocIdentidad.unshift(optionNull);
             // data.cmbTipoGenHistoriaClinica.unshift(optionNull);
-            form.cmbTipoSexo.unshift(optionNull);
-            form.cmbEtnia.unshift(optionNull);
-            form.cmbIdioma.unshift(optionNull);
-            form.cmbEstadoCivil.unshift(optionNull);
-            form.cmbGradoInstruccion.unshift(optionNull);
-            form.cmbProcedencia.unshift(optionNull);
-            form.cmbTipoOcupacion.unshift(optionNull);
+            form.cmbTipoSexo.unshift(opcionBlanco);
+            form.cmbEtnia.unshift(opcionBlanco);
+            form.cmbIdioma.unshift(opcionBlanco);
+            form.cmbEstadoCivil.unshift(opcionBlanco);
+            form.cmbGradoInstruccion.unshift(opcionBlanco);
+            form.cmbProcedencia.unshift(opcionBlanco);
+            form.cmbTipoOcupacion.unshift(opcionBlanco);
 
             $('select[name="cmbIdDocIndentidad"]').select2({data: form.cmbDocIdentidad});
             $('select[name="cmbIdTipoGenHistoriaClinica"]').select2({data: form.cmbTipoGenHistoriaClinica});
@@ -175,12 +175,12 @@ function setData()
             $('select[name="cmbMadreTipoDocumento"]').select2({data: form.cmbDocIdentidad});
 
 
-            form.cmbParentescoTitular.unshift(optionNull);
-            form.cmbRegimen.unshift(optionNull);
-            form.cmbTipoAfiliacion.unshift(optionNull);
-            form.cmbValidacionRegIden.unshift(optionNull);
-            form.cmbEstadoSeguro.unshift(optionNull);
-            form.cmbTipoOperacion.unshift(optionNull);
+            form.cmbParentescoTitular.unshift(opcionBlanco);
+            form.cmbRegimen.unshift(opcionBlanco);
+            form.cmbTipoAfiliacion.unshift(opcionBlanco);
+            form.cmbValidacionRegIden.unshift(opcionBlanco);
+            form.cmbEstadoSeguro.unshift(opcionBlanco);
+            form.cmbTipoOperacion.unshift(opcionBlanco);
 
 
             $('select[name="cmbParentescoTitular"]').select2({data: form.cmbParentescoTitular});
@@ -262,7 +262,7 @@ function setCombosIgualDomicilio( context )
 function resetCombo( classSelector )
 {
     let cmbData = [];
-    cmbData.unshift(optionNull);
+    cmbData.unshift(opcionBlanco);
     $('select[name="'+classSelector+'"]').html ('').select2({ data: cmbData });
 }
 
@@ -296,7 +296,7 @@ function cargarComboDepartamentos( idPais, context )
             type:  'GET', dataType: 'json',
             success:  function (cmbDepartamentoData) {
 
-                cmbDepartamentoData.unshift(optionNull);
+                cmbDepartamentoData.unshift(opcionBlanco);
 
                 $('select[name="cmbIdDepartamento'+context+'"]').html ('').select2({ data: cmbDepartamentoData });
                 resetCombo( 'cmbIdProvincia'+context );
@@ -325,7 +325,7 @@ function cargarComboProvincias( idDepartamento, context )
             url: urlBase+'/controles',
             type:  'GET', dataType: 'json',
             success:  function (cmbProvinciasData) {
-                cmbProvinciasData.unshift(optionNull);
+                cmbProvinciasData.unshift(opcionBlanco);
 
                 $('select[name="cmbIdProvincia'+context+'"]').html ('').select2({ data: cmbProvinciasData });
                 resetCombo( 'cmbIdDistrito'+context );
@@ -349,7 +349,7 @@ function cargarComboDistritos( idProvincia, context )
             url: urlBase+'/controles',
             type:  'GET', dataType: 'json',
             success:  function (cmbDistritosData) {
-                cmbDistritosData.unshift(optionNull);
+                cmbDistritosData.unshift(opcionBlanco);
 
                 $('select[name="cmbIdDistrito'+context+'"]').html ('').select2({ data: cmbDistritosData });
                 resetCombo( 'cmbIdCentroPoblado'+context );
@@ -372,7 +372,7 @@ function cargarComboCentrosPoblados( idDistrito, context )
             url: urlBase+'/controles',
             type:  'GET', dataType: 'json',
             success:  function (cmbCentrosPobladosData) {
-                cmbCentrosPobladosData.unshift(optionNull);
+                cmbCentrosPobladosData.unshift(opcionBlanco);
                 $('select[name="cmbIdCentroPoblado'+context+'"]').html ('').select2({ data: cmbCentrosPobladosData });
             }
         });

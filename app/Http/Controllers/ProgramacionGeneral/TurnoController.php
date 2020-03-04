@@ -10,8 +10,14 @@ use DB;
 class TurnoController extends Controller
 {
 	const PATH_VIEW = 'programacion-general.turno.';
+	private $idListItem;
 
-	public function index(Request $request)
+	public function __construct()
+    {
+        $this->idListItem = 402;
+    }
+
+    public function index(Request $request)
 	{
 
 		if($request->ajax())
@@ -49,6 +55,8 @@ class TurnoController extends Controller
         {
             $oTurno = $this->fillFromRequest($request);
             $oTurno = $oTurno::guardar($oTurno);
+            AuditoriaAgregarVGood('A', $oTurno->IdTurno, $oTurno->getTable(), $this->idListItem, $oTurno->Descripcion);
+
             return imprimeJSON(true, "Registrado correctamente", $oTurno);
         }
         catch (\Exception $e)
@@ -63,6 +71,7 @@ class TurnoController extends Controller
         {
             $oTurno = $this->fillFromRequest($request, $turno);
             $oTurno = $oTurno::guardar($oTurno);
+            AuditoriaAgregarVGood('M', $oTurno->IdTurno, $oTurno->getTable(), $this->idListItem, $oTurno->Descripcion);
             return imprimeJSON(true, "Registrado actualizado", $oTurno);
         }
         catch (\Exception $e)
@@ -76,6 +85,7 @@ class TurnoController extends Controller
         try
         {
             $turno->delete();
+            AuditoriaAgregarVGood('E', $turno->IdTurno, $turno->getTable(), $this->idListItem, $turno->Descripcion);
             return imprimeJSON(true, "Registrado eliminado", $turno);
         }
         catch (\Exception $e)

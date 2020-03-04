@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\ProgramacionGeneral;
 
+use App\Http\Controllers\ConsultaReniecController;
 use App\Http\Requests\ProfesionalesSaludRequest;
 use App\VB\SIGHDatos\DepartamentosHospital;
 use App\VB\SIGHDatos\Empleados;
@@ -59,6 +60,7 @@ class ProfesionalesSaludController extends Controller
         $this->oMedico              = Medicos::find($idMedico);
         $this->oEmpleado            = Empleados::find($this->oMedico->IdEmpleado);
         $this->oEmpleado->DNI = trim($this->oEmpleado->DNI);
+        $this->oMedico->Colegiatura = trim($this->oMedico->Colegiatura);
         $this->oEmpleado->FechaNacimiento = dateFormat($this->oEmpleado->FechaNacimiento, 'Y-m-d');
         $oMedicosEspecialidad  = MedicosEspecialidad::where('IdMedico', $this->oMedico->IdMedico)->get();
 
@@ -270,10 +272,12 @@ class ProfesionalesSaludController extends Controller
             }
 
             // Verificar que colegiatura no se repita
-            $datos = ReglasComunes::EmpleadosObtenerConLaMismaColegiatura($this->oMedico->Colegiatura);
+            //$datos = ReglasComunes::EmpleadosObtenerConLaMismaColegiatura($this->oMedico->Colegiatura);
+            $datos = Medicos::whereTrim("Colegiatura", $this->oMedico->Colegiatura)->get();
             if(count($datos)>0)
             {
-                $mensaje = "Ese número de colegiatura ya está registrado para: {$datos[0]->ApellidoPaterno} {$datos[0]->ApellidoMaterno} {$datos[0]->Nombres}";
+                $datos = $datos->first();
+                $mensaje = "Ese número de colegiatura ya está registrado para: ".Empleados::find($datos->IdEmpleado)->nombre_completo;
                 throw new \Exception($mensaje);
             }
 
@@ -426,6 +430,13 @@ class ProfesionalesSaludController extends Controller
             case 'getEmpleadosCoincidencia':
                 {
                     return $this->getEmpleadosPorCoincidencia($request);
+                } break;
+            case 'getByDNI':
+                {
+                    $nroDocumento = $request->nro_documento;
+                    $datosReniec = new ConsultaReniecController();
+                    $datosReniec = $datosReniec->consultarPorNroDocumento($nroDocumento);
+                    return $datosReniec;
                 } break;
             default:
                 {

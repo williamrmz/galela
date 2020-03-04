@@ -1,82 +1,245 @@
+var fechaSeleccion = "";
+var CONFIG_IDMEDICO = "";
 
-var model="citasAdmision";
-
-//almacena datos de la programacion de un medico en el front 
+//almacena datos de la programacion de un medico en el front
 var programacion = [];
 
-$(function(){
+$(function()
+{
+    ajaxConfig();
+    initConfiguracionCita();
+    initEventos();
 
-    getConfig();
-    
 });
 
-function calClick( btn ){
-    
-    $('.btn-dia').each( function() {  $(this).removeClass('btn-warning'); });
-    btn.addClass('btn-warning');
-
-    // let dia = JSON.parse( btn.find('input.dia-data').val() );
-    let indexProg = btn.find('input.prog-index').val();
-
-    showPacientes( indexProg );
-
-    renderCitas( indexProg );
-
-    // getProgramacion(0, 0);
-}
-
-// Obtiene 42 dias de acuerdo al mes y anio
-function getCalendario()
+function initConfiguracionCita()
 {
-    let fecha = '01-'+$('#cmbMes').val()+'-'+$('#cmbAnio').val();
     $.ajax({
-        data: { fecha }, url: getPathCtrl()+'/api/service?name=getCalendario',
+        data: {}, url: url+'/api/service?name=getConfig',
         type:  'GET', dataType: 'json',
-        success:  function (response) {
-           renderDias( response );
-           clearPacientes();
+        success:  function (response)
+        {
+            let serviciosData = response.servicios;
+            serviciosData.unshift(opcionBlanco);
+            $('select[name=cmbIdServicio]').select2({ data: serviciosData });
+            renderizarCalendario( response.calendario);
         }
     });
 }
 
-// Dibuja la tabla con 42 configurada para el mes y anio
-function renderDias( calendario )
+function getAtencionesDias()
 {
+    idServicio = $("select[name=cmbIdServicio]").val();
+    idMedico = CONFIG_IDMEDICO;
+    fecha = fechaSeleccion;
 
+    if(idServicio == "" || idMedico == "" || fecha == "")
+    {
+        toastr.clear();
+        toastr.error("No se puede listar las atenciones del día debido a que no se ha indicado fecha, médico o servicio");
+        return;
+    }
+
+    $.ajax({
+        data: {idServicio, idMedico, fecha}, url: url+'/api/service?name=getAtencionesDia',
+        type:  'GET', dataType: 'html',
+        success:  function (response)
+        {
+            $(".atenciones-cronograma-dia").html(response);
+            getListaPacientesDia();
+        }
+    });
+}
+
+function getListaPacientesDia()
+{
+    idServicio = $("select[name=cmbIdServicio]").val();
+    idMedico = CONFIG_IDMEDICO;
+    fecha = fechaSeleccion;
+
+    if(idServicio == "" || idMedico == "" || fecha == "")
+    {
+        toastr.clear();
+        toastr.error("No se puede listar las atenciones del día debido a que no se ha indicado fecha, médico o servicio");
+        return;
+    }
+
+    $.ajax({
+        data: {idServicio, idMedico, fecha}, url: url+'/api/service?name=getListaPacientesDias',
+        type:  'GET', dataType: 'html',
+        success:  function (response)
+        {
+            $(".atenciones-listado-dia").html(response);
+        }
+    });
+}
+
+function cargarComboServicios()
+{
+    let mes = $("select[name=cmbMes]").val();
+    let anio = $("select[name=cmbAnio]").val();
+    let fecha = '01-'+mes+'-'+anio;
+    $.ajax({
+        data: { fecha: fecha }, url: url+'/api/service?name=getServicios',
+        type:  'GET', dataType: 'json',
+        success:  function (response)
+        {
+            let serviciosData = JSON.parse( JSON.stringify( response) );
+            serviciosData.unshift({ id: '', text: 'Seleccione...' } );
+            $('select[name=cmbIdServicio]').html ('').select2({ data: serviciosData });
+            $("#tbody-medicos").html( '<tr> <td colspan="2" align="center">Sin resultados</td> </tr>' );
+        }
+    });
+}
+
+function getCalendario()
+{
+    let mes = $("select[name=cmbMes]").val();
+    let anio = $("select[name=cmbAnio]").val();
+    let fecha = '01-'+mes+'-'+anio;
+
+    $.ajax({
+        data: { fecha }, url: url+'/api/service?name=getCalendario',
+        type:  'GET', dataType: 'json',
+        success:  function (response) {
+            renderizarCalendario( response );
+            renderizarCalendario( response );
+            limpiarProgramacion();
+        }
+    });
+}
+
+function getMedicos()
+{
+    let idServicio = $("select[name=cmbIdServicio]").val();
+
+    if(idServicio == "")
+    {
+        console.error(":: E :: getMedicos no ha podido ejecutarse por no disponer de idServicio");
+        return;
+    }
+
+    let mes = $("select[name=cmbMes]").val();
+    let anio = $("select[name=cmbAnio]").val();
+    let fecha = '01-'+mes+'-'+anio;
+
+    $.ajax({
+        data: { fecha, idServicio }, url: url+'/api/service?name=getMedicos',
+        type:  'GET', dataType: 'json',
+        success:  function (response) {
+            html = '';
+            if( response.length > 0)
+            {
+                for(let i = 0; i<response.length; i++)
+                {
+                    let item = response[i];
+                    html += '<tr>';
+                    html += '<td>'+item.medico+'</td>';
+                    html += '<td>';
+                    html += '<input type="hidden" value=\''+JSON.stringify(item)+'\'>';
+                    html += '<input type="radio" name="medicoSeleccionado" value="1" id="idmedico-'+item.IdMedico+'">';
+                    html += '</td>';
+                    html += '/<tr>';
+                }
+
+                $("#tbody-medicos").html( html );
+
+                if(response.length==1)
+                {
+                    let item = response[0];
+                    $("#idmedico-"+item.IdMedico).click();
+                }
+            }
+        }
+    });
+}
+
+
+function calClick( btn )
+{
+    // Remover clave warning de todos los botones
+    $('.btn-dia').each( function() {  $(this).removeClass('btn-warning'); });
+    // Agregar clase sobre la opcion en la cual se hizo click
+    btn.addClass('btn-warning');
+
+    // Obtener la informacion del dia
+    let infoDia = btn.find('.dia-data').val();
+    // Obtener dia del mes|
+    let dia = JSON.parse(infoDia).dia;
+    dia = ('0'.repeat(2) + dia).slice(-2);
+
+    // Construir fecha
+    let anio = $("select[name=cmbAnio]").val();
+    let mes = $("select[name=cmbMes]").val();
+    let fecha = anio +"-"+ mes +"-"+ dia;
+    fechaSeleccion = anio+"-"+mes+"-"+dia;
+
+    // :: Verificar que haya seleccionado un medico para cargar la programacion del dia
+    getAtencionesDias();
+
+    let indexProg = btn.find('input.prog-index').val();
+}
+
+// Dibuja la tabla con 42 configurada para el mes y anio
+function renderizarCalendario( calendario )
+{
     html = '';
     let loop = 1;
-    calendario.dias.forEach(item => {
+
+    // ::: Si ya existe fecha de seleccion previa
+    if(fechaSeleccion != "")
+    {
+        // :: Indicar que el dia de la fecha seleccion debe mantener
+        let dia = fechaSeleccion.split("-")[2];
+        calendario.sistema_dia_actual = dia;
+        calendario.sistema_mes_actual = calendario.mes_actual;
+        calendario.sistema_anio_actual = calendario.anio_actual;
+        calendario.sistema_fecha_actual = calendario.anio_actual +"-"+ calendario.mes_actual +"-"+ dia;
+    }
+
+    calendario.dias.forEach(item =>
+    {
 
         // console.log( item );
         if( loop == 1) html += '<tr>';
-        
+
         html += '<td style="padding:0" align="center">';
-            if( item.valido ){
-            html += '<div class="btn btn-default btn-block btn-dia" style="padding:1px;">';
-                    html += '<input type="hidden" class="dia-data" value=\''+JSON.stringify(item)+'\'>';
-                    html += '<input type="hidden" class="prog-index prog-index-'+item.dia+'" value="">';
-                    html += '<table >';
-                        html += '<tr height="22px;">';
-                            html += '<td style="width:30px;">';
-                                html += '<div class="label label-primary" id="dia-numero-'+item.dia+'" style="width:100px">'+item.dia+'</div> ';
-                            html += '</td>';
-                            html += '<td style="width:0px;"></td>';
-                        html += '</tr>';
-                        html += '<tr height="22px;">';
-                            html += '<td colspan="2" width="53px;"> ';
-                                html += '<i class="dia-icon dia-icon-'+item.dia+'"></i>';
-                                html += '<span class="dia-citas dia-citas-'+item.dia+'"></span>';
-                            html += '</td>';
-                        html += '</tr>';
-                    html += '</table>';
-                html += '</div>';
+        if( item.valido )
+        {
+            var seleccion = "";
+
+            if(calendario.sistema_anio_actual == calendario.anio_actual && calendario.sistema_mes_actual == calendario.mes_actual && calendario.sistema_dia_actual == item.dia)
+            {
+                fechaSeleccion = calendario.sistema_fecha_actual;
+                seleccion = "btn-warning";
             }
+
+            html += '<div class="btn btn-default btn-block btn-dia '+seleccion+'" style="padding:1px;">';
+            html += '<input type="hidden" class="dia-data" value=\''+JSON.stringify(item)+'\'>';
+            html += '<input type="hidden" class="prog-index prog-index-'+item.dia+'" value="">';
+            html += '<table >';
+            html += '<tr height="50px;">';
+            html += '<td style="width:30px;">';
+            html += '<div class="label label-primary" id="dia-numero-'+item.dia+'" style="width:100px">'+item.dia+'</div> ';
+            html += '</td>';
+            html += '<td style="width:0px;"></td>';
+            html += '</tr>';
+            html += '<tr height="22px;">';
+            html += '<td colspan="2" width="53px;"> ';
+            html += '<i class="dia-icon dia-icon-'+item.dia+'"></i>';
+            html += '<span class="dia-citas dia-citas-'+item.dia+'"></span>';
+            html += '</td>';
+            html += '</tr>';
+            html += '</table>';
+            html += '</div>';
+        }
         html += '</td>';
 
         loop++
 
         if( loop == 8) { html += '</tr>'; loop=1; }
     });
+
 
     $('#tbody-calendario').html( html );
 
@@ -91,51 +254,29 @@ function renderProg( data )
         $('.dia-icon-'+item.dia ).addClass('glyphicon glyphicon-time');
         $('.dia-citas-'+item.dia ).html('('+item.atenciones.length+')');
         $('.prog-index-'+item.dia ).val( index );
+        console.log("ATENCIONES", item.atenciones.length);
     } );
 }
 
 // Limpia datos de una programacion en el calendario
-function clearProg(){
+function clearProg()
+{
     $('.prog-index').each( function() { $(this).val('') });
     $('.dia-icon').each( function() { $(this).removeClass('glyphicon glyphicon-time') });
     $('.dia-citas').each( function() { $(this).html('') });
 }
 
-function getConfig()
+function initConfiguracionCita()
 {
     $.ajax({
-        data: {}, url: getPathCtrl()+'/api/service?name=getConfig',
+        data: {}, url: url+'/api/service?name=getConfig',
         type:  'GET', dataType: 'json',
-        success:  function (response) {
-
-            $('#cmbAnio').select2({ data: response.anios });
-            $('#cmbAnio').val( parseInt(response.anio_actual) ).trigger('change');
-
-            $('#cmbMes').select2({ data: response.meses });
-            $('#cmbMes').val( parseInt(response.mes_actual) ).trigger('change');
-
-            let serviciosData = JSON.parse( JSON.stringify(response.servicios)); 
-            serviciosData.unshift({ id: '', text: 'Seleccione...' } );
-            $('#cmbServicios').select2({ data: serviciosData });
-
-            $('#cmbServicios').change( function() {
-                clearProg();
-                clearPacientes();
-                clearBtnDia();
-                let idServicio = $(this).val();
-                if( idServicio != '' ) getMedicos( idServicio );
-            })
-
-            $('#cmbAnio').change( () => {
-                getServicios();
-                getCalendario();
-            });
-            $('#cmbMes').change( () => {
-                getServicios();
-                getCalendario();
-            });
-
-            renderDias( response.calendario );
+        success:  function (response)
+        {
+            let serviciosData = response.servicios;
+            serviciosData.unshift(opcionBlanco);
+            $('select[name=cmbIdServicio]').select2({ data: serviciosData });
+            renderizarCalendario( response.calendario);
         }
     });
 }
@@ -146,168 +287,64 @@ function clearBtnDia(){
     });
 }
 
-function getServicios( idServicio, idMedico)
+
+
+
+
+function initEventos()
 {
-    let fecha = '01-'+$('#cmbMes').val()+'-'+$('#cmbAnio').val();
+    $("body").on("change", 'input[name="medicoSeleccionado"]', function ()
+    {
+        let medico = JSON.parse( $(this).siblings('input').val() );
+        CONFIG_IDMEDICO = medico.IdMedico;
+        getProgramacion();
+        getAtencionesDias();
+        limpiarProgramacion();
+    });
+
+    // Cuando cambia comobo de servicios
+    $('select[name=cmbIdServicio]').change( function() {
+        clearProg();
+        limpiarProgramacion();
+        getMedicos();
+    })
+
+    // Cuando cambia año
+    $("select[name=cmbAnio]").change(function () {
+        cargarComboServicios();
+        getCalendario();
+    });
+
+    // Cuando cambia mes
+    $("select[name=cmbMes]").change(function () {
+        cargarComboServicios();
+        getCalendario();
+    });
+}
+
+function getProgramacion()
+{
+    idServicio = $("select[name=cmbIdServicio]").val();
+    idMedico = CONFIG_IDMEDICO;
+
     $.ajax({
-        data: { fecha }, url: getPathCtrl()+'/api/service?name=getServicios',
+        data: { fecha: fechaSeleccion, idServicio, idMedico }, url: url+'/api/service?name=getProgramacion',
         type:  'GET', dataType: 'json',
-        success:  function (response) {
-            let serviciosData = JSON.parse( JSON.stringify( response) ); 
-            serviciosData.unshift({ id: '', text: 'Seleccione...' } );
-            $('#cmbServicios').html ('').select2({ data: serviciosData });
-            $("#tbody-medicos").html( '<tr> <td colspan="3" align="center">Sin resultados</td> </tr>' );
+        success:  function (response)
+        {
+            renderProg(response);
         }
     });
 }
 
-function getMedicos( idServicio )
-{
-    let fecha = '01-'+$('#cmbMes').val()+'-'+$('#cmbAnio').val();
-    $.ajax({
-        data: { fecha, idServicio }, url: getPathCtrl()+'/api/service?name=getMedicos',
-        type:  'GET', dataType: 'json',
-        success:  function (response) {
-            html = '';
-            if( response.length > 0){
-                response.forEach( item => {
-                    html += '<tr>';
-                        html += '<td>'+item.medico+'</td>';
-                        html += '<td>'+item.horaInicio+' - '+item.horaFin+'</td>';
-                        html += '<td>';
-                            html += '<input type="hidden" value=\''+JSON.stringify(item)+'\'>';
-                            html += '<input type="radio" name="medicoSeleccionado" value="1">';
-                        html += '</td>';
-                    html += '/<tr>';
-                    
-                });
-                $("#tbody-medicos").html( html );
-
-                $('input[name="medicoSeleccionado"]').change( function() {
-                    let medico = JSON.parse( $(this).siblings('input').val() );
-                    getProgramacion( idServicio, medico.idMedico );
-                    clearBtnDia();
-                    clearPacientes();
-                })
-
-                
-            }
-        }
-    });
-}
-
-function getProgramacion( idServicio, idMedico)
-{
-    let fecha = '01-'+$('#cmbMes').val()+'-'+$('#cmbAnio').val();
-    $.ajax({
-        data: { fecha, idServicio, idMedico }, url: getPathCtrl()+'/api/service?name=getProgramacion',
-        type:  'GET', dataType: 'json',
-        success:  function (response) {
-            programacion = JSON.parse(JSON.stringify(response));
-            
-            renderProg( response );
-        }
-    });
-}
-
-// Muestra los pacientes en cita para un dia
-function showPacientes( index )
-{
-    let atenciones = index != ''? JSON.parse( JSON.stringify(programacion[index].atenciones)): [];
-
-    html = '';
-
-    if( atenciones.length > 0 ){
-        atenciones.forEach( item => {
-            html += '<tr>';
-                html += '<td>'+item.horaInicio+'</td>';
-                html += '<td>'+item.horaFin+'</td>';
-                html += '<td>'+item.apellidoMaterno+'</td>';
-                html += '<td>'+item.apellidoPaterno+'</td>';
-                html += '<td>'+item.primerNombre+'</td>';
-                html += '<td>'+item.fechaSolicitud+'</td>';
-                html += '<td>'+item.horaSolicitud+'</td>';
-            html += '</tr>';
-        });
-
-    }else{
-        html += '<tr> <td colspan="7" align="center">Sin resultados</td></tr>';
-    }
-    
-    $('.tbody-pacientes').html( html );
-}
-
-function clearPacientes()
+function limpiarProgramacion()
 {
     this.programacion = [];
-    showPacientes('');
-}
+    html = '<tr> <td colspan="7" align="center">Sin resultados</td></tr>';
+    $('.tbody-atenciones-listado-dia').html( html );
+    html = '<tr> <td colspan="3" align="center">Sin resultados</td></tr>';
+    $('.tbody-atenciones-cronograma-dia').html( html );
 
-function getPathCtrl()
-{
-    return $("input[name='"+model+"-path-ctrl']").val();
-}
-
-//dibuja la tabla de citas cada ves que se eleccionda un dia de programacion
-function renderCitas( index ){
-    let data = index != ''? JSON.parse( JSON.stringify(programacion[index])): [];
-
-    if( data.length == 0 ){
-        $('.tbody-citas').html('<tr><td colspan="2" align="center">Sin programacion</td></tr>');
-        return;
-    }
-    let tiempoPromedio = parseInt(data.tiempoPromedioAtencion);
-    let tiempoBase = 5;
-    
-    minutoi = horasAMinunos(data.horaInicio);
-    minutof = horasAMinunos(data.horaFin);
-
-    
-    periodos = (minutof - minutoi) / tiempoPromedio;
-
-    let horas = [ minutosAHoras(minutoi) ];
-    while( minutoi  <  minutof){
-        minutoi += tiempoBase;
-        horas.push( minutosAHoras(minutoi) );
-    }
-
-    let tbase = 0; //
-
-    let filas = [];
-    let fila = [];
-    let indexRow  = 0;
-    for( let i in horas){
-        if( tbase == 0)  fila = [];
-
-        fila.push( horas[i] );
-
-        tbase += tiempoBase;
-
-        if( tbase >= tiempoPromedio){
-            indexRow++;
-            filas.push( {
-                index: indexRow<10? '0'+indexRow: ''+indexRow,
-                horas: fila,
-            });
-            tbase = 0;
-        }
-    }
-
-    // Dibujar rows
-    html = '';
-    for( let i in filas){
-        html += '<tr>';
-            html += '<td class="bg-gray"> <table align="center">';
-            let horas = filas[i].horas;
-            for(let j in horas){
-                html += '<tr><td>'+horas[j]+'</td><tr>';
-            }
-            html += '</table></td>';
-            html += '<td>'+ filas[i].index+' </td>';
-        html += '</tr>';
-    }
-
-    $('.tbody-citas').html(html);
 }
 
 function horasAMinunos( hora )

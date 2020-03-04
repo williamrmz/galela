@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Caja;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
+use App\VB\SIGHDatos\CajaTiposComprobante; 
 
 class CajasController extends Controller
 {
@@ -11,13 +12,14 @@ class CajasController extends Controller
 
 	public function __construct()
 	{
-		
+		$this->om_TipoComprobantes = new CajaTiposComprobante;
 	}
 
 	public function index(Request $request)
 	{
 		if($request->ajax()) {
-			$items = DB::table('empleados')->select('idEmpleado as id', 'Nombres as name')->paginate(10); //test data
+			$items = DB::table('CajaCaja')->select('IdCaja as id', 'Codigo as codigo', 'Descripcion as desc', 'loginPC as pc', 
+			'ImpresoraDefault as impresora1', 'Impresora2 as impresora2', 'idTipoComprobante as idComp')->paginate(10); //test data
 			return view(self::PATH_VIEW.'partials.item-list', compact('items'));
 		}
 		return view(self::PATH_VIEW.'index');
@@ -120,8 +122,10 @@ class CajasController extends Controller
 	{
 		switch($request->name)
 		{
-			case 'data-example':
-				return $this->getDataExample( $request );
+			case 'getData':
+				return $this->getData( $request );
+			case 'getDataNrosDocs':
+				return $this->getDataNrosDocs( $request );
 			default:
 				return null;
 		}
@@ -131,5 +135,21 @@ class CajasController extends Controller
 	{
 		return 'data example...';
 	}
+
+
+
+	private function getData( $request )
+	{
+		$cmbIdTipoComprobante = $this->om_TipoComprobantes->SeleccionarTodos();
+		$data['cmbIdTipoComprobante'] = $cmbIdTipoComprobante;
+		return $data;
+	}
+
+	private function getDataNrosDocs( $request )
+	{
+		$data = $this->om_TipoComprobantes->SeleccionarPorId($request->idCaja);
+		return $data;
+	}
+
 
 }

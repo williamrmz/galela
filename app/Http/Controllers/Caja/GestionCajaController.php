@@ -3,21 +3,39 @@ namespace App\Http\Controllers\Caja;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use DB;
+use App\VB\SIGHNegocios\ReglasComunes;
+use App\VB\SIGHNegocios\ReglasCaja;
 
+use App\VB\SIGHComun\DOCajaGestion;
+use App\VB\SIGHComun\DOPaciente;
+use App\VB\SIGHComun\DOCajaComprobantesPago;
 class GestionCajaController extends Controller
 {
 	const PATH_VIEW = 'caja.gestion-caja.';
 
+	private $mo_AdminCaja;
+
+	private $mo_AdminServiciosComunes;
+	private $oDOCajaComprobantesPago;
+	private $oDOPaciente;
+
 	public function __construct()
 	{
-		
+		$this->mo_AdminCaja = new ReglasCaja;
+		$this->mo_AdminServiciosComunes = new ReglasComunes;
+
+		$this->mo_CajaGestion = new DOCajaGestion;
+		$this->mo_Paciente = new DOPaciente;
+		$this->mo_CajaComprobantesPago = new DOCajaComprobantesPago;
 	}
 
 	public function index(Request $request)
 	{
 		if($request->ajax()) {
-			$items = DB::table('empleados')->select('idEmpleado as id', 'Nombres as name')->paginate(10); //test data
+			$items = DB::table('CajaCaja')->select('IdCaja as id', 'Descripcion as name')->paginate(10); //test data
 			return view(self::PATH_VIEW.'partials.item-list', compact('items'));
 		}
 		return view(self::PATH_VIEW.'index');

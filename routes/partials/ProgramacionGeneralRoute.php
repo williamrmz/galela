@@ -16,6 +16,10 @@ Route::prefix('programacion-general')->group( function () {
 		Route::resource('/profesionales-salud', 'ProgramacionGeneral\ProfesionalesSaludController');
 		Route::get('/profesionales-salud/api/service', 'ProgramacionGeneral\ProfesionalesSaludController@apiService')->name("profesionales-salud.api");
 
+//		Configuración de asignacion de jefes
+        Route::resource('/asignacion', 'ProgramacionGeneral\AsignacionProgramacionController');
+        Route::get('/asignacion/api/service', 'ProgramacionGeneral\AsignacionProgramacionController@apiService');
+
 	});
 
 });

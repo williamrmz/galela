@@ -193,7 +193,7 @@ class ProgramacionController extends Controller
         {
             $fecha = Carbon::createFromFormat("Y-m-d", $request->txtFechaInicio);
             $oProgramacion->Fecha = $fecha->format("d-m-Y");
-            $oProgramacion->FechaReg = Carbon::now();
+            $oProgramacion->FechaReg = Carbon::now()->format("Y-m-d\TH:i:s");
         }
 
         $oProgramacion->HoraInicio = $request->txtHoraInicio;
