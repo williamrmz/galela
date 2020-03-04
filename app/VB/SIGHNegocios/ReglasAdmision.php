@@ -47,15 +47,6 @@ class ReglasAdmision extends Model
             $oDoHistoria->nroHistoriaClinica = $oDOPaciente->nroHistoriaClinica;
             $oDoHistoria->idUsuarioAuditoria = $oDOPaciente->idUsuarioAuditoria;
 
-
-            //NOTA: la base de siempre devuelve (1), por esta razon no se puede evaludar si se a eliminado algun registro o ninguno
-            if(isset($oDoSunasaPacientesHistoricos->idSunasaPacienteHistorico))
-            {
-                $objSunasa = SunasaPacientesHistoricos::find($oDoSunasaPacientesHistoricos->idSunasaPacienteHistorico);
-                if ($objSunasa) { $objSunasa->delete(); }
-            }
-
-
             if( $oDOPaciente->idTipoNumeracion == param('sghHistoriaDefinitivaManual')
                 || $oDOPaciente->idTipoNumeracion == param('sghHistoriaDefinitivaAutomatica')
                 || $oDOPaciente->idTipoNumeracion == param('sghHistoriaDefinitivaReciclada') )
@@ -154,56 +145,13 @@ class ReglasAdmision extends Model
         }
 
         $auditar = auditoriaAgregarV($oDOPaciente->idUsuarioAuditoria, "M", $oDOPaciente->idPaciente, "Pacientes", $mo_lnIdTablaLISTBARITEMS, $mo_lcNombrePc, $lcNpaciente);      //'ListBarItems.idListItem
-        // dd( $auditar );
-        
-        if ($oDoSunasaPacientesHistoricos->nuevoSeguro == true)
-        {
-            $insertarSeguro = $oSunasaPacientesHistoricos->Insertar($oDoSunasaPacientesHistoricos);
-            // dd( $insertarSeguro );
-            if( $insertarSeguro->idSunasaPacienteHistorico == 0 ) {
-                $errors->push('Error: insertar Sunasa Pacientes Historicos');
-            }
-        }
-        else
-        {
-            $modificarSunasa = $oSunasaPacientesHistoricos->Modificar($oDoSunasaPacientesHistoricos);
-            // dd( $modificarSunasa );
-            if ( $modificarSunasa == 0 )
-            {
-                $errors->push('Error al modificar datos de SUNASA (Pacientes históricos)');
-            }
-        }
+
 
         return jsonClass([ 
             'status' => count($errors)==0? true: false, 
             'errors' => $errors 
         ]);
-        // 'GR 27062018  -- Agrega los telefonos de los pacientes
-        // If Not oPaciente.AgregarTelefonoDePacientes(oDOPaciente) Then
-        //     bProcesoOK = False: ms_MensajeError = oPaciente.MensajeError: GoTo Terminar
-        // End If
-        
-        // 'GR 27062018  -- Agrega lel telfono del tutor
-        // If Not oPaciente.AgregarTelefonoDeTutor(oDOPaciente) Then
-        //     bProcesoOK = False: ms_MensajeError = oPaciente.MensajeError: GoTo Terminar
-        // End If
-        
-        // If Not oPaciente.AgregarUbigeoTutor(oDOPaciente) Then
-        //     bProcesoOK = False: ms_MensajeError = oPaciente.MensajeError: GoTo Terminar
-        // End If
-        
-        // If Not oPaciente.AgregarGSanguineoFactorRhyReligion(oDOPaciente) Then
-        //     bProcesoOK = False: ms_MensajeError = oPaciente.MensajeError: GoTo Terminar
-        // End If
-    }
 
-    // Created by Romel Diaz at 2019-09-23
-    public function SunasaPacientesHistoricosSeleccionarPorIdPaciente( $idPaciente )
-    {
-        $oSunasaPacientesHistoricos = new SunasaPacientesHistoricos;
-        $oDoSunasaPacientesHistoricos = new DoSunasaPacientesHistoricos;
-        $oDoSunasaPacientesHistoricos->idPaciente = $idPaciente;
-        return $oSunasaPacientesHistoricos->SeleccionarPorIdPaciente($oDoSunasaPacientesHistoricos);
     }
 
     // Created by Romel Diaz at 2019-09-23
@@ -247,7 +195,8 @@ class ReglasAdmision extends Model
             $param351 = isset($param351[0])? $param351[0]->ValorTexto: '';
 
             // TODO: NO SE USA EN ESTA VERSION V3
-            if ($param351 == "S" and $oDOPaciente->nroDocumento <> "" ) {  //'Requerimiento INSNSB, Actualizado por FCV 30032015
+            if ($param351 == "S" and $oDOPaciente->nroDocumento <> "" )
+            {  //'Requerimiento INSNSB, Actualizado por FCV 30032015
                 $oDoHistoria->nroHistoriaClinica = $oDOPaciente->NroDocumento;
             }else{
                 $oDoHistoria->nroHistoriaClinica = $oHistoria->GenerarNroHistoria($oDOPaciente->idTipoNumeracion);
@@ -308,25 +257,6 @@ class ReglasAdmision extends Model
 			'status' => count($errors)==0? true: false, 
 			'errors' => $errors 
 		]);
-        
-        // SOLO V7
-        //         'GR 27062018  -- Agrega los telefonos de los pacientes
-        // If Not oPaciente.AgregarTelefonoDePacientes(oDOPaciente) Then
-        //     bProcesoOK = False: ms_MensajeError = oPaciente.MensajeError: GoTo Terminar
-        // End If
-        
-        //     'GR 07082018  -- Agrega el telefono del tutor
-        // If Not oPaciente.AgregarTelefonoDeTutor(oDOPaciente) Then
-        //     bProcesoOK = False: ms_MensajeError = oPaciente.MensajeError: GoTo Terminar
-        // End If
-        
-        // If Not oPaciente.AgregarUbigeoTutor(oDOPaciente) Then
-        //     bProcesoOK = False: ms_MensajeError = oPaciente.MensajeError: GoTo Terminar
-        // End If
-        
-        // If Not oPaciente.AgregarGSanguineoFactorRhyReligion(oDOPaciente) Then
-        //     bProcesoOK = False: ms_MensajeError = oPaciente.MensajeError: GoTo Terminar
-        // End If
     }
 
     // Created by Romel Diaz at 2019-09-19
@@ -386,15 +316,8 @@ class ReglasAdmision extends Model
         return $oTabla->ObtenerConLaMismaHistoriaDefinitiva($oPaciente);
     }
 
-    // Created by Romel Diaz at 2019-09-18
-    public function PacientesObtenerConElAutogenerado( $oPaciente )
-    {
-        $oTabla = new Pacientes;
-        return $oTabla->ObtenerConElMismoAutogenerado($oPaciente);
-    }
-
     // Created by Romel Diaz at 2019-09-17
-    public function PacienteCrearNroAutogenerado($oPaciente)
+    public function PacienteCrearNroAutogenerado($FechaNacimiento, $PrimerNombre, $SegundoNombre, $ApellidoPaterno, $ApellidoMaterno, $IdTipoSexo)
     {
         $P1 = "";    //'Primer digito del apellido paterno
         $P4 = "";    //'Cuarto Digito del apellido paterno
@@ -410,21 +333,21 @@ class ReglasAdmision extends Model
         $AAA = "";
         $sTemp  = "";
 
-        $oPaciente->fechaNacimiento = dateFormat( $oPaciente->fechaNacimiento, 'd-m-Y H:i');
+        $FechaNacimiento = dateFormat( $FechaNacimiento, 'd-m-Y H:i');
 
-        $DD = left($oPaciente->fechaNacimiento, 2);
-        $MM = mid($oPaciente->fechaNacimiento, 4, 2);
-        $AAA = mid($oPaciente->fechaNacimiento, 8, 3);
+        $DD = left($FechaNacimiento, 2);
+        $MM = mid($FechaNacimiento, 4, 2);
+        $AAA = mid($FechaNacimiento, 8, 3);
 
 
-        $this->DevuelvePrimeryCuartoCaracter( $oPaciente->apellidoPaterno, $P1, $P4 );
-        $this->DevuelvePrimeryCuartoCaracter( $oPaciente->apellidoMaterno, $M1, $M4 );
-        $this->DevuelvePrimeryCuartoCaracter( $oPaciente->primerNombre, $N11, $N41 );
-        $this->DevuelvePrimeryCuartoCaracter( $oPaciente->segundoNombre, $N12, $N42 );
+        $this->DevuelvePrimeryCuartoCaracter( $ApellidoPaterno, $P1, $P4 );
+        $this->DevuelvePrimeryCuartoCaracter( $ApellidoMaterno, $M1, $M4 );
+        $this->DevuelvePrimeryCuartoCaracter( $PrimerNombre, $N11, $N41 );
+        $this->DevuelvePrimeryCuartoCaracter( $SegundoNombre, $N12, $N42 );
 
-        $sTemp = $AAA . $MM . $DD . $oPaciente->idTipoSexo . $P1 . $P4 . $M1 . $M4 . $N11 . $N41 . $N12 . $N42;
+        $sTemp = $AAA . $MM . $DD . $IdTipoSexo . $P1 . $P4 . $M1 . $M4 . $N11 . $N41 . $N12 . $N42;
         $mod = $this->Modulo10($sTemp);
-        $hora = dateFormat($oPaciente->fechaNacimiento, 'H:i');
+        $hora = dateFormat($FechaNacimiento, 'H:i');
 
         $return = $sTemp . $mod . $hora;
 

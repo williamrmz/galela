@@ -163,7 +163,7 @@ class RegistroTriajeController extends Controller
         $oAtencion->TriajeFrecRespiratoria = $request->txtFreRespiratoria;
         if(!$tempTriaje)
         {
-            $oAtencion->TriajeFecha = Carbon::now()->format('d-m-Y H:i:s');
+            $oAtencion->TriajeFecha = Carbon::now()->format("Y-m-d\TH:i:s");
             $oAtencion->TriajeIdUsuario = Auth::user()->id;
         }
         return $oAtencion;

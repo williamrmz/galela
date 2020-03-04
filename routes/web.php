@@ -18,11 +18,11 @@ Route::middleware('auth')->group(function ()
     include __DIR__.'\\partials\\FactConfigRoute.php';
 
 
-    /* TODO: se desactiva temporalmente el ruteo generado automaticamente al modulo (lab) ya que la programacion incial del modulo 
+    /* TODO: se desactiva temporalmente el ruteo generado automaticamente al modulo (lab) ya que la programacion incial del modulo
     no pusee una arquitectura de clases y no utiliza procedimientos almacenados acorde al proyecto actual.
     Ademas: no se adaptó al proyecto final porque se empezo a priorizar el desarrollo de otros modulos... (consultorio externo)
     */
-    // include __DIR__.'\\partials\\LaboratorioRoute.php';  
+    // include __DIR__.'\\partials\\LaboratorioRoute.php';
     include __DIR__.'\\partials\\ImagenologiaRoute.php';
     include __DIR__.'\\partials\\SisRoute.php';
     include __DIR__.'\\partials\\HisRoute.php';
@@ -40,7 +40,8 @@ Auth::routes();
 Route::get('/test/{dni}', 'ConsultaReniecController@consultarPorNroDocumento');
 Route::get('/test', function ()
 {
-    return \App\VB\SIGHDatos\Medicos::filtrarMedico();
+    $objeto = new \App\Http\Controllers\ProgramacionGeneral\AsignacionProgramacionController();
+    return $objeto->getComboEmpleadosSalud();
 });
 
 Route::get('/postgres', function(){
@@ -63,7 +64,7 @@ Route::get('/api', 'ApiController@index');
 
 Route::get('/partials', 'PartialController@index');
 
-Route::get('/controles', 'ControlesController@index');
+Route::get('/controles', 'ControlesController@index')->name('controles');
 
 
 
@@ -82,10 +83,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/asignaciones/partial/tbody-consumos', 'Lab\InsumoAsignacionController@partialTbodyConsumos');
 
             Route::resource('/configuracion-resultados', 'Lab\ConfigResultadoLaboratorioController');
-            
+
         });
     });
-}); 
+});
 
 Route::middleware('auth')->group(function () {
     Route::prefix('laboratorio/pat-clinica')->group( function () {
@@ -94,25 +95,25 @@ Route::middleware('auth')->group(function () {
             Route::get('/', 'Lab\PatClinicaController@index')->name('patologia-clinica');
 
             Route::resource('/ordenes', 'Lab\OrdenController');
-    
+
             Route::get('/ordenes/{idMovimiento}/detalle', 'Lab\OrdenController@detalle')
                 ->name('ordenes.detalle');
-        
+
             Route::get('/ordenes/{idOrden}/previa', 'Lab\OrdenController@previa')
                 ->name('ordenes.previa');
-        
+
             Route::get('/ordenes/{idOrden}/imprimir', 'Lab\OrdenController@imprimir')
                 ->name('ordenes.imprimir');
-        
+
             Route::get('/ordenes/{idMovimiento}/servicio/{idProducto}', 'Lab\OrdenController@resultados')
                 ->name('ordenes.resultados');
-        
+
             Route::post('/actualizaResultados', 'Lab\OrdenController@actualizaResultados')
                 ->name('ordenes.resultados-update');
 
-            
+
             //CRUD MODELS
-    
+
             Route::get('/config-antibiograma', 'Lab\ConfigAntibiogramaController@index')->name('config-antibiograma.index');
             Route::resource('/germenes', 'Lab\GermenController');
             Route::get('/germenes/{id}/delete', 'Lab\GermenController@delete');
@@ -121,16 +122,16 @@ Route::middleware('auth')->group(function () {
 
             Route::resource('/items', 'Lab\ItemController');
             Route::get('items/{id}/delete', 'Lab\ItemController@delete');
-        
+
             Route::resource('refs', 'Lab\ValorReferenciaController');
             Route::get('refs/{id}/delete', 'Lab\ValorReferenciaController@delete');
-    
+
             Route::resource('/firmas', 'Lab\FirmaController');
             Route::get('/firmas/{id}/delete', 'Lab\FirmaController@delete');
-    
+
             Route::get('/estadisticas', 'Lab\EstadisticaController@index')->name('estadisticas.index');
             Route::get('/estadisticas/print', 'Lab\EstadisticaController@print')->name('estadisticas.print');
-    
+
             Route::resource('/periodos', 'Lab\PeriodoIndicadorController');
             Route::get('/periodos/{id}/delete', 'Lab\PeriodoIndicadorController@delete');
             Route::get('/periodos/{id}/sumary', 'Lab\PeriodoIndicadorController@sumary');

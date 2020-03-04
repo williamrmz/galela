@@ -8,9 +8,61 @@ use DB;
 
 class Pacientes extends Model
 {
-	public $fillable = ['conexion'];
-	
-	public function Insertar($oTabla)
+    protected $fillable = [
+        "IdPaciente",
+        "ApellidoPaterno",
+        "ApellidoMaterno",
+        "PrimerNombre",
+        "SegundoNombre",
+        "TercerNombre",
+        "FechaNacimiento",
+        "IdTipoNumeracion",
+        "NroHistoriaClinica",
+        "NroDocumento",
+        "Telefono",
+        "DireccionDomicilio",
+        "IdTipoSexo",
+        "IdProcedencia",
+        "IdGradoInstruccion",
+        "IdEstadoCivil",
+        "IdDocIdentidad",
+        "IdTipoOcupacion",
+        "IdPaisNacimiento",
+        "IdDistritoNacimiento",
+        "IdCentroPobladoNacimiento",
+        "IdPaisDomicilio",
+        "IdDistritoDomicilio",
+        "IdCentroPobladoDomicilio",
+        "IdPaisProcedencia",
+        "IdDistritoProcedencia",
+        "IdCentroPobladoProcedencia",
+        "Autogenerado",
+        "NombrePadre",
+        "NombreMadre",
+        "IdEtnia",
+        "IdIdioma",
+        "UsoWebReniec",
+        "Email",
+        "NroOrdenHijo",
+        "madreTipoDocumento",
+        "madreDocumento",
+        "madreApellidoPaterno",
+        "madreApellidoMaterno",
+        "madrePrimerNombre",
+        "madreSegundoNombre",
+        "Observacion",
+        "FichaFamiliar",
+        "GrupoSanguineo",
+        "FactorRh",
+        "Sector",
+        "Sectorista",
+    ];
+    protected $table = "Pacientes";
+    protected $primaryKey = 'IdPaciente';
+    public $timestamps = false;
+
+
+    public function Insertar($oTabla)
 	{
 		$query = "
 			DECLARE @idPaciente AS Int = :idPaciente
@@ -79,7 +131,7 @@ class Pacientes extends Model
 
 	public function Modificar($oTabla, $lbVerificaPacientesRepetidosAntesDeGrabarDatos)
 	{
-
+	    dd($oTabla);
 		$errors = collect([]);
 		if ($lbVerificaPacientesRepetidosAntesDeGrabarDatos == true) {
 			$data = $this->PacientesVerificaRepetidosAntesDeGrabarDatos($oTabla);
@@ -111,7 +163,7 @@ class Pacientes extends Model
 			'idProcedencia' => ($oTabla->idProcedencia == 0)? Null: $oTabla->idProcedencia, 
 			'idGradoInstruccion' => ($oTabla->idGradoInstruccion == 0)? Null: $oTabla->idGradoInstruccion, 
 			'idEstadoCivil' => ($oTabla->idEstadoCivil == 0)? Null: $oTabla->idEstadoCivil, 
-			'idDocIdentidad' => ($oTabla->idDocIdentidad == 0)? Null: $oTabla->idDocIdentidad, 
+			'idDocIdentidad' => ($oTabla->idDocIdentidad == 0)? Null: $oTabla->idDocIdentidad,
 			'idTipoOcupacion' => ($oTabla->idTipoOcupacion == 0)? Null: $oTabla->idTipoOcupacion, 
 			'idCentroPobladoDomicilio' => ($oTabla->idCentroPobladoDomicilio == 0)? Null: $oTabla->idCentroPobladoDomicilio,
 			'nombrePadre' => ($oTabla->nombrePadre == "")? Null: $oTabla->nombrePadre, 
@@ -142,20 +194,19 @@ class Pacientes extends Model
 			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria, 
 		];
 
-
 		$data = \DB::update($query, $params);
 
 		return $data;
 	}
 
-	public function Eliminar($oTabla)
+	public function Eliminar($IdPaciente)
 	{
 		$query = "
 			EXEC PacientesEliminar :idPaciente, :idUsuarioAuditoria";
 
 		$params = [
-			'idPaciente' => ($oTabla->idPaciente == 0)? Null: $oTabla->idPaciente, 
-			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria, 
+			'idPaciente' => ($IdPaciente == 0)? Null: $IdPaciente,
+			'idUsuarioAuditoria' => 0,
 		];
 
 		$data = \DB::update($query, $params);
@@ -262,26 +313,89 @@ class Pacientes extends Model
 		return $data;
 	}
 
-	public function Filtrar($oTabla)
+	public static function FiltrarSecundario($NroHistoriaClinica, $ApellidoPaterno, $ApellidoMaterno, $IdDocIdentidad = 0, $NroDocumento)
 	{
 		$query = "
 			EXEC PacientesFiltrarTodos :nroHistoriaClinica, :apellidoPaterno, :apellidoMaterno, :primerNombre, :segundoNombre, :idDocIdentidad, :nroDocumento, :fichaFamiliar";
 
 		$params = [
-			'nroHistoriaClinica' => $oTabla->nroHistoriaClinica, 
-			'apellidoPaterno' => $oTabla->apellidoPaterno, 
-			'apellidoMaterno' => $oTabla->apellidoMaterno, 
-			'primerNombre' => $oTabla->primerNombre, 
-			'segundoNombre' => $oTabla->segundoNombre, 
-			'idDocIdentidad' => $oTabla->idDocIdentidad, 
-			'nroDocumento' => $oTabla->nroDocumento, 
-			'fichaFamiliar' => $oTabla->fichaFamiliar, 
+			'nroHistoriaClinica' => $NroHistoriaClinica,
+			'apellidoPaterno' => $ApellidoPaterno,
+			'apellidoMaterno' => $ApellidoMaterno,
+			'primerNombre' => "",
+			'segundoNombre' => "",
+			'idDocIdentidad' => $IdDocIdentidad,
+			'nroDocumento' => $NroDocumento,
+			'fichaFamiliar' => "",
 		];
 
 		$data = \DB::select($query, $params);
 
 		return $data;
 	}
+
+    public static function Filtrar($NroHistoriaClinica = 0, $ApellidoPaterno = '', $ApellidoMaterno = '', $PrimerNombre = '', $SegundoNombre = '', $IdDocIdentidad = 0, $NroDocumento = '', $FichaFamiliar = '', $size = 50)
+    {
+        $page = request()->page;
+        $rowStart = ($page-1) * $size;
+
+        $params = [ 'size' => $size, 'rowStart' => $rowStart,];
+
+        $queryPag = "ORDER BY dbo.Pacientes.idPaciente OFFSET :rowStart ROWS FETCH NEXT :size ROWS ONLY";
+
+        $querySelect = "SELECT 
+		    dbo.Pacientes.IdPaciente, 
+			dbo.Pacientes.ApellidoPaterno, 
+			dbo.Pacientes.ApellidoMaterno, 
+			dbo.Pacientes.PrimerNombre, 
+			dbo.Pacientes.SegundoNombre, 
+			dbo.Pacientes.NroHistoriaClinica, 
+			dbo.Pacientes.fichaFamiliar,
+			dbo.Pacientes.FechaNacimiento, 
+			dbo.TiposServicio.Descripcion AS TipoServicio, 
+			dbo.Servicios.Nombre AS ServicioIngreso, 
+			dbo.TiposNumeracionHistoria.Descripcion AS TipoNumeracion, 
+			dbo.Pacientes.IdTipoNumeracion, 
+			CONVERT(char(10), dbo.Atenciones.FechaIngreso, 103) AS FechaIngreso, 
+			CONVERT(char(10), dbo.Atenciones.FechaEgreso, 103) AS FechaEgreso";
+
+        $queryFrom = " FROM dbo.Pacientes 
+			LEFT OUTER JOIN dbo.TiposNumeracionHistoria ON dbo.Pacientes.IdTipoNumeracion = dbo.TiposNumeracionHistoria.IdTipoNumeracion
+			LEFT OUTER JOIN dbo.Atenciones ON dbo.Pacientes.IdPaciente = dbo.Atenciones.IdPaciente AND dbo.Atenciones.IdAtencion =
+															(SELECT MAX(IdAtencion) FROM Atenciones WHERE Atenciones.IdPaciente = Pacientes.IdPaciente) 
+			LEFT OUTER JOIN dbo.Servicios ON dbo.Servicios.IdServicio = dbo.Atenciones.IdServicioIngreso 
+			LEFT OUTER JOIN dbo.TiposServicio ON dbo.TiposServicio.IdTipoServicio = dbo.Atenciones.IdTipoServicio";
+
+        $queryWhere = " WHERE 1=1 ";
+
+
+        if( $NroHistoriaClinica > 0 ) $queryWhere .= " AND Pacientes.NroHistoriaClinica = $NroHistoriaClinica";
+        if( $ApellidoPaterno <> '' ) $queryWhere .= " AND Pacientes.ApellidoPaterno like '$ApellidoPaterno%' ";
+        if( $ApellidoMaterno <> '' ) $queryWhere .= " AND Pacientes.ApellidoMaterno like '$ApellidoMaterno%' ";
+        if( $PrimerNombre <> '' ) $queryWhere .= " AND Pacientes.PrimerNombre like '$PrimerNombre%' ";
+        if( $SegundoNombre <> '' ) $queryWhere .= " AND Pacientes.SegundoNombre like '$SegundoNombre%' ";
+        if( $FichaFamiliar <> '') $queryWhere .= " AND Pacientes.FichaFamiliar like $FichaFamiliar";
+        if( $NroDocumento <> '') $queryWhere .= " AND Pacientes.NroDocumento = '$NroDocumento' AND Pacientes.idDocIdentidad = $IdDocIdentidad ";
+
+
+        $queryItems = $querySelect . $queryFrom . $queryWhere .$queryPag;
+
+        $queryCount = "SELECT count(*) total" . $queryFrom . $queryWhere;
+
+        $items = DB::select( $queryItems, $params );
+
+        $count = DB::select( $queryCount );
+        $total = reset( $count )->total; // first element of array
+
+        $pag = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect ( $items )->forPage(1, $size),
+            $total,
+            $size,
+            $page
+        );
+
+        return $pag;
+    }
 
 	public function FiltrarConHistoriasTemporales($oTabla)
 	{
@@ -338,14 +452,14 @@ class Pacientes extends Model
 		return $data;
 	}
 
-	public function ObtenerConLaMismaHistoriaDefinitiva($oTabla)
+	public static function ObtenerConLaMismaHistoriaDefinitiva($NroHistoriaClinica, $IdPaciente)
 	{
 		$query = "
 			EXEC PacientesObtenerConLaMismaHistoriaDefinitiva :nroHistoriaClinica, :idPaciente";
 
 		$params = [
-			'nroHistoriaClinica' => $oTabla->nroHistoriaClinica, 
-			'idPaciente' => $oTabla->idPaciente, 
+			'nroHistoriaClinica' => $NroHistoriaClinica,
+			'idPaciente' => $IdPaciente,
 		];
 
 		$data = \DB::select($query, $params);
@@ -353,14 +467,14 @@ class Pacientes extends Model
 		return $data;
 	}
 
-	public function ObtenerConElMismoAutogenerado($oTabla)
+	public static function ObtenerConElMismoAutogenerado($autoGenerado, $IdPaciente)
 	{
 		$query = "
 			EXEC PacientesObtenerConElMismoAutogenerado :autogenerado, :idPaciente";
 
 		$params = [
-			'autogenerado' => $oTabla->autogenerado, 
-			'idPaciente' => $oTabla->idPaciente, 
+			'autogenerado' => $autoGenerado,
+			'idPaciente' => $IdPaciente,
 		];
 
 		$data = \DB::select($query, $params);
@@ -490,14 +604,14 @@ class Pacientes extends Model
 		return $data;
 	}
 
-	public function PacientesFiltraPorNroDocumentoYtipo($lcNroDocumento, $lnIdDocIdentidad)
+	public static function PacientesFiltraPorNroDocumentoYtipo($NroDocumento, $IdDocIdentidad)
 	{
 		$query = "
 			EXEC PacientesFiltraPorNroDocumentoYtipo :nroDocumento, :idDocIdentidad";
 
 		$params = [
-			'nroDocumento' => $lcNroDocumento, 
-			'idDocIdentidad' => $lnIdDocIdentidad, 
+			'nroDocumento' => $NroDocumento,
+			'idDocIdentidad' => $IdDocIdentidad,
 		];
 
 		$data = \DB::select($query, $params);

@@ -11,7 +11,7 @@ function execute( $function, $params=[], $first=false, $conexion='sqlsrv')
     $inputs = ( count($params) >0 )? substr($inputs, 0, strlen($inputs)-1): "";
 
     $query = "EXEC $function $inputs";
-    
+
     $data = !$first? \DB::connection($conexion)->select( $query, $params): \DB::connection($conexion)->update( $query, $params);
 
     if( $first && isset($data[0]) ) $data = $data[0];
@@ -52,7 +52,7 @@ function validate_args($function, $params, $args)
 //     $inputs = ( count($params) >0 )? substr($inputs, 0, strlen($inputs)-1): "";
 
 //     $query = "SELECT * FROM $function ($inputs)";
-    
+
 //     $data = \DB::select( $query, $params);
 
 //     if( $first && isset($data[0]) ) $data = $data[0];
@@ -118,7 +118,7 @@ function getData( $array)
 
 function jsonClass( $attr = [] )
 {
-    return json_decode( json_encode( $attr )); 
+    return json_decode( json_encode( $attr ));
 }
 
 
@@ -170,7 +170,7 @@ function dbParam( $idParam ){
 function AuditoriaAgregarV ($idUsuario, $accion, $idRegistroTabla, $tabla, $idListItem, $nombrePc, $observaciones)
 {
     $sql = 'EXEC AuditoriaAgregarV :idUsuario, :accion, :idRegistroTabla, :tabla, :idListItem, :nombrePc, :observaciones';
-    $params = [ 
+    $params = [
         'idUsuario' => $idUsuario,
         'accion' => $accion,
         'idRegistroTabla' => $idRegistroTabla,
@@ -211,7 +211,7 @@ function calcularEdad($fechaNacimiento, $fechaActual = null ){
     $diaActual = date('d',strtotime($fechaActual));
     $horaActual = date('H',strtotime($fechaActual));
     $minutoActual = date('i',strtotime($fechaActual));
-    
+
     $anoNacimiento = date('Y',strtotime($fechaNacimiento));
     $mesNacimiento = date('m',strtotime($fechaNacimiento));
     $diaNacimiento = date('d',strtotime($fechaNacimiento));
@@ -260,13 +260,13 @@ function zeroFill ($valor, $long = 0)
 
 
 function dateFormat($date, $format=null)
-{   
+{
     if(!$date) return null;
 
     if($format){
         return date($format, strtotime($date));
     }
-    
+
     return $date;
 }
 
@@ -282,7 +282,7 @@ function nextId($table, $pk)
 
 function menuArray()
 {
-    $data = 
+    $data =
     [
         [
             'label' => 'Fact - Config',
@@ -330,9 +330,9 @@ function menuArray()
 
 
 function pruebaValidada($idMovimiento, $idOrden)
-{   
+{
     $idItemValidar = 100;
-    $sql = 
+    $sql =
     "SELECT  TOP 1
     ic.idItem, ri.idOrden, ri.idProductoCpt, ri.ordenXresultado, ri.ValorCheck
     FROM LabMovimientoLaboratorio ml
@@ -384,7 +384,7 @@ function getStringBetween($string, $start, $end){
     $string = " ".$string;
     $ini = strpos($string,$start);
     if ($ini == 0) return "";
-    $ini += strlen($start);   
+    $ini += strlen($start);
     $len = strpos($string,$end,$ini) - $ini;
     return substr($string,$ini,$len);
 }
@@ -404,7 +404,7 @@ function normaliza($cadena){
     $modificadas = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
     $cadena = utf8_decode($cadena);
     $cadena = strtr($cadena, utf8_decode($originales), $modificadas);
-    
+
     return utf8_encode($cadena);
 }
 
@@ -431,7 +431,7 @@ function buildDataPagination($items, $perPage=10, $request){
     $paginatedItems= new $LapClass($currentPageItems , count($itemCollection), $perPage);
     // set url path for generted links
     $paginatedItems->setPath($request->url());
-    
+
     return $paginatedItems;
 }
 
@@ -467,4 +467,28 @@ function imprimeJSON($estado, $mensaje = '', $datos = null)
     $response["datos"]	= $datos;
 
     echo json_encode($response);
+}
+
+function horasAMinunos($hora)
+{
+    $horaArray = explode(':', $hora);
+    $minutos = ( intval($horaArray[0]) * 60 ) + intval($horaArray[1]);
+    return $minutos;
+}
+
+function minutosAHoras( $minutos )
+{
+    $horas = intval($minutos / 60);
+    if ($horas < 10 )
+    {
+        $horas = '0'.$horas;
+    }
+
+    $min = $minutos % 60;
+    if ($min < 10 )
+    {
+        $min = '0'.$min;
+    }
+    $hora = $horas .':'.$min;
+    return $hora;
 }

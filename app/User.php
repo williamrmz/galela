@@ -71,7 +71,7 @@ class User extends Authenticatable
                 ->leftJoin('listBarItems as bi', 'bi.idListItem', 'ri.idListItem')
                 ->whereRaw("ri.idRol IN (SELECT idRol from usuariosRoles where idEmpleado = $this->id_empleado)")
                 ->whereRaw("bi.Texto COLLATE Latin1_General_CI_AI = '$nombreItem' COLLATE Latin1_General_CI_AI");
-            
+
             if($accion=='AGREGAR') $query->where('ri.agregar', 1);
             if($accion=='MODIFICAR') $query->where('ri.modificar', 1);
             if($accion=='ELIMINAR') $query->where('ri.eliminar', 1);
@@ -109,11 +109,10 @@ class User extends Authenticatable
             ->orderBy('bi.Indice', 'asc')
             ->get();
 
-        // dd($data);
         $items = [];
         foreach ($data as $row)
         {
-            
+
             $items[$row->grupoClave]['id'] = $row->grupoId;
             $items[$row->grupoClave]['key'] = $row->grupoClave;
             $items[$row->grupoClave]['index'] = $row->grupoIndice;

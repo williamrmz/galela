@@ -12,44 +12,44 @@ class Atenciones extends Model
 	{
 		$query = "
 			DECLARE @idAtencion AS Int = :idAtencion
-			SET NOCOUNT ON 
+			SET NOCOUNT ON
 			EXEC AtencionesAgregar :horaIngreso, :fechaIngreso, :idTipoServicio, :idPaciente, @idAtencion OUTPUT, :idTipoCondicionALEstab, :fechaEgresoAdministrativo, :idCamaEgreso, :idCamaIngreso, :idServicioEgreso, :idTipoAlta, :idCondicionAlta, :idTipoEdad, :idOrigenAtencion, :idDestinoAtencion, :horaEgresoAdministrativo, :idTipoCondicionAlServicio, :horaEgreso, :fechaEgreso, :idMedicoEgreso, :edad, :idEspecialidadMedico, :idMedicoIngreso, :idServicioIngreso, :idTipoGravedad, :idCuentaAtencion, :idFormaPago, :idUsuarioAuditoria, :idFuenteFinanciamiento, :idEstadoAtencion, :esPacienteExterno, :idSunasaPacienteHistorico, :idCondicionMaterna
 			SELECT @idAtencion AS idAtencion";
 
 		$params = [
-			'horaIngreso' => ($oTabla->horaIngreso == "")? Null: $oTabla->horaIngreso, 
-			'fechaIngreso' => ($oTabla->fechaIngreso == 0)? Null: $oTabla->fechaIngreso, 
-			'idTipoServicio' => ($oTabla->idTipoServicio == 0)? Null: $oTabla->idTipoServicio, 
-			'idPaciente' => ($oTabla->idPaciente == 0)? Null: $oTabla->idPaciente, 
-			'idAtencion' => 0, 
-			'idTipoCondicionALEstab' => ($oTabla->idTipoCondicionALEstab == 0)? Null: $oTabla->idTipoCondicionALEstab, 
-			'fechaEgresoAdministrativo' => ($oTabla->fechaEgresoAdministrativo == 0)? Null: $oTabla->fechaEgresoAdministrativo, 
-			'idCamaEgreso' => ($oTabla->idCamaEgreso == 0)? Null: $oTabla->idCamaEgreso, 
-			'idCamaIngreso' => ($oTabla->idCamaIngreso == 0)? Null: $oTabla->idCamaIngreso, 
-			'idServicioEgreso' => ($oTabla->idServicioEgreso == 0)? Null: $oTabla->idServicioEgreso, 
-			'idTipoAlta' => ($oTabla->idTipoAlta == 0)? Null: $oTabla->idTipoAlta, 
-			'idCondicionAlta' => ($oTabla->idCondicionAlta == 0)? Null: $oTabla->idCondicionAlta, 
-			'idTipoEdad' => ($oTabla->idTipoEdad == 0)? Null: $oTabla->idTipoEdad, 
-			'idOrigenAtencion' => ($oTabla->idOrigenAtencion == 0)? Null: $oTabla->idOrigenAtencion, 
-			'idDestinoAtencion' => ($oTabla->idDestinoAtencion == 0)? Null: $oTabla->idDestinoAtencion, 
-			'horaEgresoAdministrativo' => ($oTabla->horaEgresoAdministrativo == "")? Null: $oTabla->horaEgresoAdministrativo, 
-			'idTipoCondicionAlServicio' => ($oTabla->idTipoCondicionAlServicio == 0)? Null: $oTabla->idTipoCondicionAlServicio, 
-			'horaEgreso' => ($oTabla->horaEgreso == "")? Null: $oTabla->horaEgreso, 
-			'fechaEgreso' => ($oTabla->fechaEgreso == 0)? Null: $oTabla->fechaEgreso, 
-			'idMedicoEgreso' => ($oTabla->idMedicoEgreso == 0)? Null: $oTabla->idMedicoEgreso, 
-			'edad' => ($oTabla->edad == 0)? 0: $oTabla->edad, 
-			'idEspecialidadMedico' => ($oTabla->idEspecialidadMedico == 0)? Null: $oTabla->idEspecialidadMedico, 
-			'idMedicoIngreso' => ($oTabla->idMedicoIngreso == 0)? Null: $oTabla->idMedicoIngreso, 
-			'idServicioIngreso' => ($oTabla->idServicioIngreso == 0)? Null: $oTabla->idServicioIngreso, 
-			'idTipoGravedad' => ($oTabla->idTipoGravedad == 0)? Null: $oTabla->idTipoGravedad, 
-			'idCuentaAtencion' => ($oTabla->idCuentaAtencion == 0)? Null: $oTabla->idCuentaAtencion, 
-			'idFormaPago' => ($oTabla->idFormaPago == 0)? Null: $oTabla->idFormaPago, 
-			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria, 
-			'idFuenteFinanciamiento' => ($oTabla->idFuenteFinanciamiento == 0)? Null: $oTabla->idFuenteFinanciamiento, 
-			'idEstadoAtencion' => $oTabla->idEstadoAtencion, 
-			'esPacienteExterno' => ($oTabla->esPacienteExterno == True)? 1: 0, 
-			'idSunasaPacienteHistorico' => ($oTabla->idSunasaPacienteHistorico == 0)? Null: $oTabla->idSunasaPacienteHistorico, 
-			'idCondicionMaterna' => ($oTabla->idCondicionMaterna == 0)? Null: $oTabla->idCondicionMaterna, 
+			'horaIngreso' => ($oTabla->horaIngreso == "")? Null: $oTabla->horaIngreso,
+			'fechaIngreso' => ($oTabla->fechaIngreso == 0)? Null: $oTabla->fechaIngreso,
+			'idTipoServicio' => ($oTabla->idTipoServicio == 0)? Null: $oTabla->idTipoServicio,
+			'idPaciente' => ($oTabla->idPaciente == 0)? Null: $oTabla->idPaciente,
+			'idAtencion' => 0,
+			'idTipoCondicionALEstab' => ($oTabla->idTipoCondicionALEstab == 0)? Null: $oTabla->idTipoCondicionALEstab,
+			'fechaEgresoAdministrativo' => ($oTabla->fechaEgresoAdministrativo == 0)? Null: $oTabla->fechaEgresoAdministrativo,
+			'idCamaEgreso' => ($oTabla->idCamaEgreso == 0)? Null: $oTabla->idCamaEgreso,
+			'idCamaIngreso' => ($oTabla->idCamaIngreso == 0)? Null: $oTabla->idCamaIngreso,
+			'idServicioEgreso' => ($oTabla->idServicioEgreso == 0)? Null: $oTabla->idServicioEgreso,
+			'idTipoAlta' => ($oTabla->idTipoAlta == 0)? Null: $oTabla->idTipoAlta,
+			'idCondicionAlta' => ($oTabla->idCondicionAlta == 0)? Null: $oTabla->idCondicionAlta,
+			'idTipoEdad' => ($oTabla->idTipoEdad == 0)? Null: $oTabla->idTipoEdad,
+			'idOrigenAtencion' => ($oTabla->idOrigenAtencion == 0)? Null: $oTabla->idOrigenAtencion,
+			'idDestinoAtencion' => ($oTabla->idDestinoAtencion == 0)? Null: $oTabla->idDestinoAtencion,
+			'horaEgresoAdministrativo' => ($oTabla->horaEgresoAdministrativo == "")? Null: $oTabla->horaEgresoAdministrativo,
+			'idTipoCondicionAlServicio' => ($oTabla->idTipoCondicionAlServicio == 0)? Null: $oTabla->idTipoCondicionAlServicio,
+			'horaEgreso' => ($oTabla->horaEgreso == "")? Null: $oTabla->horaEgreso,
+			'fechaEgreso' => ($oTabla->fechaEgreso == 0)? Null: $oTabla->fechaEgreso,
+			'idMedicoEgreso' => ($oTabla->idMedicoEgreso == 0)? Null: $oTabla->idMedicoEgreso,
+			'edad' => ($oTabla->edad == 0)? 0: $oTabla->edad,
+			'idEspecialidadMedico' => ($oTabla->idEspecialidadMedico == 0)? Null: $oTabla->idEspecialidadMedico,
+			'idMedicoIngreso' => ($oTabla->idMedicoIngreso == 0)? Null: $oTabla->idMedicoIngreso,
+			'idServicioIngreso' => ($oTabla->idServicioIngreso == 0)? Null: $oTabla->idServicioIngreso,
+			'idTipoGravedad' => ($oTabla->idTipoGravedad == 0)? Null: $oTabla->idTipoGravedad,
+			'idCuentaAtencion' => ($oTabla->idCuentaAtencion == 0)? Null: $oTabla->idCuentaAtencion,
+			'idFormaPago' => ($oTabla->idFormaPago == 0)? Null: $oTabla->idFormaPago,
+			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria,
+			'idFuenteFinanciamiento' => ($oTabla->idFuenteFinanciamiento == 0)? Null: $oTabla->idFuenteFinanciamiento,
+			'idEstadoAtencion' => $oTabla->idEstadoAtencion,
+			'esPacienteExterno' => ($oTabla->esPacienteExterno == True)? 1: 0,
+			'idSunasaPacienteHistorico' => ($oTabla->idSunasaPacienteHistorico == 0)? Null: $oTabla->idSunasaPacienteHistorico,
+			'idCondicionMaterna' => ($oTabla->idCondicionMaterna == 0)? Null: $oTabla->idCondicionMaterna,
 		];
 
 		$data = \DB::select($query, $params);
@@ -65,39 +65,39 @@ class Atenciones extends Model
 			EXEC AtencionesModificar :horaIngreso, :fechaIngreso, :idTipoServicio, :idPaciente, :idAtencion, :idTipoCondicionALEstab, :fechaEgresoAdministrativo, :idCamaEgreso, :idCamaIngreso, :idServicioEgreso, :idTipoAlta, :idCondicionAlta, :idTipoEdad, :idOrigenAtencion, :idDestinoAtencion, :horaEgresoAdministrativo, :idTipoCondicionAlServicio, :horaEgreso, :fechaEgreso, :idMedicoEgreso, :edad, :idEspecialidadMedico, :idMedicoIngreso, :idServicioIngreso, :idTipoGravedad, :idCuentaAtencion, :idFormaPago, :idUsuarioAuditoria, :idFuenteFinanciamiento, :idEstadoAtencion, :esPacienteExterno, :idSunasaPacienteHistorico, :idCondicionMaterna";
 
 		$params = [
-			'horaIngreso' => ($oTabla->horaIngreso == "")? Null: $oTabla->horaIngreso, 
-			'fechaIngreso' => ($oTabla->fechaIngreso == 0)? Null: $oTabla->fechaIngreso, 
-			'idTipoServicio' => ($oTabla->idTipoServicio == 0)? Null: $oTabla->idTipoServicio, 
-			'idPaciente' => ($oTabla->idPaciente == 0)? Null: $oTabla->idPaciente, 
-			'idAtencion' => ($oTabla->idAtencion == 0)? Null: $oTabla->idAtencion, 
-			'idTipoCondicionALEstab' => ($oTabla->idTipoCondicionALEstab == 0)? Null: $oTabla->idTipoCondicionALEstab, 
-			'fechaEgresoAdministrativo' => ($oTabla->fechaEgresoAdministrativo == 0)? Null: $oTabla->fechaEgresoAdministrativo, 
-			'idCamaEgreso' => ($oTabla->idCamaEgreso == 0)? Null: $oTabla->idCamaEgreso, 
-			'idCamaIngreso' => ($oTabla->idCamaIngreso == 0)? Null: $oTabla->idCamaIngreso, 
-			'idServicioEgreso' => ($oTabla->idServicioEgreso == 0)? Null: $oTabla->idServicioEgreso, 
-			'idTipoAlta' => ($oTabla->idTipoAlta == 0)? Null: $oTabla->idTipoAlta, 
-			'idCondicionAlta' => ($oTabla->idCondicionAlta == 0)? Null: $oTabla->idCondicionAlta, 
-			'idTipoEdad' => ($oTabla->idTipoEdad == 0)? Null: $oTabla->idTipoEdad, 
-			'idOrigenAtencion' => ($oTabla->idOrigenAtencion == 0)? Null: $oTabla->idOrigenAtencion, 
-			'idDestinoAtencion' => ($oTabla->idDestinoAtencion == 0)? Null: $oTabla->idDestinoAtencion, 
-			'horaEgresoAdministrativo' => ($oTabla->horaEgresoAdministrativo == "")? Null: $oTabla->horaEgresoAdministrativo, 
-			'idTipoCondicionAlServicio' => ($oTabla->idTipoCondicionAlServicio == 0)? Null: $oTabla->idTipoCondicionAlServicio, 
-			'horaEgreso' => ($oTabla->horaEgreso == "")? Null: $oTabla->horaEgreso, 
-			'fechaEgreso' => ($oTabla->fechaEgreso == 0)? Null: $oTabla->fechaEgreso, 
-			'idMedicoEgreso' => ($oTabla->idMedicoEgreso == 0)? Null: $oTabla->idMedicoEgreso, 
-			'edad' => ($oTabla->edad == 0)? 0: $oTabla->edad, 
-			'idEspecialidadMedico' => ($oTabla->idEspecialidadMedico == 0)? Null: $oTabla->idEspecialidadMedico, 
-			'idMedicoIngreso' => ($oTabla->idMedicoIngreso == 0)? Null: $oTabla->idMedicoIngreso, 
-			'idServicioIngreso' => ($oTabla->idServicioIngreso == 0)? Null: $oTabla->idServicioIngreso, 
-			'idTipoGravedad' => ($oTabla->idTipoGravedad == 0)? Null: $oTabla->idTipoGravedad, 
-			'idCuentaAtencion' => ($oTabla->idCuentaAtencion == 0)? Null: $oTabla->idCuentaAtencion, 
-			'idFormaPago' => ($oTabla->idFormaPago == 0)? Null: $oTabla->idFormaPago, 
-			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria, 
-			'idFuenteFinanciamiento' => ($oTabla->idFuenteFinanciamiento == 0)? Null: $oTabla->idFuenteFinanciamiento, 
-			'idEstadoAtencion' => $oTabla->idEstadoAtencion, 
-			'esPacienteExterno' => ($oTabla->esPacienteExterno == True)? 1: 0, 
-			'idSunasaPacienteHistorico' => ($oTabla->idSunasaPacienteHistorico == 0)? Null: $oTabla->idSunasaPacienteHistorico, 
-			'idCondicionMaterna' => ($oTabla->idCondicionMaterna == 0)? Null: $oTabla->idCondicionMaterna, 
+			'horaIngreso' => ($oTabla->horaIngreso == "")? Null: $oTabla->horaIngreso,
+			'fechaIngreso' => ($oTabla->fechaIngreso == 0)? Null: $oTabla->fechaIngreso,
+			'idTipoServicio' => ($oTabla->idTipoServicio == 0)? Null: $oTabla->idTipoServicio,
+			'idPaciente' => ($oTabla->idPaciente == 0)? Null: $oTabla->idPaciente,
+			'idAtencion' => ($oTabla->idAtencion == 0)? Null: $oTabla->idAtencion,
+			'idTipoCondicionALEstab' => ($oTabla->idTipoCondicionALEstab == 0)? Null: $oTabla->idTipoCondicionALEstab,
+			'fechaEgresoAdministrativo' => ($oTabla->fechaEgresoAdministrativo == 0)? Null: $oTabla->fechaEgresoAdministrativo,
+			'idCamaEgreso' => ($oTabla->idCamaEgreso == 0)? Null: $oTabla->idCamaEgreso,
+			'idCamaIngreso' => ($oTabla->idCamaIngreso == 0)? Null: $oTabla->idCamaIngreso,
+			'idServicioEgreso' => ($oTabla->idServicioEgreso == 0)? Null: $oTabla->idServicioEgreso,
+			'idTipoAlta' => ($oTabla->idTipoAlta == 0)? Null: $oTabla->idTipoAlta,
+			'idCondicionAlta' => ($oTabla->idCondicionAlta == 0)? Null: $oTabla->idCondicionAlta,
+			'idTipoEdad' => ($oTabla->idTipoEdad == 0)? Null: $oTabla->idTipoEdad,
+			'idOrigenAtencion' => ($oTabla->idOrigenAtencion == 0)? Null: $oTabla->idOrigenAtencion,
+			'idDestinoAtencion' => ($oTabla->idDestinoAtencion == 0)? Null: $oTabla->idDestinoAtencion,
+			'horaEgresoAdministrativo' => ($oTabla->horaEgresoAdministrativo == "")? Null: $oTabla->horaEgresoAdministrativo,
+			'idTipoCondicionAlServicio' => ($oTabla->idTipoCondicionAlServicio == 0)? Null: $oTabla->idTipoCondicionAlServicio,
+			'horaEgreso' => ($oTabla->horaEgreso == "")? Null: $oTabla->horaEgreso,
+			'fechaEgreso' => ($oTabla->fechaEgreso == 0)? Null: $oTabla->fechaEgreso,
+			'idMedicoEgreso' => ($oTabla->idMedicoEgreso == 0)? Null: $oTabla->idMedicoEgreso,
+			'edad' => ($oTabla->edad == 0)? 0: $oTabla->edad,
+			'idEspecialidadMedico' => ($oTabla->idEspecialidadMedico == 0)? Null: $oTabla->idEspecialidadMedico,
+			'idMedicoIngreso' => ($oTabla->idMedicoIngreso == 0)? Null: $oTabla->idMedicoIngreso,
+			'idServicioIngreso' => ($oTabla->idServicioIngreso == 0)? Null: $oTabla->idServicioIngreso,
+			'idTipoGravedad' => ($oTabla->idTipoGravedad == 0)? Null: $oTabla->idTipoGravedad,
+			'idCuentaAtencion' => ($oTabla->idCuentaAtencion == 0)? Null: $oTabla->idCuentaAtencion,
+			'idFormaPago' => ($oTabla->idFormaPago == 0)? Null: $oTabla->idFormaPago,
+			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria,
+			'idFuenteFinanciamiento' => ($oTabla->idFuenteFinanciamiento == 0)? Null: $oTabla->idFuenteFinanciamiento,
+			'idEstadoAtencion' => $oTabla->idEstadoAtencion,
+			'esPacienteExterno' => ($oTabla->esPacienteExterno == True)? 1: 0,
+			'idSunasaPacienteHistorico' => ($oTabla->idSunasaPacienteHistorico == 0)? Null: $oTabla->idSunasaPacienteHistorico,
+			'idCondicionMaterna' => ($oTabla->idCondicionMaterna == 0)? Null: $oTabla->idCondicionMaterna,
 		];
 
 		$data = \DB::update($query, $params);
@@ -111,8 +111,8 @@ class Atenciones extends Model
 			EXEC AtencionesEliminar :idAtencion, :idUsuarioAuditoria";
 
 		$params = [
-			'idAtencion' => ($oTabla->idAtencion == 0)? Null: $oTabla->idAtencion, 
-			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria, 
+			'idAtencion' => ($oTabla->idAtencion == 0)? Null: $oTabla->idAtencion,
+			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria,
 		];
 
 		$data = \DB::update($query, $params);
@@ -126,7 +126,7 @@ class Atenciones extends Model
 			EXEC AtencionesSeleccionarPorId :idAtencion";
 
 		$params = [
-			'idAtencion' => $oTabla->idAtencion, 
+			'idAtencion' => $oTabla->idAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -134,15 +134,14 @@ class Atenciones extends Model
 		return $data;
 	}
 
-	public function AtencionesPacientesCitasDatosadicionalesSeleccionarPorId()
+	public static function AtencionesSeleccionarPorIdAtencion($idAtencion)
 	{
 		$query = "
-			EXEC AtencionesSeleccionarPorIdAtencionEnAtencionesAtencionesdatosadicionalesPacientes :idCita, :idAtencion";
+			EXEC AtencionesSeleccionarPorIdAtencion :idAtencion";
 
-		// $params = [
-		// 	'idCita' => DoCita->idCita, 
-		// 	'idAtencion' => oTabla->idAtencion, 
-		// ];
+		 $params = [
+		 	'idAtencion' => $idAtencion,
+		 ];
 
 		$data = \DB::select($query, $params);
 
@@ -155,8 +154,8 @@ class Atenciones extends Model
 			EXEC CitasActualizarConIdAtencion :idAtencion, :idCita";
 
 		$params = [
-			'idAtencion' => $idAtencion, 
-			'idCita' => IdCita, 
+			'idAtencion' => $idAtencion,
+			'idCita' => IdCita,
 		];
 
 		$data = \DB::update($query, $params);
@@ -170,7 +169,7 @@ class Atenciones extends Model
 			EXEC ListarDatosAltaMedica :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -184,7 +183,7 @@ class Atenciones extends Model
 			EXEC AtencionesReporteParaHistoriaClinica :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -198,7 +197,7 @@ class Atenciones extends Model
 			EXEC AtencionesReporteParaEmergencia :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -212,7 +211,7 @@ class Atenciones extends Model
 			EXEC AtencionesHistoriaClinicaAnamnesis :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -226,7 +225,7 @@ class Atenciones extends Model
 			EXEC AtencionesEsObservacion :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -240,7 +239,7 @@ class Atenciones extends Model
 			EXEC AtencionesHistoriaClinicaTratamiento :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -254,7 +253,7 @@ class Atenciones extends Model
 			EXEC AtencionesHistoriaClinicaPlan :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -268,7 +267,7 @@ class Atenciones extends Model
 			EXEC AtencionesHistoriaClinicaDiagnosticos :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -282,7 +281,7 @@ class Atenciones extends Model
 			EXEC AtencionesHistoriaClinicaEvolucion :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -296,7 +295,7 @@ class Atenciones extends Model
 			EXEC AtencionesHistoriaClinicaAlta :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -310,7 +309,7 @@ class Atenciones extends Model
 			EXEC AtencionesHistoriaClinicaAltaTopico :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -324,7 +323,7 @@ class Atenciones extends Model
 			EXEC ImprimirAtencionAnamnesisCE :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -338,7 +337,7 @@ class Atenciones extends Model
 			EXEC ImprimirAtencionAntecedentes :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdPaciente, 
+			'idAtencion' => $lIdPaciente,
 		];
 
 		$data = \DB::select($query, $params);
@@ -352,7 +351,7 @@ class Atenciones extends Model
 			EXEC ImprimirAtencionDatosAdicionales :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -366,7 +365,7 @@ class Atenciones extends Model
 			EXEC ListarDiagnosticoIngreso :idCuenta";
 
 		$params = [
-			'idCuenta' => $lIdAtencion, 
+			'idCuenta' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -380,7 +379,7 @@ class Atenciones extends Model
 			EXEC ListarDiagnosticoTransferencia :idCuenta";
 
 		$params = [
-			'idCuenta' => $lIdAtencion, 
+			'idCuenta' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -394,7 +393,7 @@ class Atenciones extends Model
 			EXEC ListarDiagnosticoEgreso :idCuenta";
 
 		$params = [
-			'idCuenta' => $lIdAtencion, 
+			'idCuenta' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -408,7 +407,7 @@ class Atenciones extends Model
 			EXEC ListarFacturacionServicioDespacho :idCuenta ";
 
 		$params = [
-			'idCuenta ' => $lIdAtencion, 
+			'idCuenta ' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -422,7 +421,7 @@ class Atenciones extends Model
 			EXEC ListarDiagnosticoCIE10 :idCuenta";
 
 		$params = [
-			'idCuenta' => $lIdAtencion, 
+			'idCuenta' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -436,7 +435,7 @@ class Atenciones extends Model
 			EXEC AtencionesReporteProcedencia :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -450,8 +449,8 @@ class Atenciones extends Model
 			EXEC atencionesMaxAtencionesXPacienteYTipoServicio :lIdPaciente, :lTipoServicio";
 
 		$params = [
-			'lIdPaciente' => $lIdPaciente, 
-			'lTipoServicio' => $lTipoServicio, 
+			'lIdPaciente' => $lIdPaciente,
+			'lTipoServicio' => $lTipoServicio,
 		];
 
 		$data = \DB::select($query, $params);
@@ -465,8 +464,8 @@ class Atenciones extends Model
 			EXEC AtencionesMaxAtencionesXPacienteYCuenta :lIdPaciente, :idCuentaAtencion";
 
 		$params = [
-			'lIdPaciente' => $lIdPaciente, 
-			'idCuentaAtencion' => IdCuentaAtencion, 
+			'lIdPaciente' => $lIdPaciente,
+			'idCuentaAtencion' => IdCuentaAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -480,7 +479,7 @@ class Atenciones extends Model
 			EXEC FiltrarConsultaExterna :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -494,7 +493,7 @@ class Atenciones extends Model
 			EXEC AtencionesEmergenciaSegunFiltro :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -508,7 +507,7 @@ class Atenciones extends Model
 			EXEC AtencionesFiltrarObservacionEmergencia :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -522,7 +521,7 @@ class Atenciones extends Model
 			EXEC AtencionesFiltrarEmergencia :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -536,7 +535,7 @@ class Atenciones extends Model
 			EXEC AtencionesFiltrarHospitalizacion :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -550,7 +549,7 @@ class Atenciones extends Model
 			EXEC AtencionesFiltrarPacientesParaIngresarProcedimientos :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -564,7 +563,7 @@ class Atenciones extends Model
      	$sSql = "";
      	if ($lnHistoriaClinica <> "") { //'JHIMI 13032018 de > 0  a <> ""
 			$sSql .=  " WHERE dbo.Pacientes.NroHistoriaClinica='" . $lnHistoriaClinica . "'" .
-                      "      and dbo.Atenciones.IdServicioIngreso=" . $lnIdServicio . 
+                      "      and dbo.Atenciones.IdServicioIngreso=" . $lnIdServicio .
                       "      and dbo.Atenciones.idTipoServicio=1  and dbo.Atenciones.esPacienteExterno<>1" .
                       " order by Atenciones.FechaIngreso asc, Atenciones.HoraIngreso asc, Pacientes.ApellidoPaterno, Pacientes.ApellidoMaterno, Pacientes.PrimerNombre";
 		}else if( $lnIdCuentaAtencion > 0 and $lnIdCuentaAtencion <> '') {
@@ -605,7 +604,7 @@ class Atenciones extends Model
 			EXEC AtencionesSeleccionarCEPorCuentaPorHistoriaPorApellidosPorServicio :lcFiltro";
 
 		$params = [
-			'lcFiltro' => $sSql, 
+			'lcFiltro' => $sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -619,7 +618,7 @@ class Atenciones extends Model
 			EXEC AtencionesSeleccionarEmergPorCuentaPorHistoriaPorApellidosPorServicio :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -633,8 +632,8 @@ class Atenciones extends Model
 			EXEC AtencionesSeleccionarHospPorCuentaPorHistoriaPorApellidosPorServicio :lcFiltro, :lcParametro289";
 
 		$params = [
-			'lcFiltro' => sSql, 
-			'lcParametro289' => lcParametro289, 
+			'lcFiltro' => sSql,
+			'lcParametro289' => lcParametro289,
 		];
 
 		$data = \DB::select($query, $params);
@@ -648,8 +647,8 @@ class Atenciones extends Model
 			EXEC AtencionesSeleccionarPacExtPorFechas :ldFechaIni, :ldFechaFin";
 
 		$params = [
-			'ldFechaIni' => $ldFechaIni, 
-			'ldFechaFin' => $ldFechaFin, 
+			'ldFechaIni' => $ldFechaIni,
+			'ldFechaFin' => $ldFechaFin,
 		];
 
 		$data = \DB::select($query, $params);
@@ -663,7 +662,7 @@ class Atenciones extends Model
 			EXEC AtencionesSeleccionarPacExtPorCuentaHistoriaApellidosServPARTIC :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -677,7 +676,7 @@ class Atenciones extends Model
 			EXEC AtencionesSeleccionarPacExtPorCuentaHistoriaApellidosServSEGUROS :lcFiltro";
 
 		$params = [
-			'lcFiltro' => sSql, 
+			'lcFiltro' => sSql,
 		];
 
 		$data = \DB::select($query, $params);
@@ -691,7 +690,7 @@ class Atenciones extends Model
 			EXEC atencionesXIdCuentaAtencion :idCuentaAtencion";
 
 		$params = [
-			'idCuentaAtencion' => $lnIdCuentaAtencion, 
+			'idCuentaAtencion' => $lnIdCuentaAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -705,11 +704,11 @@ class Atenciones extends Model
 			EXEC AtencionesDatosAdicionalesAltaInsertar :idCuenta, :pronostico, :recomendacionesyTratamiento, :enfermedadActual, :nroActaDef";
 
 		$params = [
-			'idCuenta' => $oTabla->idAtencion, 
-			'pronostico' => ($oTabla->pronostico == "")? Null: $oTabla->pronostico, 
-			'recomendacionesyTratamiento' => ($oTabla->recomendacionesyTratamiento == "")? Null: $oTabla->recomendacionesyTratamiento, 
-			'enfermedadActual' => ($oTabla->enfermedadActual == "")? Null: $oTabla->enfermedadActual, 
-			'nroActaDef' => ($oTabla->nroActaDef == "")? Null: $oTabla->nroActaDef, 
+			'idCuenta' => $oTabla->idAtencion,
+			'pronostico' => ($oTabla->pronostico == "")? Null: $oTabla->pronostico,
+			'recomendacionesyTratamiento' => ($oTabla->recomendacionesyTratamiento == "")? Null: $oTabla->recomendacionesyTratamiento,
+			'enfermedadActual' => ($oTabla->enfermedadActual == "")? Null: $oTabla->enfermedadActual,
+			'nroActaDef' => ($oTabla->nroActaDef == "")? Null: $oTabla->nroActaDef,
 		];
 
 		$data = \DB::select($query, $params);
@@ -723,7 +722,7 @@ class Atenciones extends Model
 			EXEC ListarDatosAdicionalesAltaMedica :idAtencion";
 
 		$params = [
-			'idAtencion' => $lnIdAtencion, 
+			'idAtencion' => $lnIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -737,7 +736,7 @@ class Atenciones extends Model
 			EXEC ListarMedicoEgresoAltaMedica :idAtencion";
 
 		$params = [
-			'idAtencion' => $lnIdAtencion, 
+			'idAtencion' => $lnIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -751,7 +750,7 @@ class Atenciones extends Model
 			EXEC AtencionesReporteParaProcedimientos :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -765,7 +764,7 @@ class Atenciones extends Model
 			EXEC ImprimirProcedimientos :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -779,7 +778,7 @@ class Atenciones extends Model
 			EXEC ListarExamenesConcepto :idCuenta";
 
 		$params = [
-			'idCuenta' => $lIdAtencion, 
+			'idCuenta' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -793,7 +792,7 @@ class Atenciones extends Model
 			EXEC ListarExamenesCantidad :idCuenta";
 
 		$params = [
-			'idCuenta' => $lIdAtencion, 
+			'idCuenta' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -807,7 +806,7 @@ class Atenciones extends Model
 			EXEC ListarDiagnosticoIngreso2 :idCuenta";
 
 		$params = [
-			'idCuenta' => $lIdAtencion, 
+			'idCuenta' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -821,7 +820,7 @@ class Atenciones extends Model
 			EXEC ListarDiagnosticoIngreso :idCuenta";
 
 		$params = [
-			'idCuenta' => $lIdAtencion, 
+			'idCuenta' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -835,7 +834,7 @@ class Atenciones extends Model
 			EXEC ListarObservacionCpt :idCuenta";
 
 		$params = [
-			'idCuenta' => $lIdAtencion, 
+			'idCuenta' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -849,7 +848,7 @@ class Atenciones extends Model
 			EXEC AtencionesDatosAltaMedica :idAtencion";
 
 		$params = [
-			'idAtencion' => $lnIdAtencion, 
+			'idAtencion' => $lnIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -863,7 +862,7 @@ class Atenciones extends Model
 			EXEC Evolucion_configInsert :idUsuario";
 
 		$params = [
-			'idUsuario' => $oTabla->idUsuarioAuditoria, 
+			'idUsuario' => $oTabla->idUsuarioAuditoria,
 		];
 
 		$data = \DB::select($query, $params);
@@ -877,7 +876,7 @@ class Atenciones extends Model
 			EXEC Concurrencia_configInsert :idUsuario";
 
 		$params = [
-			'idUsuario' => $oTabla->idUsuarioAuditoria, 
+			'idUsuario' => $oTabla->idUsuarioAuditoria,
 		];
 
 		$data = \DB::select($query, $params);
@@ -891,8 +890,8 @@ class Atenciones extends Model
 			EXEC AtencionesModificarIndicadores :idAtencion, :fIngresoIndicador";
 
 		$params = [
-			'idAtencion' => ($oTabla->idAtencion == 0)? Null: $oTabla->idAtencion, 
-			'fIngresoIndicador' => ($oTabla->fechaIngresoIndicador == 0)? Null: $oTabla->fechaIngresoIndicador, 
+			'idAtencion' => ($oTabla->idAtencion == 0)? Null: $oTabla->idAtencion,
+			'fIngresoIndicador' => ($oTabla->fechaIngresoIndicador == 0)? Null: $oTabla->fechaIngresoIndicador,
 		];
 
 		$data = \DB::update($query, $params);
@@ -906,7 +905,7 @@ class Atenciones extends Model
 			EXEC ListarPacienteSIS :idusuario";
 
 		$params = [
-			'idusuario' => $oTabla->idUsuarioAuditoria, 
+			'idusuario' => $oTabla->idUsuarioAuditoria,
 		];
 
 		$data = \DB::select($query, $params);
@@ -920,8 +919,8 @@ class Atenciones extends Model
 			EXEC CambiarEstadoPaciente :nroDocumento, :idusuario";
 
 		$params = [
-			'nroDocumento' => $oTabla->nroDocumento, 
-			'idusuario' => $oTabla->idUsuarioAuditoria, 
+			'nroDocumento' => $oTabla->nroDocumento,
+			'idusuario' => $oTabla->idUsuarioAuditoria,
 		];
 
 		$data = \DB::select($query, $params);
@@ -946,16 +945,16 @@ class Atenciones extends Model
 	{
 		$query = "
 			DECLARE @idAtencionDiagnostico AS Int = :idAtencionDiagnostico
-			SET NOCOUNT ON 
+			SET NOCOUNT ON
 			EXEC AtencionesDiagnosticosAgregarMortalidad @idAtencionDiagnostico OUTPUT, :idSubclasificacionDx, :idClasificacionDx, :idDiagnostico, :idAtencion
 			SELECT @idAtencionDiagnostico AS idAtencionDiagnostico";
 
 		$params = [
-			'idAtencionDiagnostico' => 0, 
-			'idSubclasificacionDx' => ($oTabla->idSubClasificacionDX == 0)? Null: $oTabla->idSubClasificacionDX, 
-			'idClasificacionDx' => ($oTabla->idClasificacionDx == 0)? Null: $oTabla->idClasificacionDx, 
-			'idDiagnostico' => ($oTabla->idDiagnostico == 0)? Null: $oTabla->idDiagnostico, 
-			'idAtencion' => ($oTabla->idAtencion == 0)? Null: $oTabla->idAtencion, 
+			'idAtencionDiagnostico' => 0,
+			'idSubclasificacionDx' => ($oTabla->idSubClasificacionDX == 0)? Null: $oTabla->idSubClasificacionDX,
+			'idClasificacionDx' => ($oTabla->idClasificacionDx == 0)? Null: $oTabla->idClasificacionDx,
+			'idDiagnostico' => ($oTabla->idDiagnostico == 0)? Null: $oTabla->idDiagnostico,
+			'idAtencion' => ($oTabla->idAtencion == 0)? Null: $oTabla->idAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -971,7 +970,7 @@ class Atenciones extends Model
 			EXEC FiltrarDiagxAtencionMortalidad :idCuenta";
 
 		$params = [
-			'idCuenta' => $oTabla->idAtencion, 
+			'idCuenta' => $oTabla->idAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -985,8 +984,8 @@ class Atenciones extends Model
 			EXEC EliminarDiagnosticoMortalidad :idAtencionDiagnostico, :idAtencion";
 
 		$params = [
-			'idAtencionDiagnostico' => $oTabla->idAtencionDiagnostico, 
-			'idAtencion' => $oTabla->idAtencion, 
+			'idAtencionDiagnostico' => $oTabla->idAtencionDiagnostico,
+			'idAtencion' => $oTabla->idAtencion,
 		];
 
 		$data = \DB::update($query, $params);
@@ -1000,7 +999,7 @@ class Atenciones extends Model
 			EXEC AtencionesReporteParaEspecialidad :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -1014,7 +1013,7 @@ class Atenciones extends Model
 			EXEC ListarDiagnosticoIngresoParaEspecialidad :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -1028,7 +1027,7 @@ class Atenciones extends Model
 			EXEC ListarDiagnosticosxIdAtencion :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -1042,7 +1041,7 @@ class Atenciones extends Model
 			EXEC ImprimirEspecialidades :idAtencion";
 
 		$params = [
-			'idAtencion' => $lIdAtencion, 
+			'idAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -1056,7 +1055,7 @@ class Atenciones extends Model
 			EXEC ListarEspecialidadesyDiagporIdcuenta :idCuentaAtencion";
 
 		$params = [
-			'idCuentaAtencion' => $lIdAtencion, 
+			'idCuentaAtencion' => $lIdAtencion,
 		];
 
 		$data = \DB::select($query, $params);
@@ -1070,8 +1069,8 @@ class Atenciones extends Model
 			EXEC AtencionesSeleccionarHospPorFechaIngreso :fechaIngreso, :tipoServicio";
 
 		$params = [
-			'fechaIngreso' => $ms_FechaIngreso, 
-			'tipoServicio' => $ml_TipoServicio, 
+			'fechaIngreso' => $ms_FechaIngreso,
+			'tipoServicio' => $ml_TipoServicio,
 		];
 
 		$data = \DB::select($query, $params);
@@ -1085,10 +1084,10 @@ class Atenciones extends Model
 			EXEC AgregarContraRefenciaDestino :idcuentaAtencion, :idTipoDestino, :tratamiento, :recomendaciones";
 
 		$params = [
-			'idcuentaAtencion' => ($oTabla->idCuentaAtencion == 0)? Null: $oTabla->idCuentaAtencion, 
-			'idTipoDestino' => ($oTabla->idDestino == 0)? Null: $oTabla->idDestino, 
-			'tratamiento' => ($oTabla->tratamiento == "")? Null: $oTabla->tratamiento, 
-			'recomendaciones' => ($oTabla->recomendaciones == "")? Null: $oTabla->recomendaciones, 
+			'idcuentaAtencion' => ($oTabla->idCuentaAtencion == 0)? Null: $oTabla->idCuentaAtencion,
+			'idTipoDestino' => ($oTabla->idDestino == 0)? Null: $oTabla->idDestino,
+			'tratamiento' => ($oTabla->tratamiento == "")? Null: $oTabla->tratamiento,
+			'recomendaciones' => ($oTabla->recomendaciones == "")? Null: $oTabla->recomendaciones,
 		];
 
 		$data = \DB::update($query, $params);

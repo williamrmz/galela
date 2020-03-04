@@ -13,6 +13,8 @@ class HistoriasClinicas extends Model
 
     protected $primaryKey = "NroHistoriaClinica";
 
+    public $timestamps = false;
+
     protected $fillable =
         [
             "NroHistoriaClinica",
@@ -26,6 +28,8 @@ class HistoriasClinicas extends Model
             "IdTipoNumeracionAnterior",
             "HistoriaSistemaAnterior"
         ];
+
+    public $incrementing = false;
 
 
 	public function Insertar($oTabla)
@@ -81,8 +85,8 @@ class HistoriasClinicas extends Model
 
 		$params = 
 		[
-			'nroHistoriaClinica' => ($oTabla->nroHistoriaClinica == "")? null: $oTabla->nroHistoriaClinica,
-			'idUsuarioAuditoria' => $oTabla->idUsuarioAuditoria, 
+			'nroHistoriaClinica' => ($oTabla->NroHistoriaClinica == "")? null: $oTabla->NroHistoriaClinica,
+			'idUsuarioAuditoria' => $oTabla->IdUsuarioAuditoria,
 		];
 
 		$data = \DB::update($query, $params);
@@ -103,12 +107,12 @@ class HistoriasClinicas extends Model
 		return $data;
 	}
 
-	public function GenerarNroHistoria($lTipoNumeracion)
+	public static function GenerarNroHistoria($idTipoNumeracion)
 	{
 		$lnNroHistoriaClinica = '';
 
 		$params = [
-			'idTipoNumeracion' => $lTipoNumeracion,
+			'idTipoNumeracion' => $idTipoNumeracion,
 			'nroHistoriaClinica' => 0,
 		];
 
@@ -116,10 +120,12 @@ class HistoriasClinicas extends Model
 		$lnNroHistoriaClinica = $dataTmp->nroHistoriaClinica;
 		$GenerarNroHistoria = $lnNroHistoriaClinica;
 
-		if( Enumerados::param('sghHistoriaDefinitivaAutomatica') == $lTipoNumeracion) {
+		if( Enumerados::param('sghHistoriaDefinitivaAutomatica') == $idTipoNumeracion)
+		{
 			$oRsTmp1 = execute('HistoriasClinicasSeleccionarPorId', ['nroHistoriaClinica'=>$lnNroHistoriaClinica]);
 
-			if( count( $oRsTmp1 ) > 0 ){
+			if( count( $oRsTmp1 ) > 0 )
+			{
 				$oRsTmp1 = execute('HistoriasClinicasUltimoGenerado');
 
 				$lnNroHistoriaClinica = $oRsTmp1[0]->nroHistoriaClinica + 1;

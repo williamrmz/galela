@@ -7,7 +7,7 @@
     {{-- <link rel="shortcut icon" href="{{ url('/storage/icons/app.ico') }}" /> --}}
 
     <link rel="icon" type="image/png" sizes="180x180" href="{{ url('/storage/icons/logo-180x180.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url('/storage/icons/logo-32x43.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url('/storage/icons/logo-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url('/storage/icons/logo-16x16.png') }}">
     {{-- <link rel="shortcut icon" href="/favicon.ico?v=lk9GwJGqxB"> --}}
 
@@ -134,6 +134,25 @@
 
         <!-- Main content -->
         <section class="content">
+            {{-- Mensajes de información --}}
+            @if(Session::has('msg'))
+                <div class="alert alert-success }}">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    {{ Session::get('msg') }}
+                </div>
+            @endif
+
+            {{-- Mensajes de error --}}
+            @if(count($errors))
+                <div class="alert alert-danger text-left">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    @foreach($errors->all() as $error)
+                        - {!! $error  !!}  <br>
+                    @endforeach
+
+                </div>
+            @endif
+
             @yield('content')
         </section>
         <!-- /.content -->

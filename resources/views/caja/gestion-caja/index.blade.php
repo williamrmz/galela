@@ -26,7 +26,9 @@
 				<div class="box-header with-border">
 					<h3 class="box-title"><i class="fa fa-dashboard"></i> Gestion de caja</h3>
 					<div class="box-tools pull-right">
-						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-create"> <i class="fa fa-plus"></i> Crear</a>
+						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-create"> <i class="fa fa-plus"></i> Abrir caja</a>
+						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-edit"> <i class="fa fa-plus"></i> Aperturar caja</a>
+						<a href="#" class="btn btn-primary btn-xs disabled" id="{{$model}}-btn-cerrar"> <i class="fa fa-close"></i> Cerrar caja</a>
 					</div>
 				</div>
 				<!-- /.box-header -->
@@ -61,6 +63,6 @@
 
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="{{ url('/js/caja/gestion-caja.js') }}"></script>
-@endsection
+@endpush

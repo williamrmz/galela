@@ -95,8 +95,46 @@ function initEventos() {
             minimumInputLength: 3,
         });
     });
+
+    // :: Buscar en RENIEC
+    $("input[name='txtNroDocumento']").focusout(function ()
+    {
+        var tipoDoc = $('select[name="cmbIdDocIdentidad"]').val();
+        if (tipoDoc=="1" && $("input[name='txtNroDocumento']").prop("readonly") == false)
+        {
+            var dni = $('input[name="txtNroDocumento"]').val();
+            buscarPacientexDNI(dni);
+        }
+    });
+
 }
 
+function buscarPacientexDNI(dni)
+{
+    if(dni.length==8)
+    {
+        overlay_title = "&nbsp; Consultando en RENIEC";
+        $.ajax({
+            data: {'nro_documento': dni }, url: url+'/api/service?name=getByDNI',
+            type:  'GET', dataType: 'json',
+            success:  function (response)
+            {
+                $('input[name="txtDocumento"]').val( $('select[name="cmbIdDocIdentidad"]').select2('data')[0].Descripcion );
+                $("input[name='txtApellidoPaterno']").val( response.ApellidoPaterno);
+                $("input[name='txtApellidoMaterno']").val( response.ApellidoMaterno);
+                $("input[name='txtNombres']").val( response.PrimerNombre+" "+response.SegundoNombre+" "+response.TercerNombre);
+                $("input[name='txtFechaNacimiento']").val( response.FechaNacimiento);
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+                if(jqXHR.status == 500)
+                {
+                    toastr.error("El servicio RENIEC no responde. <br> Ingrese los datos manualmente", 'Error');
+                }
+            }
+        });
+    }
+}
 function actionSave()
 {
     form = $('#' + model + '-form');
@@ -165,6 +203,7 @@ function initForm() {
     $("input[name=txtNroDocumento]").val("");
     $("input[name=txtApellidoPaterno]").val("");
     $("input[name=txtApellidoMaterno]").val("");
+    $("input[name=txtNombres]").val("");
     $("input[name=txtFechaNacimiento]").val("");
     $("input[name=txtCodigoPlanilla]").val("");
     $("input[name=txtColegiatura]").val("");
