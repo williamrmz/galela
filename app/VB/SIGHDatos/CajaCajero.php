@@ -81,7 +81,7 @@ class CajaCajero extends Model
 	public function SeleccionarTodos()
 	{
 		$query = "
-			EXEC CajaCajeroSeleccionarTodos ";
+			EXEC CajerosSeleccionarTodos ";
 
 		$params = [
 		];

@@ -4,6 +4,8 @@
 
 {{  Form::open(['route' => ['caja.cajas.store'], 'method'=>'POST', 'id'=>$model.'-form']) }}
 	<div class="row">
+	<fieldset class="scheduler-border">
+	<legend class="scheduler-border">Datos Generales</legend>
 		<div class="col-sm-3 form-group">
 			{{ Form::label('codigo', 'Codigo') }}
 			{{ Form::text('codigo', null, ['class'=>'form-control input-sm']) }}
@@ -19,18 +21,19 @@
 		<div class="col-sm-6 form-group">
 			{{ Form::label('impresoradefault', 'Impresora 1') }}
 			{{ Form::text('impresoradefault', null, ['class'=>'form-control input-sm']) }}
-			{{ Form::label('asd', 'Impresora asdas1') }}
 		</div>
 		<br>
 		<div class="col-sm-6 form-group">
 			{{ Form::label('impresora2', 'Impresora 2') }}
 			{{ Form::text('impresora2', null, ['class'=>'form-control input-sm']) }}
 		</div>
-		<br>
+		<br>  
 		<div class="col-sm-6 form-group">
 			{{ Form::label('cmbIdTipoComprobante', 'Tipo de Comprobante') }}
 			{{ Form::select('cmbIdTipoComprobante', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
 		</div>
+		<br>
+		</fieldset>
 		<fieldset class="scheduler-border">
 		<legend class="scheduler-border">Generación de Comprobantes</legend>
 		<div class="col-sm-12 form-group">

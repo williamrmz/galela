@@ -122,8 +122,10 @@ class CajasController extends Controller
 	{
 		switch($request->name)
 		{
-			case 'data-example':
-				return $this->getDataExample( $request );
+			case 'getData':
+				return $this->getData( $request );
+			case 'getDataNrosDocs':
+				return $this->getDataNrosDocs( $request );
 			default:
 				return null;
 		}
@@ -134,14 +136,17 @@ class CajasController extends Controller
 		return 'data example...';
 	}
 
+	private function getData( $request )
+	{
+		$cmbIdTipoComprobante = $this->om_TipoComprobantes->SeleccionarTodos();
+		$data['cmbIdTipoComprobante'] = $cmbIdTipoComprobante;
+		return $data;
+	}
 
-	public function listarTipoComprobante()
-	{	
-		$item = $this->om_TipoComprobantes->CajaTiposComprobanteSeleccionarTodos();
-		foreach ($item as $row) {
-            $row->id = $row->idTipoComprobante;
-            $row->text = $row->Descripcion;
-        }
+	private function getDataNrosDocs( $request )
+	{
+		$data = $this->om_TipoComprobantes->SeleccionarPorId($request->idCaja);
+		return $data;
 	}
 
 }
