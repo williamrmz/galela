@@ -78,6 +78,8 @@ function createItem()
             });
 
             $('#myModal').modal('show');
+
+            
         }
     });
 }

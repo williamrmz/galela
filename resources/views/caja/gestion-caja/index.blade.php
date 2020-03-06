@@ -34,17 +34,57 @@
 				<!-- /.box-header -->
 				<div class="box-body">
 					<div class="row">
-
 						<div class="col-sm-12">
 							{{ Form::open(['route' => ['caja.gestion-caja.index'], 
-								'id'=>"$model-form-search", 'method'=>'GET', 'class'=> 'form-inline pull-right']) }}
-								<div class="form-group">
-									{{ Form::text('search', null, ['class'=>"form-control input-sm $model-input-search"]) }}
-								</div>
-								<button type="submit" class="btn btn-sm btn-default" id="{{$model}}-btn-search" 
-									title="buscar"> <i class="fa fa-search"></i></button>
-								<a href="#" class="btn btn-sm btn-default" id="{{$model}}-btn-clear" 
-									title="limpiar"> <i class="fa fa-refresh"></i></a>
+								'id'=>"$model-form-search", 'method'=>'GET']) }}
+									<div class="row">
+										<div class="col-sm-1 form-group">
+											{{ Form::label('serie', 'Serie') }}
+											{{ Form::text('serie', null, ['class'=>'form-control input-sm']) }}
+										</div>
+										<div class="col-sm-1 form-group">
+											{{ Form::label('numDocumento', 'N° Docum') }}
+											{{ Form::text('numDocumento', null, ['class'=>'form-control input-sm']) }}
+										</div>
+										<div class="col-sm-1 form-group">
+											{{ Form::label('numHistoria', 'Nro Hist') }}
+											{{ Form::text('numHistoria', null, ['class'=>'form-control input-sm']) }}
+										</div>
+										<div class="col-sm-2 form-group">
+											{{ Form::label('cmbCaja', 'Caja') }}
+											{{ Form::select('cmbCaja', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
+										</div>
+										<div class="col-sm-1 form-group">
+											{{ Form::label('cmbTurno', 'Turno') }}
+											{{ Form::select('cmbTurno', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
+										</div>
+										<div class="col-sm-2 form-group">
+											{{ Form::label('rsocial', 'R. Social') }}
+											{{ Form::text('rsocial', null, ['class'=>'form-control input-sm']) }}
+										</div>	
+										<div class="col-sm-2 form-group">
+											{{ Form::label('fechaInicio', 'Fecha I.') }}
+											{{ Form::text('fechaInicio', date('d/m/2018 00:00:00'), ['class'=>'form-control input-sm']) }}
+										</div>
+										<div class="col-sm-2 form-group">
+											{{ Form::label('fechaFin', 'Fecha F.') }}
+											{{ Form::text('fechaFin', date('d/m/y 23:59:00'), ['class'=>'form-control input-sm']) }}
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-sm-12 form-group">
+											{{ Form::label('cmbCajero', 'Cajero') }}
+											{{ Form::select('cmbCajero', [], null, ['class'=>'form-control input-ss', 'style'=>'width:100%']) }}
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-sm-3 form-group">
+											<button type="submit" class="btn btn-sm btn-default" id="{{$model}}-btn-search" 
+											title="buscar"> <i class="fa fa-search"></i> Buscar</button>
+											<a href="#" class="btn btn-sm btn-default" id="{{$model}}-btn-clear" 
+											title="limpiar"> <i class="fa fa-refresh"></i></a>
+										</div>
+									</div>
 							{{ Form::close() }}
 						</div>
 
@@ -64,5 +104,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ url('/js/caja/gestion-caja.js') }}"></script>
+    <script src="{{ url('/js/caja/gestion-caja.js?v=Math.random();') }}"></script>
 @endpush
