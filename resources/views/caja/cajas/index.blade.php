@@ -27,9 +27,6 @@
 					<h3 class="box-title"><i class="fa fa-inbox text-blue"></i> Cajas</h3>
 					<div class="box-tools pull-right">
 						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-create"> <i class="fa fa-plus"></i> Agregar</a>
-						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-edit"> <i class="fa fa-plus"></i> Modificar</a>
-						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-edit"> <i class="fa fa-plus"></i> Consultar</a>
-						<a href="#" class="btn btn-primary btn-xs" id="{{$model}}-btn-cerrar"> <i class="fa fa-close"></i> Eliminar</a>
 					</div>
 				</div>
 				<!-- /.box-header -->
@@ -56,7 +53,6 @@
 								<br><br><br>
 						<div class="col-sm-12 periodos-tabla">
 							<div class="table-responsive {{$model}}-table">
-
 							</div>
 						</div>
 					</div>
