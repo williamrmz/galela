@@ -7,7 +7,7 @@
 		<div class="row">
 			<div class="col-sm-6 form-group">
 				{{ Form::label('codigo', 'Codigo') }}
-				{{ Form::text('codigo', null, ['class'=>'form-control input-sm']) }}
+				{{ Form::text('codigo', null, ['class'=>'form-control input-sm nrserie', 'maxlength' => 4]) }}
 			</div>
 			<div class="col-sm-6 form-group">
 				{{ Form::label('pc', 'Nombre de PC') }}
@@ -52,16 +52,16 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
+				<tr >
 						<td>Recibo</td>
 						<!--{{ Form::label('nroSerieRecibo', ' ') }}
 						{{ Form::label('nroDocIniRecibo', ' ') }}
 						{{ Form::label('nroDocFinRecibo', ' ') }}
 						{{ Form::label('nroUltDocRecibo', ' ') }} -->
-						<td>{{ Form::text('nroSerieRecibo', null, ['class'=>'form-control input-sm' ]) }}</td>
-						<td>{{ Form::text('nroDocIniRecibo', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroDocFinRecibo', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroUltDocRecibo', null, ['class'=>'form-control input-sm']) }}</td>
+						<td>{{ Form::text('nroSerieRecibo', null, ['class'=>'form-control input-sm nrserie', 'maxlength' => 3]) }}</td>
+						<td>{{ Form::text('nroDocIniRecibo', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
+						<td>{{ Form::text('nroDocFinRecibo', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
+						<td>{{ Form::text('nroUltDocRecibo', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td> 
 					</tr>
 					<tr>
 						<td>Factura</td>
@@ -69,10 +69,10 @@
 						{{ Form::label('nroDocIniFactura', ' ') }}
 						{{ Form::label('nroDocFinFactura', ' ') }}
 						{{ Form::label('nroUltDocFactura', ' ') }}-->
-						<td>{{ Form::text('nroSerieFactura', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroDocIniFactura', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroDocFinFactura', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroUltDocFactura', null, ['class'=>'form-control input-sm']) }}</td>
+						<td>{{ Form::text('nroSerieFactura', null, ['class'=>'form-control input-sm nrserie','maxlength' => 3]) }}</td>
+						<td>{{ Form::text('nroDocIniFactura', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
+						<td>{{ Form::text('nroDocFinFactura', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
+						<td>{{ Form::text('nroUltDocFactura', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
 					</tr>
 					<tr>
 						<td>Boleta</td>
@@ -80,10 +80,10 @@
 						{{ Form::label('nroDocIniBoleta', ' ') }}
 						{{ Form::label('nroDocFinBoleta', ' ') }}
 						{{ Form::label('nroUltDocBoleta', ' ') }} -->
-						<td>{{ Form::text('nroSerieBoleta', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroDocIniBoleta', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroDocFinBoleta', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroUltDocBoleta', null, ['class'=>'form-control input-sm']) }}</td>
+						<td>{{ Form::text('nroSerieBoleta', null, ['class'=>'form-control input-sm nrserie','maxlength' => 3]) }}</td>
+						<td>{{ Form::text('nroDocIniBoleta', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
+						<td>{{ Form::text('nroDocFinBoleta', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
+						<td>{{ Form::text('nroUltDocBoleta', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
 					</tr>
 					<tr>
 						<td>Ticket</td>
@@ -91,17 +91,18 @@
 						{{ Form::label('nroDocIniTicket', ' ') }}
 						{{ Form::label('nroDocFinTicket', ' ') }}
 						{{ Form::label('nroUltDocTicket', ' ') }} -->
-						<td>{{ Form::text('nroSerieTicket', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroDocIniTicket', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroDocFinTicket', null, ['class'=>'form-control input-sm']) }}</td>
-						<td>{{ Form::text('nroUltDocTicket', null, ['class'=>'form-control input-sm']) }}</td>
+						<td>{{ Form::text('nroSerieTicket', null, ['class'=>'form-control input-sm nrserie','maxlength' => 3]) }}</td>
+						<td>{{ Form::text('nroDocIniTicket', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
+						<td>{{ Form::text('nroDocFinTicket', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
+						<td>{{ Form::text('nroUltDocTicket', null, ['class'=>'form-control input-sm nrserie','maxlength' => 6]) }}</td>
 					</tr>
 				</tbody>
 			</table>
 		</div>
 		<div class="col-sm-12">
 			<div class="pull-right">
-				<button class="btn btn-sm btn-primary {{$model}}-btn-store">Aceptar</button>
+				<a href="" class="btn btn-sm btn-default {{$model}}-btn-cancel" data-dismiss="modal"> CANCELAR</a>
+				<button type="submit" class="btn btn-sm btn-success {{$model}}-btn-update">ACTUALIZAR</button>
 			</div>
 		</div>
 	</fieldset>

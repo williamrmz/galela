@@ -116,13 +116,13 @@ class CajaCaja extends Model
 		return $data;
 	}
 
-	public function RealizarFiltro($oCaja)
+	public function RealizarFiltro($lcFiltro)
 	{
 		$query = "
-			EXEC CajaCajaSegunFiltro :lcFiltro";
+			EXEC CajaCajaSegunFiltro :lcFiltro ";
 
 		$params = [
-			'lcFiltro' => SQL, 
+			'lcFiltro' => $lcFiltro, 
 		];
 
 		$data = \DB::select($query, $params);

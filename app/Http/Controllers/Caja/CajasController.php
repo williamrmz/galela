@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use DB;
 use App\VB\SIGHDatos\CajaTiposComprobante; 
 use App\VB\SIGHDatos\CajaNroDocumento; 
+use App\VB\SIGHNegocios\ReglasCaja; 
+
 
 class CajasController extends Controller
 {
@@ -14,17 +16,49 @@ class CajasController extends Controller
 
 	public function __construct()
 	{
-		$this->om_TipoComprobantes = new CajaTiposComprobante;
-		$this->om_CajaDocumentos = new CajaNroDocumento;
+		$this->mo_ReglasCaja = new ReglasCaja;
+		//$this->om_CajaDocumentos = new CajaNroDocumento;
 		$this->user = \Auth::user();
 	}
 
 	public function index(Request $request)
 	{
 		if($request->ajax()) {
-			$items = DB::table('CajaCaja')->select('IdCaja as id', 'Codigo as codigo', 'Descripcion as desc', 'loginPC as pc', 
-			'ImpresoraDefault as impresora1', 'Impresora2 as impresora2', 'idTipoComprobante as idComp')->paginate(10); //test data
-			return view(self::PATH_VIEW.'partials.item-list', compact('items'));
+
+
+		$codigo = $request->fCodigo;
+		$desc= $request->fDescripcion;
+		$consulta = '';
+
+		if(strlen($codigo)==0  && strlen($desc)==0)
+		{
+			/*$items = DB::table('CajaCaja')->select('IdCaja', 'Codigo', 'Descripcion', 'loginPC', 
+			'ImpresoraDefault', 'Impresora2', 'idTipoComprobante')->paginate(10);*/
+			$consulta = '';
+			$items = $this->mo_ReglasCaja->BuscarCaja($consulta);
+		}
+		else if(strlen($codigo)>0  && strlen($desc)>0)
+		{
+			$consulta = 'codigo like  "%'.$codigo.'%" and descripcion like "%'.$desc.'%" ';
+			$items = $this->mo_ReglasCaja->BuscarCaja($consulta);
+		}
+		else if(strlen($codigo)>0  && strlen($desc)==0)
+		{
+			$consulta = 'codigo like  "%'.$codigo.'%" ';
+			$items = $this->mo_ReglasCaja->BuscarCaja($consulta);
+		}
+		else if(strlen($codigo)==0  && strlen($desc)>0)
+		{
+			$consulta = 'descripcion like  "%'.$desc.'%" ';
+			$items = $this->mo_ReglasCaja->BuscarCaja($consulta);
+		}
+
+
+		/*$items = DB::table('CajaCaja')->select('IdCaja', 'Codigo', 'Descripcion', 'loginPC', 
+			'ImpresoraDefault', 'Impresora2', 'idTipoComprobante')->paginate(10);		*/
+		return $items;
+
+
 		}
 		return view(self::PATH_VIEW.'index');
 	}
@@ -130,7 +164,12 @@ class CajasController extends Controller
 			case 'tiposComprobante':
 				return $this->tiposComprobante( $request );
 			case 'tablaComprobante':
-				return $this->tablaComprobante( $request );
+				$idCaja = $request->idCaja;
+				return $this->tablaComprobante( $idCaja );
+			/*case 'buscarCaja':
+				$codigo = $request->codigo;
+				$desc = $request->desc;
+				return $this->buscarCaja( $codigo, $desc );*/
 			default:
 				return null;
 		}
@@ -143,18 +182,43 @@ class CajasController extends Controller
 
 
 
-	private function tiposComprobante( $request )
+	private function tiposComprobante()
 	{
-		$cmbIdTipoComprobante = $this->om_TipoComprobantes->SeleccionarTodos();
+		$cmbIdTipoComprobante = $this->mo_ReglasCaja->TiposDeComprobantes();
 		$data['cmbIdTipoComprobante'] = $cmbIdTipoComprobante;
 		return $data;
 	}
 
-	private function tablaComprobante( $request )
+	private function tablaComprobante( $idCaja )
 	{
-		$data = $this->om_CajaDocumentos->SeleccionarPorIdCaja($request->idCaja);
+		$data = $this->mo_ReglasCaja->TablaComprobante($idCaja);
 		return $data;
 	}
+
+	/*private function buscarCaja($codigo, $desc)
+	{
+		$consulta = '';
+		if(strlen($codigo)>0  && strlen($desc)>0){
+			$consulta = 'codigo like  "%'.$codigo.'%" and descripcion like "%'.$desc.'%" ';
+		}else if(strlen($codigo)>0  && strlen($desc)==0){
+			$consulta = 'codigo like  "%'.$codigo.'%" ';
+		}else {
+			$consulta = 'descripcion like  "%'.$desc.'%" ';
+		}		
+		
+		$items = $this->mo_ReglasCaja->BuscarCaja($consulta);
+		//return view(self::PATH_VIEW.'partials.item-list', compact('items'));
+		return $items;
+	}*/
+
+
+
+
+
+
+
+
+
 
 
 	private function ValidarDatosObligatorios($request){

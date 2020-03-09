@@ -3,35 +3,30 @@ var model="cajas";
 $(function()
 {
          
-    //ya que el modal no reconoce luego de traer el ajax
-   /* $('body').on('blur', '.nrserie', function()
+    //evento solo números en clase nrserie
+    $('body').on('keypress', '.nrserie', function(e)
     {
-        if($('.nrserie').val().length >3){
-            //toastr.error('No de debe tener más de 4 dígitos');
-            $('.nrserie').val('');
-        };
-        //$('.nrserie').attr('maxlength' , '2');
+        if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+            //display error message
+            $("#errmsg").html("Digits Only").show().fadeOut("slow");
+            return false;
+        }
     });
-*/
-$('body').on('keypress', '.nrserie', function(e)
-{
-    if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
-        //display error message
-        $("#errmsg").html("Digits Only").show().fadeOut("slow");
-               return false;
-    }
-});
 
-   
-
-   
+    $('body').on('onclick', '.nrserie', function(e)
+    {
+        if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+            //display error message
+            $("nrserie").select();
+        }
+    });
+    ///
     
-
     showListItems();
-    optionNull = { id: "0", text: 'Selecciona un tipo de comprobante' };
-    
+
     $('#'+model+'-form-search').submit( function(e) {
         e.preventDefault();
+        //buscarCaja();
         showListItems();
     });
 
@@ -44,37 +39,15 @@ $('body').on('keypress', '.nrserie', function(e)
     $('#'+model+'-btn-create').click( function (e) {
         e.preventDefault();
         createItem();
+    });
 
     
-    });
 });
-
-
-
-
-
-function setInputFilter(textbox, inputFilter) {
-    ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
-      textbox.addEventListener(event, function() {
-        if (inputFilter(this.value)) {
-          this.oldValue = this.value;
-          this.oldSelectionStart = this.selectionStart;
-          this.oldSelectionEnd = this.selectionEnd;
-        } else if (this.hasOwnProperty("oldValue")) {
-          this.value = this.oldValue;
-          this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
-        } else {
-          this.value = "";
-        }
-      });
-    });
-  }
 
 
 function getPathCtrl()
 {
     return $("input[name='"+model+"-path-ctrl']").val();
-    console.log(model)
 }
 
 function showListItems(page=1)
@@ -82,11 +55,13 @@ function showListItems(page=1)
     url = getPathCtrl();
     params  = $('#'+model+'-form-search').serialize();
     params += "&page="+page;
+    //console.log(params);
 
     $.ajax({
         data: params, url: url,
         type:  'GET', dataType: 'html',
         success:  function (response) {
+            console.log(response);
             $('.'+model+'-table').html(response);
 
             $('.'+model+'-paginator .pagination a').click( function (e) {
@@ -122,7 +97,6 @@ function showListItems(page=1)
 function createItem()
 {
     let url = getPathCtrl();    
-    console.log(url);
     params = $('#'+model+'-form').serialize();
     
 
@@ -132,8 +106,7 @@ function createItem()
         type:  'GET', dataType: 'html',
         success:  function (response) {
             cargarComboTipoComprobante();
-            nrosTiposComprobante(1);
-            
+
             $('#myModalTitle').html('Crear '+model);
             $('#myModalSize').addClass('modal-lg'); //options: '', 'modal-lg'
             $('#myModalBody').html(response);
@@ -151,7 +124,6 @@ function createItem()
 function showItem(id)
 {
     let url = getPathCtrl();
-    console.log(url);
 
     $.ajax({
         data: {}, url: url+'/'+id+'/show',
@@ -184,13 +156,13 @@ function editItem(id)
         data: {}, url: url+'/'+id+'/edit',
         type:  'GET', dataType: 'html',
         success:  function (response) {
+
             $('#myModalTitle').html('Editar '+model);
-            $('#myModalSize').addClass('modal-lg'); //options: '', 'modal-lg'
+            $('#myModalSize').addClass('modal-lg');
             $('#myModalBody').html(response);
 
             cargarComboTipoComprobante();
             nrosTiposComprobante(parseInt(id));
-
 
             $('#'+model+'-form').submit( function (e) {
                 e.preventDefault();
@@ -248,7 +220,6 @@ function storeItem()
         data: params, url: url,
         type:  'POST', dataType: 'json',
         success:  function (response) {
-            console.log(response);
             if(response.success){
                 toastr.success(model+' creado', 'OK!');
                 $('#'+model+'-form-search').trigger("reset");
@@ -326,7 +297,6 @@ function cargarComboTipoComprobante()
         data: {}, url: getPathCtrl()+'/api/service?name=tiposComprobante',
         type:  'GET', dataType: 'json',
         success:  function (data) {
-            console.log(data);
             comprobantesTipo = $.map(data.cmbIdTipoComprobante, function (obj) {
                 obj.id = obj.IdTipoComprobante;
                 obj.text = obj.Descripcion;
@@ -347,10 +317,6 @@ function nrosTiposComprobante(id)
         data: {}, url: getPathCtrl()+'/api/service?name=tablaComprobante&idCaja='+id,
         type:  'GET', dataType: 'json',
         success:  function (data) {
-            cantidadTipos = data.length;
-            /*for(let res of data){
-                console.log(res)
-            }*/
             //RECIBO
             $('#nroSerieRecibo').val(data[0].NroSerie);
             $('#nroDocIniRecibo').val(data[0].nroDocumentoInicial);
@@ -376,10 +342,49 @@ function nrosTiposComprobante(id)
             $('#nroDocIniTicket').val(data[3].nroDocumentoInicial);
             $('#nroDocFinTicket').val(data[3].nroDocumentoFinal);
             $('#nroUltDocTicket').val(data[3].nroDocumento);
-
-            
-
-            //$('input[name="txtApellidoPaterno"]').val( paciente.ApellidoPaterno);
         }
     });
 }
+
+/*
+function buscarCaja()
+{
+    codigo = $('input[name="fCodigo"]').val();
+    desc = $('input[name="fDescripcion"]').val();
+    $.ajax({
+        data: {codigo, desc}, url: getPathCtrl()+'/api/service?name=buscarCaja',
+        type:  'GET', dataType: 'json',
+        success:  function (data) {
+                console.log(data);
+                $('.'+model+'-table').html(data);
+
+                $('.'+model+'-paginator .pagination a').click( function (e) {
+                    e.preventDefault();
+                    $('.firma-paginator li').removeClass('active');
+                    $(this).parent('.firma-paginator li').addClass('active');
+                    let page=$(this).attr('href').split('page=')[1];
+                    showListItems(page);
+                });
+
+
+                $('.'+model+'-btn-edit').click( function (e) {
+                    e.preventDefault();
+                    id = $(this).siblings('input').val();
+                    editItem(id);
+                });
+                
+                $('.'+model+'-btn-delete').click( function (e) {
+                    e.preventDefault();
+                    id = $(this).siblings('input').val();
+                    deleteItem(id);
+                });
+    
+                $('.'+model+'-btn-show').click( function (e) {
+                    e.preventDefault();
+                    id = $(this).siblings('input').val();
+                    showItem(id);
+                });
+            }
+        });
+}
+   */

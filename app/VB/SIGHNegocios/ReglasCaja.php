@@ -11,7 +11,7 @@ use App\VB\SIGHDatos\CajaTurno;
 use App\VB\SIGHDatos\CajaCajero;
 use App\VB\SIGHDatos\CajaGestion;
 use App\VB\SIGHDatos\TiposNumeracionHistoria;
-use App\VB\SIGHDatos\CajaTiposComprobante;
+use App\VB\SIGHDatos\CajaTiposComprobante;  //TIPOS COMPROBANTE
 use App\VB\SIGHDatos\CajaNroDocumento;
 use App\VB\SIGHComun\DOCajaNroDocumento;
 
@@ -38,7 +38,7 @@ class ReglasCaja extends Model
         return $oTabla->SeleccionarTodos();
     }
 
-    public function NrosComprobante($cNroCaja)
+    public function TablaComprobante($cNroCaja)
     {
         $oTabla = new CajaNroDocumento;
         return $oTabla->SeleccionarPorIdCaja($cNroCaja);
@@ -48,6 +48,12 @@ class ReglasCaja extends Model
     {
         $oTabla = new CajaTiposComprobante;
         return $oTabla->SeleccionarTodos();
+    }
+
+    public function BuscarCaja($consulta)
+    {
+        $oTabla = new CajaCaja;
+        return $oTabla->RealizarFiltro($consulta);
     }
 
     public Function CajaAgregar($oDOCaja, $cNroDocumentos, $mo_lnIdTablaLISTBARITEMS ,$mo_lcNombrePc, $lcNcaja)

@@ -1,0 +1,1 @@
+resources / views / partials / my-modal.blade.php  ->  style="background-color: #ecf0f5;" para cambiar el bg del modal

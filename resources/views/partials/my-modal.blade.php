@@ -12,7 +12,7 @@
                 <span aria-hidden="true">×</span></button>
                 <h4 class="modal-title" id="{{$idModal}}Title">Title</h4>
             </div>
-            <div class="modal-body" id="{{$idModal}}Body">
+            <div class="modal-body" id="{{$idModal}}Body"  style="background-color: #fff;">
                 {!! $content !!};
             </div>
         </div>

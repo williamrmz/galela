@@ -104,7 +104,7 @@
 		
 		<div class="col-sm-12">
 			<div class="pull-right">
-				<button class="btn btn-sm btn-primary {{$model}}-btn-store">Aceptar</button>
+			<a href="" class="btn btn-sm btn-primary {{$model}}-btn-store" data-dismiss="modal"> ACEPTAR</a>
 			</div>
 		</div>
 	</fieldset>
