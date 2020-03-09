@@ -54,10 +54,9 @@ class CajasController extends Controller
 		}
 
 
-		/*$items = DB::table('CajaCaja')->select('IdCaja', 'Codigo', 'Descripcion', 'loginPC', 
-			'ImpresoraDefault', 'Impresora2', 'idTipoComprobante')->paginate(10);		*/
-		return $items;
-
+		//$items = DB::table('CajaCaja')->select('IdCaja', 'Codigo', 'Descripcion', 'loginPC', 'ImpresoraDefault', 'Impresora2', 'idTipoComprobante')->get();
+		//return $items;
+		return view(self::PATH_VIEW.'partials.item-list', compact('items'));
 
 		}
 		return view(self::PATH_VIEW.'index');

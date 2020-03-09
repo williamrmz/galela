@@ -113,6 +113,8 @@ class ReglasCaja extends Model
         return $oTabla->NotaCreditoDevueltosPorNumYFecha($lnNroSerie, $lnNroDcto, $ldFechaInicio, $ldFechaFin);
     }
 
+    
+
 
     
 }

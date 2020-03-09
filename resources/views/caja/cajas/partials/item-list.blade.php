@@ -36,11 +36,8 @@
 	</tbody>
 </table>
 
-<div class="{{$model}}-paginator">
+<!-- <div class="{{$model}}-paginator">
 	{{ $items->render() }}
-</div>
-
-
-
+</div> -->
 
 
